@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ $# -gt 1 ]; then
+	echo "Usage : mpirs_stat <hostname>"
+	echo "<hostname> : the queried MPD host name"
+	exit 1
+fi
+
+if [ $# -eq 1 ]; then
+	host=$1
+else
+	host="127.0.0.1"
+fi
+
+java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar:$CLASSPATH -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE -DHOSTNAME=$myhost p2pmpi.tools.RSStatus $host

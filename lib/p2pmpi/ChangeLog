@@ -1,0 +1,392 @@
+
+0.29.0
+-------------------------------------------------------------------------------------------------
+jeudi 6 août 2009, 18:05:03 (UTC+0200) - genaud
+- reworked the NAT problem with nio.
+
+Mer  5 aoû 2009 16:38:51 CEST - genaud
+- mpihost has a new -d argument to display local knowledge of files in remote data caches
+
+mardi 4 août 2009, 18:16:28 (UTC+0200) - genaud
+- redesign the network interfaces discovery. All interfaces are discovered automatically, 
+  IFACE allows to select choose between the usable interfaces discovered. ExternalIP
+  is set only if the address is valid.
+
+Mon Jul 27 09:46:35 CEST 2009 - jagdish,genaud
+- cache capability of peers
+- reworked buggy launcher of remote windows hosts (p2pclient.bat script).
+
+Tue Jun 23 15:29:35 CEST 2009 - jagdish
+- New file transfer method (above a certain file size, the transfer uses a new channel)
+
+mardi 9 juin 2009, 21:18:58 (UTC+0200) - genaud
+- Propagate Exceptions raised in FT, and send error messages to MPD for logging and to Rank0 
+for a user-friendly explanation of what is happening 
+Fri Apr 3 09:03:35 2009 UTC - choopan
+- reduce memory consumption due to message logging (p2pmpi/mpi/dev/MessageIDLog.java)
+
+0.28.2
+-------------------------------------------------------------------------------------------------
+Mer nov  5 00:45:33 CET 2008 - genaud
+- fixed available IP guess: MPIClient uses the same IP than daemons (MPD, RS, ...)
+Mer oct  1 21:15:34 CEST 2008 - genaud
+- added the 'IFACE' property in conf file to indicate the preferred network interface
+Wed Sep  12 20:20:20 CEST 2008 - choopan
+- changed the windows scripts to tackle dir names having spaces + find jar files in
+  current dir when p2pmpirun.bat is called.
+
+0.28.0
+-------------------------------------------------------------------------------------------------
+Wed May 21 13:31:09 CEST 2008 - Choopan
+- fixed NIO device bug MPI.ANY_SOURCE, MPI.ANY_TAG
+Fev 1, 2008, 13:53:41 (UTC+0100) 
+- fixed bug for mpihost with DNS resolution
+Thu Nov 8 2007, 14:02:43 (UTC+0100)
+- changed the local IP detection mechanism
+Tue Aug  7 18:47:13 CEST 2007 - choopan
+- merge with new visu from branch p2pmpi-0240 
+
+0.24.0
+-------------------------------------------------------------------------------------------------
+Thu Aug 2, 2007, 16:04:37 (UTC+0200) - genaud
+- changes in config file keywords : 
+  MAX_PROCESSES_PER_JOB replaces NUM_PROC_SIMULTANEOUS_JOB, VISU_PROXY is introduced.
+
+Tue Jul 31, 2007, 17:58:28 (UTC+0200) - genaud
+- runVisu nearly totally rewritten to work with SuperNode.
+Tue Jul 31, 2007, 17:58:28 (UTC+0200) - genaud
+- debug level logs added for supernode, log4j.properties updated  
+* vendredi 28 septembre 2007, 17:50:32 (UTC+0200) - genaud
+- mpihost resolves IP by default (use -n to see numeric IPs)
+* lundi 24 septembre 2007, 14:02:54 (UTC+0200) - choopan
+- bug fix on Gather with MPI.STRING and Object
+Fri Aug 10, 2007, 16:26:27 (UTC+0200) - genaud
+- added a constraint on MPD version in reservation negociations: 
+  a RS only accepts reservations from a RS with same version.
+- runVisu tries first to connect to a VisuProxy, and then to a Supernode.
+Thu Aug 2, 2007, 16:04:37 (UTC+0200) - genaud
+- changes in config file keywords : 
+  MAX_PROCESSES_PER_JOB replaces NUM_PROC_SIMULTANEOUS_JOB, VISU_PROXY is introduced.
+
+Tue Jul 31, 2007, 17:58:28 (UTC+0200) - genaud
+- runVisu nearly totally rewritten to work with SuperNode.
+- debug level logs added for supernode, log4j.properties updated  
+Tue Jul 17 10:16:09 CEST 2007 - choopan
+- changed p2p infrastructure from jxta to supernode
+
+0.23.1
+-------------------------------------------------------------------------------------------------
+Thu Jul  5 13:43:36 CEST 2007 - choopan
+- added timeout to reservation server
+- changed display on "mpihost" command
+- added -a option (-a scatter, -a gather)
+
+0.23.0
+-------------------------------------------------------------------------------------------------
+* Mon May 14 16:40:49 CEST 2007 - choopan
+- removed JXTA socket. 
+- changed,JXTA discovery service to resolver service
+- added, reservation service RS
+
+0.22.0
+-------------------------------------------------------------------------------------------------
+* Fri Apr 20 11:04:54 CEST 2007 - choopan
+- fixed bug : MPI.BOOLEAN type 
+
+* Tue Apr 17 2007, 23:35:23 (UTC+0200)
+- corrected IRecv() to Irecv() to conform to MPJ
+- added Request.Waitall() primitive
+
+* Tue Mar 20 14:04:33 CET 2007
+- changed - Wtime() and Wtick() from millisecond to second
+
+
+0.21.0
+-------------------------------------------------------------------------------------------------
+Tue Mar 20 13:13:30 CET 2007 - choopan
+- fixed bug : argument return from MPI.Init 
+
+0.20.1
+-------------------------------------------------------------------------------------------------
+* Thu Jan 11 15:17:37 2007 (UTC+0100)
+- fixed bug : Send msg to rank=0 when "p2pmpirun -n 1" caused a wrong 
+  "you're firewalled" message. 
+* Jan 2007 ** Test by students **
+
+0.20.0
+-------------------------------------------------------------------------------------------------
+* Thu Nov 30 17:25:35 CET 2006 - choopan
+- added, user can choose DBRR or BRR protocol for FD from config file
+- changed, T_CLEANUP for DBRR -> 3log_2(n) and BRR -> 2log_2(n)
+- fixed bug in routing of messages for DBRR - choopan
+
+0.18.0
+-------------------------------------------------------------------------------------------------
+* Thu Sep 14 16:52:01 CEST 2006 - choopan
+- removed, T_MARGIN from configuration file (calculated automatically)
+- added, T_MAX_HANG to prevent temporary network problem
+- changed, FD can detect failure process 2 times faster
+
+* Fri Jun  2 18:27:09 CEST 2006 - choopan
+- fixed, warning not enough host message
+- changed, round robin is not 100% guarantee distributing processes to DBRR
+- fixed, some RDV problem of JXTA 2.4
+
+0.17.0
+-------------------------------------------------------------------------------------------------
+* Wed Mar  8 13:47:07 CET 2006 - choopan
+- fixed, bug fault detection
+- added, hostdeny, allow from config file
+
+* Fri Mar  3 04:50:54 CET 2006 - choopan
+- added, check file existance in file transfer list before send to others.
+
+* Thu Feb 23 19:54:40 CET 2006 - choopan
+- added, different of delay time to send rank table (t_diff) to each process
+to be able to adjust gossip starting heartbeat
+- fixed, after MPI registers to MPD, it will wait to an ack. To prevent MPI
+application crash and FD sent unregister message before register message is
+treated.
+
+* Tue Feb 21 14:54:38 CET 2006 - choopan
+- changed, gossip period comes from config file that can be set speed depend
+on network bandwidth.
+
+0.16.0
+-------------------------------------------------------------------------------------------------
+* Thu Feb 16 00:36:50 CET 2006 - genaud
+- moved the "client mode" behavior from MPI.java to MPIClient.java  
+
+* Tue Feb 14 10:23:23 CET 2006 - genaud
+- Extended download mechanism: list of files to be transfered (p2pmpirun -l) may contained http:// URL
+
+* Mon Feb 13 14:17:31 CET 2006 - choopan
+- bug fixed with MPI.ANY_SOURCE, MPI.ANY_TAG. Messages with such tags were not removed properly from the message queue. 
+
+* Mon Feb 13 14:17:31 CET 2006 - genaud
+- mpistat queries the running MPD to show an accurate release version (not backward compatible).
+
+0.15.0
+-------------------------------------------------------------------------------------------------
+Fri Jan 27 19:45:36 CET 2006 - choopan
+- Changed, runVisu display only peer with the same MAINVERSION
+- Fixed, waiting message runVisu
+
+0.14.1
+-------------------------------------------------------------------------------------------------
+Fri jan 27 16:42:01 CET 2006 - genaud
+- Reworked GUI of runVisu (layout resizes better)
+Thu Jan 26 15:19:38 CET 2006 - choopan
+- Changed, some system timeout in degree of number of nodes
+Fri jan 20 15:19:02 CET 2006 - genaud
+- error messages clarification
+Thu Jan 12 13:53:03 CET 2006 - choopan
+- Changed, listening message thread to daemon to prevent blocking on application crashes
+- improved auto-regression test for Allgatherv
+
+0.14.0
+-------------------------------------------------------------------------------------------------
+Fri Dec  9 11:36:01 CET 2005 - choopan
+- Changed, fault detector from gossip random path to double binary round robin
+gossip
+- Added, firewall detection and warning to user
+
+0.13.1
+-------------------------------------------------------------------------------------------------
+Thu Nov 17 15:37:18 CET 2005 - choopan
+- Added, usage for p2pmpirun.bat
+- Added, fd,ft,mpd port information in MPDAdv
+- Fixed, /bin/sh of some shell script to /bin/bash (credits to Daniel P. Santoni for this bug found on
+Solaris)
+
+0.13.0
+-------------------------------------------------------------------------------------------------
+Thu Nov  3 17:09:40 CET 2005 - choopan
+- Fixed, false info in mpistat with -n 1
+- Added, more infomation on searching nodes
+- Added, -w option of p2pmpirun for setting a waiting time
+
+Thu nov  3 18:15:40 CET 2005 - genaud
+- regression tests framework allows test of individual comm. operations
+
+0.12.1
+-------------------------------------------------------------------------------------------------
+Wed nov  2 18:23:08 CET 2005 - genaud
+- mpistat returns 1 if mpd is not running, 0 if running + displays version
+
+Wed Nov  2 02:21:33 CET 2005 - genaud
+- Added cpu model/freq and mem info for MacOsX (+ code re-organization)
+
+ven oct 28 23:47:29 CEST 2005 - genaud
+-Added support for SunOS in visu
+
+ven oct 28 23:47:47 CEST 2005 - choopan
+- added localIPcheck program and call from mpiboot to warn about 127.0.0.1 IP
+only
+
+0.12.0
+-------------------------------------------------------------------------------------------------
+lun oct 10 17:09:17 CEST 2005 - genaud
+- rewrote command line parsing for runVisu : use runVisu -h to list options
+  (note that -tm becomes --console|-c)
+
+Thu Sep 29 19:18:02 CEST 2005 - genaud
+- Added support for MacOSX + homogeneous OS name quey.
+
+Fri Sep 17 18:00:03 CEST 2005 - genaud
+- Experimental code for request denial of external host (HOST_DENY). 
+  Needs more general authorization mechanism.
+
+0.11.2
+-------------------------------------------------------------------------------------------------
+Fri Aug 26 18:11 CEST 2005 - ghazi
+-Added specific MPD advertisements support which avoids using jxtaSockets;
+ (every MPD creates and publishes at startup an advertisement containing its
+ IP for direct connection, plus some characteristics concerning harwdare
+ (linux only)).
+
+-Added support of MPD Advertisements in Visu.
+
+0.11.1
+-------------------------------------------------------------------------------------------------
+Fri Aug 26 16:40:52 CEST 2005 - choopan
+- Changed, the order of pipe advertisement. Rank 0 should be at the bottom of list.
+
+0.11.0
+-------------------------------------------------------------------------------------------------
+Thu Aug 25 10:46:37 CEST 2005 - choopan
+- Changed, Version variable to MainVersion and SubVersion
+- Fixed, search advertisement and wait time in MPI application
+
+0.10.0
+-------------------------------------------------------------------------------------------------
+* Thu Jun 30 15:48:04 CEST 2005 - choopan
+- Added supported MPI.OBJECT for 2d-array
+
+0.9.0
+-------------------------------------------------------------------------------------------------
+* jeu jun 30 14:09:23 CEST 2005 - choopan
+- Added, Sendrecv
+
+* Tue Jun 28 16:02:21 CEST 2005 - choopan
+- Added, Send,Recv for java object
+ 
+0.8.0
+-------------------------------------------------------------------------------------------------
+* Thu Jun 23 18:02:51 CEST 2005 - choopan
+- Added, Group (Incl, Excl, Union, Intersection, Difference)
+- Added, MPI_COMM_Split
+
+* lun jun 20 16:12:02 CEST 2005 - choopan
+- Changed, mpihalt is better
+  
+0.7.0
+-------------------------------------------------------------------------------------------------
+* Fri Jun 17 10:26:02 CEST 2005 - choopan
+- Added, MPI_Scan (MPI::Intracomm::Scan)
+- Added, MPI.STRING (Datatype)
+- Changed, p2pmpi-<version>.jar to p2pmpi.jar
+- Added, no need to add CLASSPATH for p2pmpi.jar and jxta.jar
+- Added, BYTE2, SHORT2, INT2, LONG2, FLOAT2, DOUBLE2 datatype
+- Added, MAXLOC, MINLOC operations
+
+* Thu Jun 16 23:21:40 CEST 2005 - choopan
+- Fixed, mpiboot with ssh does not hang anymore
+
+* Thu Jun 16 17:41:02 CEST 2005 - choopan
+  Fixed bug, Reduce if root node is not 0
+  Fixed bug, Allgatherv
+  Added MPI_Exception
+  Changed, some API to make the compatibility with mpiJava
+
+0.6.0
+-------------------------------------------------------------------------------------------------
+* Thu Jun 16 11:17:54 CEST 2005 - choopan
+  Added support transfer dependance jar files
+
+* Tue Jun 14 14:36:15 CEST 2005 - choopan
+  Added Group notation (Incl, Excl) and operation inside group
+  Added Interactive mode all processes send its output to rank 0 to display
+  Added MPI.Get_processor_name
+  Changed p2pmpirun format (see Usage)
+
+* Mon Jun 13 13:49:53 CEST 2005 - choopan
+  MPI_Reduce uses binomial tree if the operation is commutative if not uses flat-tree
+
+0.5.0
+-------------------------------------------------------------------------------------------------
+
+* Wed Jun  8 23:14:30 CEST 2005 - ghazi
+  added touchGraph Display to Visu.
+  More efficient peers Discovery due to a bug fix.
+
+* Wed Jun  8 21:37:30 CEST 2005 - choopan
+  fixed, MPD strange bugs
+
+0.4.0
+-------------------------------------------------------------------------------------------------
+* Mon May 30 12:28:01 CEST 2005 - choopan
+  added, ping message. 
+  After MPD found other peers, it will try to ping them before assigning a MPI rank
+  to them.
+
+0.3.0
+-------------------------------------------------------------------------------------------------
+* Thu May 26 21:43:20 CEST 2005 - choopan
+  added, Gatherv, AllGatherv, Scatterv, Reduce_scatter in IntraComm
+  added, Get_count in Status (now status supports length value)
+  added, display error when a sending message is bigger than receiving buffer
+
+0.2.1
+-------------------------------------------------------------------------------------------------
+* jeu mai 26 14:38:55 CEST 2005 - ghazi
+  New Visu version , New look (avoids overloading CPU)
+  uses JTables to display scan data.	
+  
+* Tue May 24 17:49:40 CEST 2005 - choopan
+  changed, version to 0.2.1
+  added, Gather,AllGather,Scatter in IntraComm class
+
+0.2.0
+-------------------------------------------------------------------------------------------------
+* Tue May 24 12:03:49 CEST 2005 - choopan
+  added nohup in linux script. 
+  changed, environment variable from P2P_MPI_CONFIG_PATH to P2PMPI_HOME 
+  deleted, no need of environment variable P2P_MPI_PRIVATE
+
+* Sun May 22 12:38:59 CEST 2005 - choopan
+  full windows support, added External_IP in conf for users behind firewall
+
+* Sat May 21 11:46:32 CEST 2005 - choopan
+  changed, using java 1.5 syntax [no warning while "Ant"]
+
+* Sat May 21 00:31:21 CEST 2005 - choopan
+  added MPI.Rand() and MPI.Rand(int n) 
+  log file is cleaner
+
+* ven mai 20 18:05:20 CEST 2005 - genaud
+  warning when message buffer not empty on finalize
+  
+* Thu May 19 15:01:45 CEST 2005 - choopan
+  mpiboot/mpihalt is cleaner
+
+* mer mai 18 21:19:43 CEST 2005 - genaud
+  MPI_Test() added (Request.Test())
+
+* mer mai 18 21:15:57 CEST 2005 - genaud
+  New build.xml. Generates homogeneous version number for files. Generates
+  distribution tarballs including doc ("ant dist"). Obsoletes dist-build.sh.
+  
+* Tue May 17 10:55:49 CEST 2005 - choopan
+  Added, version support
+
+* Fri May 13 13:36:50 CEST 2005 - choopan
+  Added, Windows support
+
+* jeu mai 12 16:21:01 CEST 2005 - genaud
+  MPI.ANY_SOURCE and MPI.ANY_TAG implemented for MPI.IRecv.
+  Changes Request.Wait(): now returns a Status s that can be queried by s.MPI_SOURCE and s.MPI_TAG
+
+-------------------------------------------------------------------------------------------------
+0.1.0
+-------------------------------------------------------------------------------------------------

@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ $# -gt 3 ]; then
+	echo "Usage : mpihost [options] [hostname]"
+	echo "[options]  : -n for numeric IP display"
+	echo "[options]  : -d for remote datacache display"
+	echo "[hostname] : the queried MPD host name"
+	exit 1
+fi
+
+java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar:$CLASSPATH -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE p2pmpi.tools.HostCacheDisplay $@ 

@@ -1,0 +1,3 @@
+@echo off
+set myhost=%COMPUTERNAME%
+java -cp ".\;%P2PMPI_HOME%\p2pmpi.jar;%P2PMPI_HOME%\log4j.jar;%CLASSPATH%" -DP2PMPI_HOME="%P2PMPI_HOME%" -DHOSTNAME=%myhost% -Dlog4j.configuration="file:%P2PMPI_HOME%/log4j.properties" p2pmpi.p2p.SuperNode 

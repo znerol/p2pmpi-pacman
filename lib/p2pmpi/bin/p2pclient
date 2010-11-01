@@ -1,0 +1,18 @@
+#!/bin/bash
+#Usage : p2pclient <jardep> <ip-rank0> <port-rank0> <rank> <cmd> [args]
+################################################################
+jar=$1
+ip=$2
+port=$3
+hashkey=$4
+rank=$5
+shift
+shift
+shift
+shift
+shift
+if [ "$jar" == "_" ]; then
+	jar=""
+fi
+#(I don't see any use of ':$CLASSPATH')java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar:$CLASSPATH$jar -Xmx512m -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE -Dhashkey=$hashkey -Drank=$rank -Dip=$ip -Dport=$port -Dmode=client -Ddevice=niodevice-DrunCmd="$*" $*
+java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar$jar -Xmx512m -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE -Dhashkey=$hashkey -Drank=$rank -Dip=$ip -Dport=$port -Dmode=client -Ddevice=niodevice-DrunCmd="$*" $*

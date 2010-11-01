@@ -1,0 +1,36 @@
+#!/bin/bash
+#########################################################
+
+# get hostname
+myhost=`hostname`
+
+java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$CLASSPATH -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE p2pmpi.tools.LocalIPCheck
+if [ $? == 1 ]; then
+      echo "*** Error. Fix network configuration first. Exiting."
+      exit 1
+fi
+
+java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$$P2PMPI_HOME/log4j.jar:$CLASSPATH -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE p2pmpi.tools.P2PMPI_Boot
+
+if [ $? -eq 0 ]; then
+	# remove old log files
+	rm -f $P2PMPI_HOME/tmp/mpd[$myhost].log
+      runFT /tmp/ft.log 
+	runFD 
+	runRS
+	runMPD 
+java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar:$CLASSPATH -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE -DHOSTNAME=$myhost p2pmpi.tools.MPDStatus
+	if [ $? -ne 0 ]; then
+		kill -9 `cat $P2PMPI_HOME/tmp/ft-$myhost.pid`
+  		kill -9 `cat $P2PMPI_HOME/tmp/fd-$myhost.pid`
+  		kill -9 `cat $P2PMPI_HOME/tmp/rs-$myhost.pid`
+		rm -f $P2PMPI_HOME/tmp/ft-$myhost.pid $P2PMPI_HOME/tmp/fd-$myhost.pid  $P2PMPI_HOME/tmp/rs-$myhost.pid
+ 
+	fi
+	
+else
+  echo "***                                                            ***"
+  echo "***  An error occured. FD, FT , RS and MPD can not be started. ***" 
+  echo "***                                                            ***"
+  rm -f $P2PMPI_HOME/tmp/ft-$myhost.pid $P2PMPI_HOME/tmp/fd-$myhost.pid  $P2PMPI_HOME/tmp/rs-$myhost.pid
+fi

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="p2pmpi/test/matrix/|p2pmpi/test/Ep/|p2pmpi/test/mpiCommTest/PerfTest/|p2pmpi/test/Pi/|p2pmpi/test/fdTest/|p2pmpi/test/mpiCommTest/Individual/|p2pmpi/test/FileTransfer/|p2pmpi/test/Ring/|p2pmpi/test/|p2pmpi/test/Is/|p2pmpi/visu/" kind="src" path=""/>
+	<classpathentry excluding="matrix/|Ep/|mpiCommTest/PerfTest/|Pi/|fdTest/|mpiCommTest/Individual/|FileTransfer/|Ring/|Is/" kind="src" path="p2pmpi/test"/>
+	<classpathentry kind="src" path="p2pmpi/test/Ep"/>
+	<classpathentry kind="src" path="p2pmpi/test/fdTest"/>
+	<classpathentry kind="src" path="p2pmpi/test/FileTransfer"/>
+	<classpathentry kind="src" path="p2pmpi/test/Is"/>
+	<classpathentry kind="src" path="p2pmpi/test/matrix"/>
+	<classpathentry kind="src" path="p2pmpi/test/mpiCommTest/Individual"/>
+	<classpathentry kind="src" path="p2pmpi/test/mpiCommTest/PerfTest"/>
+	<classpathentry kind="src" path="p2pmpi/test/Pi"/>
+	<classpathentry kind="src" path="p2pmpi/test/Ring"/>
+	<classpathentry kind="src" path="p2pmpi/visu"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

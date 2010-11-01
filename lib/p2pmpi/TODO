@@ -1,0 +1,45 @@
+TODO List :
+===========
+
+********************
+* Data Management 
+********************
+
+BUGS:
+
+- File locking is not implemented: 
+  it should prevent an application A1 to remove from cache data that another application A2 may be using. 
+  
+  Discussion: could be implemented with an auxiliary lock file, e.g when f1 in cache is used, create a f1.lock
+  file. We can turn this in a semaphore, setting an initial value 1 into it upon creation,  adding 1 each time
+  an app. start using it, -1 each time it stops using it, and remove it if its value was 1.
+  However, this solution has two drawbacks: 
+  i) an application that crashes will not decrement the semaphore,
+  ii) the increment of the semaphore value is not atomic
+
+
+
+********************
+* MPI implemenation 
+********************
+ - Status length (should be corrected)
+ - Handle temporary connection lost <--(need to test)
+ - Single port device <---- (wait to integrated)
+ - performance asDoubleBuffer -> for(int i) putDouble
+
+****************
+* Visualization
+****************
+- how PEER_CACHE=/tmp/cache.xml in config_file is to be defined for windows (getTempDir() from java ?)
+
+- remove dead nodes after a given timeout
+- add a "Don't use cache" tick box, so to list application names
+- implement computer characteristics (RAM, CPU, ...)  description for Windows (exists now for Linux, MacOs, Solaris)
+
+
+****************
+* FIXMEs
+****************
+Gather doesnt not work with INT2 yet
+displacement in Datatype in C/C++/FORTRAN count as byte
+but in Java we can't do that.

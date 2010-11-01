@@ -1,0 +1,23 @@
+#!/bin/bash
+
+## -----------------------------------------------------------------
+## 
+## Simple script to install a tarball on a given host through ssh.
+## Assume P2PMPI env variables are set as follows:
+##
+##  export P2PMPI_HOME=$HOME/p2pmpi-current
+##  export CLASSPATH=$CLASSPATH:$P2PMPI_HOME/p2pmpi-current.jar
+##  export PATH=$PATH:$P2PMPI_HOME/bin
+##
+## -----------------------------------------------------------------
+
+if [ $# != 2 ]; then
+   echo "usage: $0 <archive.tar.gz> <machine>"
+   exit 1 
+fi
+dirname=`basename $1 .tar.gz`
+
+## copy tarball to machine:$HOME
+scp $1 $2:
+echo "** Untaring $1 ..." 
+ssh $2 "tar xvfz $1;rm -f $1;mpihalt; sleep 4; \rm -f p2pmpi-current; ln -s $dirname p2pmpi-current; cd $dirname; mpiboot&"

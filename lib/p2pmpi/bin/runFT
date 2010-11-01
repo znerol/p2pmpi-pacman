@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ $# -ge 1 ]; then
+	logfile=$1
+	echo "===log starts `date`=====" > ${logfile}
+else
+	logfile=/dev/null
+fi
+nohup java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar:$CLASSPATH -DP2PMPI_HOME=$P2PMPI_HOME  -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE -Dlog4j.configuration=file:$P2PMPI_HOME/log4j.properties p2pmpi.ft.FileTransferServer >>${logfile} 2>&1  < /dev/null &
+echo $! > $P2PMPI_HOME/tmp/ft-`hostname`.pid

@@ -1,0 +1,113 @@
+
+Installation and startup instructions
+Valid for versions >= p2pmpi-0.24.0 
+=====================================
+
+
+         Pre-requisite : p2pmpi.jar has been generated with JDK 1.5,
+         hence your JDK must be >= 1.5 ('java -version' should tell you).
+
+      1. Extract the archive 
+        ----------------------------------------------------------------------+
+         $ unzip p2pmpi-<version>.zip
+         $ cd p2pmpi-<version>
+        -----------------------------------------------------------------------
+
+     2. Modify the configuration files to reflect your infrastructure/installation: 
+   
+         o P2P-MPI.conf: 
+           * Set SUPERNODE to the host you will be running 'runSuperNode'
+
+           * Optionally, set VISU_PROXY to a host that will serve as proxy for 
+              the visualization/monitoring of your infrastructure with 'runVisu'. 
+              VISU_PROXY is not mandatory but helps the visualisation process to scale
+              when dealing with many peers.
+
+           * Check that the prefered network interface (IFACE) is appropriate to your system.
+              You should have 'IFACE=' for a default installation. Windows users must modify
+              'IFACE=eth0' since eth0 is specific to unix systems. If you have only one interface,
+              leaving it blank (IFACE=) is perfectly ok since the system will select this unique
+              interface. 
+
+	       * Make sure the ports specified in P2P-MPI.conf for the 3 services
+              (defaults MPD_PORT=9897, FT_PORT=9898, FD_PORT=9899, RS_PORT=9900
+              and 9800 to 9899 for applications) are open from and to the outside 
+              if you have a firewall.
+              
+           * Set PEER_CACHE to a appropriate place in your hard disk. 
+              We can suggest one--->   C:\\Windows\\Temp\\cache.xml 
+
+         o P2P-RDV.conf: do not edit unless you have specific needs.
+
+
+    
+   3. Add the environment variables
+
+    Start-> Control Panel -> System -> Advanced -> Environment Variables
+    Substitute with appropriate values in P2PMPI_HOME and optionnally CLASSPATH.
+    ----------------------------------------------------------------------+
+    Variable name : P2PMPI_HOME
+    Variable value : <absolute path of p2pmpi installation directory> 
+	
+    Variable name : PATH
+    Variable value : %PATH%;%P2PMPI_HOME%\bin
+	
+
+    (*) Variable name : CLASSPATH
+    (*) Variable value : %CLASSPATH%;%P2PMPI_HOME%\p2pmpi.jar
+    -----------------------------------------------------------------------
+    
+    (*) Setting the CLASSPATH is only required for developpers, i.e. for javac
+      to find the P2PMPI classes when compiling a source file importing p2pmpi.mpi.*
+
+
+   4. Running P2P-MPI 
+
+      On one host, we need a SuperNode that acts as a directory, to which peers register.
+      Go to the host specified as SUPERNODE= in P2P-MPI.conf and run first: 
+      ----------------------------------------------------------------------+
+      $ runSuperNode
+      -----------------------------------------------------------------------
+
+      MPD : Every machine MUST run a MPD to share some of its resource and 
+      join the group of existing computing resources. 
+      ----------------------------------------------------------------------+
+      $ mpiboot
+      -----------------------------------------------------------------------
+        
+
+      After a machine has its MPD running, the user can run an MPI application by calling
+      ----------------------------------------------------------------------+
+      $ p2pmpirun -n <num_proc> [-r <num_replica> -l <inoutlist_file>] <appname> [args]
+      
+
+      -n <num_proc> : To run an MPI application with <num_proc> machines.
+		-r <num_replica> : <num_replica> process per MPI rank (default: 1 process per rank).
+		-l <inoutlist_file> : List of file that need to transfer to remote machines 
+				   (default: <appname>.class will be transfered)
+		<appname> : MPI application
+  		[args]  : Arguments of MPI applications
+     -----------------------------------------------------------------------
+
+      Example: I have written the Pi program (Pi.java) at my current directory c:\p2pmpi\Pi
+		and compiled it with "javac Pi.java". 
+
+      So c:\p2pmpi\Pi\Pi.class need to be transfered
+		If I want 4 processes and 1 replicas for each process and the application name is Pi
+		with no arguments.
+		
+    ----------------------------------------------------------------------+
+    $ p2pmpirun -n 4 Pi
+    -----------------------------------------------------------------------
+
+		Equivalent to :
+		
+    ----------------------------------------------------------------------+
+    $ p2pmpirun -n 4 -r 1 -l foo Pi
+     -----------------------------------------------------------------------
+
+		where foo just contains the full path of Pi.class (since i have no input data file for this app.). 
+    ----------------------------------------------------------------------+
+    $ type foo 
+    c:\p2pmpi\Pi\Pi.class 
+    -----------------------------------------------------------------------

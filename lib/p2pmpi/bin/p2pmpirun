@@ -1,0 +1,32 @@
+#!/bin/bash
+# Usage : p2pmpirun -n <numproc> [-r <numreplica> -l <input filelist> -o] <command> [args]
+# -n <numproc> : number of processes MPI
+# -r <numreplica> : number of replica per rank (omit for 1 replica per rank)
+# -l <filelist> : list of input file (omit for transfer only executable file)
+# -o : output will be collect in file (omit ouput will be on standard output) [not available]
+# <command> : executable file without .class
+# args : argument of executable file
+#######################################################################################
+if [ $# -lt 3 ]; then
+	echo "Usage : p2pmpirun -n <numproc> [-r <numreplica> -l <input filelist> -w <time> -a <strategy>] <command> [args]"
+	echo " -a <strategy>     : name of allocation strategy (spread|concentrate|dataspread|dataconcentrate) (default is spread)"
+	echo " -n <numproc>      : number of processes MPI"
+	echo " -r <numreplica>   : number of replica per rank (not needed for 1 replica per rank)"
+	echo " -l <filelist>     : list of input file (not needed if only the executable file is to be transfered)"
+	echo " -w <time>         : maximum time in seconds to wait for searching nodes"
+	echo " <command>         : executable file without .class"
+	echo " args              : arguments of executable file"
+	exit 1
+fi
+
+xferlist=
+pathJarFiles=
+while getopts n:r:l:w:d:a opt
+do
+  case "$opt" in
+    l) xferlist="$OPTARG";pathJarFiles=`java -cp :$P2PMPI_HOME/p2pmpi.jar p2pmpi.tools.JarReader $xferlist`;;
+  esac
+done
+
+runCmd=`java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar:$pathJarFiles  p2pmpi.tools.MPIArgs $*`
+java -cp ./:$P2PMPI_HOME/p2pmpi.jar:$P2PMPI_HOME/log4j.jar:$CLASSPATH$pathJarFiles -Xmx512m -DP2PMPI_HOME=$P2PMPI_HOME -DP2PMPI_CONF_FILE=$P2PMPI_CONF_FILE -Dmode=server -Ddevice=niodevice $runCmd
