@@ -1,0 +1,31 @@
+Event Types:
+* Pac (Sender)
+    * Enter (Field, North|East|South|West)
+    * Turn (Field, North|East|South|West) (optional)
+    * EatCookie (Field)
+    * EatHappyPill (Field)
+    * EatGhost(Ghost)
+* Ghost (Sender)
+    * Enter (Field, North|East|South|West)
+    * Turn (Field, North|East|South|West) (optional)
+    * EatPac(Pac)
+
+
+Eventqueue
+* Class: Event (Serializable) (timestamp, sender, name, args)
+
+* Class: Eventqueue
+    * Backlog
+    * Priority Queue
+    
+
+
+Interface:
+* PacListener (implementiert von 
+
+Optimized Synchronization
+* Unsend(Event)
+* Randomcounter
+
+GVT
+* 
