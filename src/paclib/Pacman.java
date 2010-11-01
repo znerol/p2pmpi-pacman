@@ -1,5 +1,7 @@
 package paclib;
 
+import p2pmpi.mpi.MPI;
+
 /**
  * Main-Klasse des Pacman-Spieles
  *
@@ -12,8 +14,10 @@ public class Pacman {
 	 * @param args nothing
 	 */
 	public static void main(String[] args) {
+		MPI.Init(args);
 		GamePlay gp = new GamePlay();
 		gp.play();
+		MPI.Finalize();
 	}
 
 }
