@@ -11,9 +11,17 @@ public class RealtimeClock {
 	double scale;
 	
 	public RealtimeClock() {
-		startRealtime = this.getRealtime();
-		startSimtime = 0;
-		scale = 1.0;
+		this(getRealtime(), 0L, 1.0);
+	}
+	
+	public RealtimeClock(double scale) {
+		this(getRealtime(), 0L, scale);
+	}
+	
+	public RealtimeClock(long startRealtime, long startSimtime, double scale) {
+		this.startRealtime = startRealtime;
+		this.startSimtime = startSimtime;
+		this.scale = scale;
 	}
 	
 	/**
@@ -41,7 +49,7 @@ public class RealtimeClock {
 	 * 
 	 * @return current walltime
 	 */
-	public long getRealtime() {
+	public static long getRealtime() {
 		return System.currentTimeMillis();
 	}
 	
