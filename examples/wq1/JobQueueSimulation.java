@@ -1,7 +1,5 @@
 package wq1;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
@@ -45,8 +43,17 @@ public class JobQueueSimulation {
 		PriorityQueue<ClientArrivedEvent> jobs =
 			new PriorityQueue<ClientArrivedEvent>();
 		
+		/* Define as many customer/clerk sources as you wish */
 		EventSource[] sources = {
+				/*
 				new ClientArrivedSource(rng),
+				new ClientArrivedSource(rng),
+				*/
+				new ClientArrivedSource(rng, 1000, 1600),
+				/*
+				new ClerkSource(jobs),
+				*/
+				new ClerkSource(jobs),
 				new ClerkSource(jobs)
 		};
 		EventSource aggSource = new EventSourceCollection(sources);
@@ -138,22 +145,25 @@ public class JobQueueSimulation {
 	
 	private static class ClientArrivedSource
 	extends AbstractGeneraterorEventSource {
-		final long MEAN_MILLISECONDS_BETWEEN_JOBS = 1000;
-		final long MEAN_MILLISECONDS_SERVICE_TIME = 800;
+		long mtbca = 1000;
+		long mstpc = 800;
 		final Random rng;
 		
-		public ClientArrivedSource(Random rng) {
+		public ClientArrivedSource(Random rng,
+				long mean_time_between_customer_arrival,
+				long mean_service_time_per_customer)
+		{
 			super();
 			this.rng = rng;
+			this.mtbca = mean_time_between_customer_arrival;
+			this.mstpc = mean_service_time_per_customer;
 		}
 		
 		@Override
 		public Event nextEvent() {
 			long arrivalTime = getLastEventSimtime() + (long)(
-					MEAN_MILLISECONDS_BETWEEN_JOBS *
-					-Math.log(rng.nextDouble()));
-			long serviceTime = (long)(MEAN_MILLISECONDS_SERVICE_TIME *
-					-Math.log(rng.nextDouble()));
+					mtbca * -Math.log(rng.nextDouble()));
+			long serviceTime = (long)(mstpc * -Math.log(rng.nextDouble()));
 			return new ClientArrivedEvent(arrivalTime, serviceTime);
 		}
 	}
