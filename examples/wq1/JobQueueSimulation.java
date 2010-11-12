@@ -91,25 +91,19 @@ public class JobQueueSimulation {
 	}
 	
 	private static class JobAggregator implements EventDispatcher {
-		Queue<ClientArrivedEvent> collectedEvents;
-		long queuelength;
+		Queue<ClientArrivedEvent> waitingQueue;
 		
 		public JobAggregator(Queue<ClientArrivedEvent> events) {
-			collectedEvents = events;
-			queuelength = 0;
+			waitingQueue = events;
 		}
 		
 		@Override
 		public void dispatchEvent(Event e) {
 			System.out.println(e);
 			if (e instanceof ClientArrivedEvent) {
-				collectedEvents.offer((ClientArrivedEvent)e);
-				queuelength++;
+				waitingQueue.offer((ClientArrivedEvent)e);
 			}
-			else if(e instanceof ClerkFreeEvent) {
-				queuelength--;
-			}
-			System.out.println("Queue Length: " + queuelength);
+			System.out.println("Queue Length: " + waitingQueue.size());
 		}
 	}
 	
