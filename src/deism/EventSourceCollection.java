@@ -1,5 +1,7 @@
 package deism;
 
+import java.util.Arrays;
+
 /**
  * Special EventSource aggregating the events from multiple EventSources
  */
@@ -12,6 +14,14 @@ public class EventSourceCollection implements EventSource {
 					"EventSourceCollection cannot operate without a list of event sources");
 		}
 		this.eventSources = eventSources;
+	}
+	
+	public EventSourceCollection(EventSource[] eventSources) {
+		if (eventSources == null) {
+			throw new IllegalArgumentException(
+					"EventSourceCollection cannot operate without a list of event sources");
+		}
+		this.eventSources = Arrays.asList(eventSources);
 	}
 	
 	@Override
