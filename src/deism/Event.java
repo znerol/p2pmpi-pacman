@@ -9,7 +9,7 @@ public class Event implements Comparable<Event> {
 	 */
 	private long simtime;
 	
-	public Event(int simtime) {
+	public Event(long simtime) {
 		this.simtime = simtime;
 	}
 	
