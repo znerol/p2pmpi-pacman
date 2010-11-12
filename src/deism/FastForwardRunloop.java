@@ -14,16 +14,16 @@ package deism;
 public class FastForwardRunloop implements EventRunloop {
 	private boolean stop = false;
 	private EventMatcher terminationCondition = null;
-	private EventMonitor monitor;
+	private EventTimer timer;
 	private long lastsimtime = 0;
 	
-	public FastForwardRunloop(EventMonitor monitor,
+	public FastForwardRunloop(EventTimer timer,
 			EventMatcher terminationCondition) {
-		if (monitor == null) {
+		if (timer == null) {
 			throw new IllegalArgumentException(
-					"FastForwardRunloop cannot operate without an event monitor");
+					"FastForwardRunloop cannot operate without an event timer");
 		}
-		this.monitor = monitor;
+		this.timer = timer;
 		this.terminationCondition = terminationCondition;
 	}
 	
@@ -53,7 +53,7 @@ public class FastForwardRunloop implements EventRunloop {
 			/*
 			 * Suspend execution until its time to handle the event.
 			 */
-			boolean timeoutExpired = monitor.waitForEvent(peekEvent);
+			boolean timeoutExpired = timer.waitForEvent(peekEvent);
 			if (!timeoutExpired) {
 				/* 
 				 * If wait was interrupted someone called wakeup(). We have to
@@ -83,7 +83,7 @@ public class FastForwardRunloop implements EventRunloop {
 
 	@Override
 	public void wakeup() {
-		monitor.wakeup();
+		timer.wakeup();
 	}
 
 	@Override

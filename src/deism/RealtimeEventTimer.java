@@ -1,15 +1,15 @@
 package deism;
 
 /**
- * EventMonitor implementation using the RealtimeClock
+ * EventTimer implementation using the RealtimeClock
  * 
- * RealtimeEventMonitor implements a mechanism to delay events until the
+ * RealtimeEventTimer implements a mechanism to delay events until the
  * timestamp of an event is reached by means of a RealtimeClock instance.
  */
-public class RealtimeEventMonitor implements EventMonitor {
+public class RealtimeEventTimer implements EventTimer {
 	RealtimeClock clock;
 	
-	public RealtimeEventMonitor(RealtimeClock clock) {
+	public RealtimeEventTimer(RealtimeClock clock) {
 		if (clock == null) {
 			throw new IllegalArgumentException(
 					"RealtimeRunloop cannot operate without a clock");

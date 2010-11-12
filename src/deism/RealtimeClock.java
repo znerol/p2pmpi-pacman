@@ -1,7 +1,7 @@
 package deism;
 
 /**
- * Clock for RealtimEventMonitor
+ * Clock for RealtimEventTimer
  * 
  * Convert between walltime and simulation time
  */
