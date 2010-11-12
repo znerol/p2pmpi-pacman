@@ -44,12 +44,10 @@ public class JobQueueSimulation {
 		PriorityQueue<ClientArrivedEvent> jobs =
 			new PriorityQueue<ClientArrivedEvent>();
 		
-		EventSource jobSource = new ClientArrivedSource(rng);
-		EventSource clerkSource = new ClerkSource(jobs);
-		
-		List<EventSource> sources = new ArrayList<EventSource>();
-		sources.add(jobSource);
-		sources.add(clerkSource);
+		EventSource[] sources = {
+				new ClientArrivedSource(rng),
+				new ClerkSource(jobs)
+		};
 		EventSource aggSource = new EventSourceCollection(sources);
 		
 		EventDispatcher disp = new JobAggregator(jobs);
