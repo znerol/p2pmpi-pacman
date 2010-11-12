@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
+import deism.AbstractGeneraterorEventSource;
 import deism.Event;
 import deism.EventDispatcher;
 import deism.EventMatcher;
@@ -135,79 +136,47 @@ public class JobQueueSimulation {
 		}
 	}
 	
-	private static class ClientArrivedSource implements EventSource {
+	private static class ClientArrivedSource
+	extends AbstractGeneraterorEventSource {
 		final long MEAN_MILLISECONDS_BETWEEN_JOBS = 1000;
 		final long MEAN_MILLISECONDS_SERVICE_TIME = 800;
 		final Random rng;
-		long lastArrivalTime = 0;
-		Event currentEvent = null;
-		
-		public ClientArrivedSource() {
-			this.rng = new Random();
-		}
 		
 		public ClientArrivedSource(Random rng) {
+			super();
 			this.rng = rng;
-			this.currentEvent = null;
 		}
 		
 		@Override
-		public Event peek() {
-			if (currentEvent == null) {
-				long arrivalTime = lastArrivalTime + (long)(
-					MEAN_MILLISECONDS_BETWEEN_JOBS * -Math.log(rng.nextDouble()));
-				long serviceTime = (long)(MEAN_MILLISECONDS_SERVICE_TIME *
-						-Math.log(rng.nextDouble()));
-				currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
-				lastArrivalTime = arrivalTime;
-			}
-			
-			return currentEvent;
-		}
-
-		@Override
-		public Event poll() {
-			Event e = currentEvent;
-			currentEvent = null;
-			return e;
+		public Event nextEvent() {
+			long arrivalTime = getLastEventSimtime() + (long)(
+					MEAN_MILLISECONDS_BETWEEN_JOBS *
+					-Math.log(rng.nextDouble()));
+			long serviceTime = (long)(MEAN_MILLISECONDS_SERVICE_TIME *
+					-Math.log(rng.nextDouble()));
+			return new ClientArrivedEvent(arrivalTime, serviceTime);
 		}
 	}
 	
-	private static class ClerkSource implements EventSource
+	private static class ClerkSource extends AbstractGeneraterorEventSource
 	{
 		Queue<ClientArrivedEvent> jobs;
-		ClientArrivedEvent currentClient;
-		ClerkFreeEvent currentClerkFreeEvent;
-		long lastClerkFreeTime = 0;
 		
 		public ClerkSource(Queue<ClientArrivedEvent> jobs)
 		{
+			super();
 			this.jobs = jobs;
 		}
 		
 		@Override
-		public Event peek() {
-			if (currentClient == null) {
-				currentClient = jobs.poll();
-				if (currentClient == null) {
-					currentClerkFreeEvent = null;
-					return null;
-				}
-				long nextClerkFreeTime =
-					Math.max(lastClerkFreeTime, currentClient.getSimtime())
-					+ currentClient.getServiceTime();
-				currentClerkFreeEvent = new ClerkFreeEvent(nextClerkFreeTime);
-				lastClerkFreeTime = nextClerkFreeTime;
+		public Event nextEvent() {
+			ClientArrivedEvent job = jobs.poll();
+			if (job == null) {
+				return null;
 			}
-			return currentClerkFreeEvent;
-		}
-
-		@Override
-		public Event poll() {
-			Event e = currentClerkFreeEvent;
-			currentClerkFreeEvent = null;
-			currentClient = null;
-			return e;
+			long nextClerkFreeTime = job.getServiceTime()
+				+ Math.max(getLastEventSimtime(), job.getSimtime());
+			return new ClerkFreeEvent(nextClerkFreeTime);
 		}
 	}
 }
