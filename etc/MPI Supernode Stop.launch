@@ -2,6 +2,7 @@
 <launchConfiguration type="org.eclipse.ui.externaltools.ProgramLaunchConfigurationType">
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
 <mapEntry key="P2PMPI_HOME" value="${workspace_loc:/Pacman/lib/p2pmpi}"/>
+<mapEntry key="PATH" value="${env_var:PATH}:${workspace_loc:Pacman/lib/p2pmpi/bin}"/>
 </mapAttribute>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
 <listEntry value="org.eclipse.ui.externaltools.launchGroup"/>
