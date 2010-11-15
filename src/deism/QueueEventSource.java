@@ -9,23 +9,23 @@ import java.util.Queue;
  * java.util.Queue.
  */
 public class QueueEventSource implements EventSource {
-	private Queue<Event> events;
-	
-	public QueueEventSource(Queue<Event> events) {
-		if (events == null) {
-			throw new IllegalArgumentException(
-					"QueueEventSource cannot operate without a queue of events");
-		}
-		this.events = events;
-	}
-	
-	@Override
-	public Event peek() {
-		return events.peek();
-	}
+    private Queue<Event> events;
 
-	@Override
-	public Event poll() {
-		return events.poll();
-	}
+    public QueueEventSource(Queue<Event> events) {
+        if (events == null) {
+            throw new IllegalArgumentException(
+                    "QueueEventSource cannot operate without a queue of events");
+        }
+        this.events = events;
+    }
+
+    @Override
+    public Event peek() {
+        return events.peek();
+    }
+
+    @Override
+    public Event poll() {
+        return events.poll();
+    }
 }

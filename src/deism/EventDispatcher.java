@@ -7,5 +7,5 @@ package deism;
  * handlers.
  */
 public interface EventDispatcher {
-	void dispatchEvent(Event e);
+    void dispatchEvent(Event e);
 }

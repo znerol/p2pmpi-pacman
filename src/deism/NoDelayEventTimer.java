@@ -8,13 +8,13 @@ package deism;
  * event streams.
  */
 public class NoDelayEventTimer implements EventTimer {
-	@Override
-	public boolean waitForEvent(Event e) {
-		return true;
-	}
+    @Override
+    public boolean waitForEvent(Event e) {
+        return true;
+    }
 
-	@Override
-	public void wakeup() {
-		/* Intentionally left empty */
-	}
+    @Override
+    public void wakeup() {
+        /* Intentionally left empty */
+    }
 }

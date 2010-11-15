@@ -6,7 +6,7 @@ package deism;
  */
 @SuppressWarnings("serial")
 public class EventSourceOrderException extends RuntimeException {
-	public EventSourceOrderException(String message) {
-		super(message);
-	}
+    public EventSourceOrderException(String message) {
+        super(message);
+    }
 }

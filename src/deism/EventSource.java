@@ -8,15 +8,17 @@ package deism;
  * models or previously recorded event streams.
  */
 public interface EventSource {
-	/**
-	 * Retrieves, but does not remove, the next event.
-	 * @return The next event or null
-	 */
-	Event peek();
-	
-	/**
-	 * Retrieves and removes the next event.
-	 * @return The next event or null
-	 */
-	Event poll();
+    /**
+     * Retrieves, but does not remove, the next event.
+     * 
+     * @return The next event or null
+     */
+    Event peek();
+
+    /**
+     * Retrieves and removes the next event.
+     * 
+     * @return The next event or null
+     */
+    Event poll();
 }
