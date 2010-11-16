@@ -18,7 +18,7 @@ public abstract class AbstractGeneraterorEventSource implements EventSource {
 
     @Override
     public Event poll() {
-        Event e = currentEvent;
+        Event e = peek();
         currentEvent = null;
         return e;
     }
