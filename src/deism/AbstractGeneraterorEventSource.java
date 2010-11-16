@@ -8,10 +8,9 @@ public abstract class AbstractGeneraterorEventSource implements EventSource {
     public Event peek() {
         if (currentEvent == null) {
             currentEvent = nextEvent();
-            if (currentEvent == null) {
-                return null;
+            if (currentEvent != null) {
+                lastEventSimtime = currentEvent.getSimtime();
             }
-            lastEventSimtime = currentEvent.getSimtime();
         }
         return currentEvent;
     }
