@@ -38,6 +38,12 @@ public class FastForwardRunloopTest {
         verifyZeroInteractions(eventTimer);
         verify(terminationCondition).match(null);
     }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testMissingEventTimer()
+    {
+        new FastForwardRunloop(null, null);
+    }
 
     /**
      * FastForwardRunloop.run must execute EventDispatcher.dispatchEvent for
@@ -120,7 +126,35 @@ public class FastForwardRunloopTest {
         verify(terminationCondition).match(one);
         verify(terminationCondition).match(two);
     }
+    
+    @Test
+    public void testReevaluateWhenTimeoutNotReached()
+    {
+        final Event one = new Event(0);
+        final Event term = new Event(1);
 
+        final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
+                terminationCondition);
+
+        when(eventSource.peek()).thenReturn(one, one, term);
+        when(eventSource.poll()).thenReturn(one);
+        when(eventTimer.waitForEvent(one)).thenReturn(false, true);
+        
+        when(terminationCondition.match(one)).thenReturn(false);
+        when(terminationCondition.match(term)).thenReturn(true);
+        
+        r.run(eventSource, eventDispatcher);
+
+        // We expect poll being called three times (one, one, term) */
+        verify(eventSource, times(3)).peek();
+        // We expect poll beeing called only once (the second time for one)
+        verify(eventSource, times(1)).poll();
+        
+        verify(eventDispatcher).dispatchEvent(one);
+        verify(eventTimer, times(2)).waitForEvent(one);
+        verify(terminationCondition, times(2)).match(one);
+        verify(terminationCondition).match(term);
+    }
     /**
      * If an EventSource returns events which are not ordered by ascending
      * timestamp we expect FastWordwardRunloop to throw an exception.
