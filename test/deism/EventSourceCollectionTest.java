@@ -22,7 +22,29 @@ public class EventSourceCollectionTest {
         Event poll = c.poll();
         assertNull(poll);
     }
+    
+    @Test
+    public void collectionWithoutSourcesArray() {
+        final EventSource[] sources = {};
+        EventSourceCollection c = new EventSourceCollection(sources);
+        
+        Event peek = c.peek();
+        assertNull(peek);
 
+        Event poll = c.poll();
+        assertNull(poll);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void collectionWithoutAnyIterableSources() {
+        new EventSourceCollection((Iterable<EventSource>)null);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void collectionWithoutAnySourcesInArray() {
+        new EventSourceCollection((EventSource[])null);
+    }
+    
     /**
      * EventSourceCollection.peek and EventSourceCollection.poll must return
      * events in ascending timestamp-order from any source.
@@ -40,14 +62,31 @@ public class EventSourceCollectionTest {
         firstSourceEvents.add(two);
         firstSourceEvents.add(four);
 
-        final EventSource firstSource = new QueueEventSource(firstSourceEvents);
+        final EventSource firstSource = new EventSource(){
+            @Override
+            public Event peek() {
+                return firstSourceEvents.peek();
+            }
+            @Override
+            public Event poll() {
+                return firstSourceEvents.poll();
+            }
+        };
 
         /* construct second event queue */
         final PriorityQueue<Event> secondSourceEvents = new PriorityQueue<Event>();
         secondSourceEvents.add(three);
 
-        final EventSource secondSource = new QueueEventSource(
-                secondSourceEvents);
+        final EventSource secondSource = new EventSource(){
+            @Override
+            public Event peek() {
+                return secondSourceEvents.peek();
+            }
+            @Override
+            public Event poll() {
+                return secondSourceEvents.poll();
+            }
+        };
 
         /* construct sources list */
         final ArrayList<EventSource> sources = new ArrayList<EventSource>();
