@@ -7,9 +7,9 @@ package deism;
  * of an event is reached by means of a RealtimeClock instance.
  */
 public class RealtimeEventTimer implements EventTimer {
-    RealtimeClock clock;
+    Clock clock;
 
-    public RealtimeEventTimer(RealtimeClock clock) {
+    public RealtimeEventTimer(Clock clock) {
         if (clock == null) {
             throw new IllegalArgumentException(
                     "RealtimeRunloop cannot operate without a clock");
@@ -37,8 +37,8 @@ public class RealtimeEventTimer implements EventTimer {
                 this.wait();
             }
             else {
-                long delay = clock.getRealtimeDifference(e.getSimtime()
-                        - clock.getSimtime());
+                long delay = clock.getRealtime(e.getSimtime()) -
+                    clock.getRealtime();
                 if (delay > 0) {
                     this.wait(delay);
                 }
