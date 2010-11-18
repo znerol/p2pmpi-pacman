@@ -52,7 +52,7 @@ public class RealtimeEventTimer implements EventTimer {
     }
 
     @Override
-    public void wakeup() {
+    public synchronized void wakeup() {
         this.notify();
     }
 }
