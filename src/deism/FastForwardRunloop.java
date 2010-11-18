@@ -61,7 +61,13 @@ public class FastForwardRunloop implements EventRunloop {
                  */
                 continue;
             }
-
+            
+            if (peekEvent == null) {
+                // If no event was available at the time peek() was called we
+                // must restart the loop and peek again.
+                continue;
+            }
+            
             if (lastsimtime > peekEvent.getSimtime()) {
                 throw new EventSourceOrderException(
                         "Event source returns events out of sequence");
