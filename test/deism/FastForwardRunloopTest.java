@@ -51,9 +51,9 @@ public class FastForwardRunloopTest {
      */
     @Test
     public void runSomeEvents() throws InterruptedException {
-        final Event one = new Event(0);
-        final Event two = new Event(1);
-        final Event term = new Event(2);
+        final Event one = new Event(1);
+        final Event two = new Event(2);
+        final Event term = new Event(3);
         final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
                 terminationCondition);
 
@@ -63,8 +63,8 @@ public class FastForwardRunloopTest {
          */
         when(eventSource.peek()).thenReturn(one, two, term);
         when(eventSource.poll()).thenReturn(one, two);
-        when(eventTimer.waitForEvent(one)).thenReturn(true);
-        when(eventTimer.waitForEvent(two)).thenReturn(true);
+        when(eventTimer.waitForEvent(one)).thenReturn(1L);
+        when(eventTimer.waitForEvent(two)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(term)).thenReturn(true);
@@ -98,9 +98,9 @@ public class FastForwardRunloopTest {
 
         when(eventSource.peek()).thenReturn(one, two, three, term);
         when(eventSource.poll()).thenReturn(one, two);
-        when(eventTimer.waitForEvent(one)).thenReturn(true);
-        when(eventTimer.waitForEvent(two)).thenReturn(true);
-        when(eventTimer.waitForEvent(three)).thenReturn(true);
+        when(eventTimer.waitForEvent(one)).thenReturn(0L);
+        when(eventTimer.waitForEvent(two)).thenReturn(1L);
+        when(eventTimer.waitForEvent(three)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(three)).thenReturn(false);
@@ -130,15 +130,15 @@ public class FastForwardRunloopTest {
     @Test
     public void testReevaluateWhenTimeoutNotReached()
     {
-        final Event one = new Event(0);
-        final Event term = new Event(1);
+        final Event one = new Event(1);
+        final Event term = new Event(2);
 
         final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
                 terminationCondition);
 
         when(eventSource.peek()).thenReturn(one, one, term);
         when(eventSource.poll()).thenReturn(one);
-        when(eventTimer.waitForEvent(one)).thenReturn(false, true);
+        when(eventTimer.waitForEvent(one)).thenReturn(0L, 1L);
         
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(term)).thenReturn(true);
@@ -172,8 +172,8 @@ public class FastForwardRunloopTest {
          */
         when(eventSource.peek()).thenReturn(two, one, term);
         when(eventSource.poll()).thenReturn(two, one);
-        when(eventTimer.waitForEvent(two)).thenReturn(true);
-        when(eventTimer.waitForEvent(one)).thenReturn(true);
+        when(eventTimer.waitForEvent(two)).thenReturn(1L);
+        when(eventTimer.waitForEvent(one)).thenReturn(0L);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(term)).thenReturn(true);

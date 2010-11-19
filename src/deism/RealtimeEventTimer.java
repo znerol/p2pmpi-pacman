@@ -29,8 +29,8 @@ public class RealtimeEventTimer implements EventTimer {
      *         interrupted by a call to wakeup.
      */
     @Override
-    public synchronized boolean waitForEvent(Event e) {
-        boolean result = true;
+    public synchronized long waitForEvent(Event e) {
+        long result = e.getSimtime();
 
         try {
             if (e == null) {
@@ -45,7 +45,8 @@ public class RealtimeEventTimer implements EventTimer {
             }
         }
         catch (InterruptedException ex) {
-            result = false;
+            long currentSimtime = clock.getSimtime();
+            result = Math.min(currentSimtime, e.getSimtime());
         }
 
         return result;

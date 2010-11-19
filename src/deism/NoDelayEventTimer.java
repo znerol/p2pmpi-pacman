@@ -9,8 +9,8 @@ package deism;
  */
 public class NoDelayEventTimer implements EventTimer {
     @Override
-    public boolean waitForEvent(Event e) {
-        return true;
+    public long waitForEvent(Event e) {
+        return e.getSimtime();
     }
 
     @Override

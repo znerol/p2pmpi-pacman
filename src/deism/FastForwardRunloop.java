@@ -53,8 +53,9 @@ public class FastForwardRunloop implements EventRunloop {
             /*
              * Suspend execution until its time to handle the event.
              */
-            boolean timeoutExpired = timer.waitForEvent(peekEvent);
-            if (!timeoutExpired) {
+            long expectSimtime = peekEvent.getSimtime();
+            long currentSimtime = timer.waitForEvent(peekEvent);
+            if (currentSimtime != expectSimtime) {
                 /*
                  * If wait was interrupted someone called wakeup(). We have to
                  * check the loop condition and peek again on the source.
@@ -68,11 +69,11 @@ public class FastForwardRunloop implements EventRunloop {
                 continue;
             }
             
-            if (lastsimtime > peekEvent.getSimtime()) {
+            if (lastsimtime > currentSimtime) {
                 throw new EventSourceOrderException(
                         "Event source returns events out of sequence");
             }
-            lastsimtime = peekEvent.getSimtime();
+            lastsimtime = currentSimtime;
 
             /*
              * This is moderately ugly. We have to remove the peek event and we
