@@ -17,4 +17,9 @@ public class NoDelayEventTimer implements EventTimer {
     public void wakeup() {
         /* Intentionally left empty */
     }
+    
+    @Override
+    public void wakeup(long wakeupTime) {
+        /* Intentionally left empty */
+    }
 }

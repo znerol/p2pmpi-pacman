@@ -8,6 +8,7 @@ package deism;
  */
 public class RealtimeEventTimer implements EventTimer {
     Clock clock;
+    long wakeupTime;
 
     public RealtimeEventTimer(Clock clock) {
         if (clock == null) {
@@ -30,30 +31,35 @@ public class RealtimeEventTimer implements EventTimer {
      */
     @Override
     public synchronized long waitForEvent(Event e) {
-        long result = e.getSimtime();
-
+        wakeupTime = Long.MAX_VALUE;
+        
         try {
             if (e == null) {
                 this.wait();
             }
             else {
-                long delay = clock.getRealtime(e.getSimtime()) -
-                    clock.getRealtime();
+                wakeupTime = e.getSimtime();
+                long delay = clock.getRealtime(wakeupTime)-clock.getRealtime();
                 if (delay > 0) {
                     this.wait(delay);
                 }
             }
         }
         catch (InterruptedException ex) {
-            long currentSimtime = clock.getSimtime();
-            result = Math.min(currentSimtime, e.getSimtime());
+            // ignored intentionally
         }
 
-        return result;
+        return wakeupTime;
     }
 
     @Override
     public synchronized void wakeup() {
+        wakeup(clock.getSimtime());
+    }
+    
+    @Override
+    public synchronized void wakeup(long wakeupTime) {
+        this.wakeupTime = Math.min(this.wakeupTime, wakeupTime);
         this.notify();
     }
 }

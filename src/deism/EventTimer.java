@@ -18,7 +18,13 @@ public interface EventTimer {
     long waitForEvent(Event e);
 
     /**
-     * Interrupt waitForEvent method.
+     * Interrupt waitForEvent method immediately.
      */
     void wakeup();
+    
+    /**
+     * Interrupt waitForEvent method immediately with the given simulation
+     * timestamp. The timestamp will be returned by waitForEvent.
+     */
+    void wakeup(long wakeupTime);
 }
