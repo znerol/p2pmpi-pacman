@@ -39,6 +39,8 @@ public class FastForwardRunloop implements EventRunloop {
     @Override
     public void run(EventSource source, EventDispatcher disp)
             throws EventSourceOrderException {
+        long lastdispatchtime = lastsimtime;
+        
         while (!stop) {
             source.compute(lastsimtime);
             
@@ -58,21 +60,21 @@ public class FastForwardRunloop implements EventRunloop {
             else {
                 newSimtime = governor.suspend();
             }
-            
-            if (lastsimtime > newSimtime) {
-                throw new EventSourceOrderException(
-                        "Event source returns events out of sequence");
-            }
-            
+
             lastsimtime = newSimtime;
-            
+
             if (peekEvent == null || newSimtime < peekEvent.getSimtime()) {
                 // Restart and reevaluate loop conditions and current event
                 // when the current simulation time is less than that of the
                 // next event.
                 continue;
             }
-            
+
+            if (lastdispatchtime > lastsimtime) {
+                throw new EventSourceOrderException(
+                        "Event source returns events out of sequence");
+            }
+
             /*
              * This is moderately ugly. We have to remove the peek event and we
              * really want to be sure that this was actually the same like the
@@ -83,6 +85,7 @@ public class FastForwardRunloop implements EventRunloop {
             assert peekEvent == polledEvent;
 
             disp.dispatchEvent(polledEvent);
+            lastdispatchtime = lastsimtime;
         }
     }
 
