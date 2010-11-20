@@ -37,16 +37,6 @@ public class EventSourceCollectionTest {
         assertNull(poll);
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void collectionWithoutAnyIterableSources() {
-        new EventSourceCollection((Iterable<EventSource>)null);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void collectionWithoutAnySourcesInArray() {
-        new EventSourceCollection((EventSource[])null);
-    }
-    
     /**
      * EventSourceCollection.peek and EventSourceCollection.poll must return
      * events in ascending timestamp-order from any source.

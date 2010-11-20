@@ -19,10 +19,6 @@ public class FastForwardRunloop implements EventRunloop {
 
     public FastForwardRunloop(EventTimer timer,
             EventMatcher terminationCondition) {
-        if (timer == null) {
-            throw new IllegalArgumentException(
-                    "FastForwardRunloop cannot operate without an event timer");
-        }
         this.timer = timer;
         this.terminationCondition = terminationCondition;
     }

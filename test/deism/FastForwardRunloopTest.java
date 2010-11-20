@@ -39,12 +39,6 @@ public class FastForwardRunloopTest {
         verify(terminationCondition).match(null);
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testMissingEventTimer()
-    {
-        new FastForwardRunloop(null, null);
-    }
-
     /**
      * FastForwardRunloop.run must execute EventDispatcher.dispatchEvent for
      * each event returned by EventSource.poll

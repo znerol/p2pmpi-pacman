@@ -10,22 +10,14 @@ public class EventSourceCollection implements EventSource {
     private EventSource currentSource;
 
     public EventSourceCollection(Iterable<EventSource> eventSources) {
-        if (eventSources == null) {
-            throw new IllegalArgumentException(
-                    "EventSourceCollection cannot operate without a list of event sources");
-        }
         this.eventSources = eventSources;
         currentSource = null;
     }
 
     public EventSourceCollection(EventSource[] eventSources) {
-        if (eventSources == null) {
-            throw new IllegalArgumentException(
-                    "EventSourceCollection cannot operate without a list of event sources");
-        }
-        this.eventSources = Arrays.asList(eventSources);
+        this(Arrays.asList(eventSources));
     }
-
+    
     @Override
     public void compute(long currentSimtime) {
         Event peekEvent = null;

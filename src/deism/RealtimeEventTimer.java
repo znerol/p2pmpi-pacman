@@ -11,10 +11,6 @@ public class RealtimeEventTimer implements EventTimer {
     long wakeupTime;
 
     public RealtimeEventTimer(Clock clock) {
-        if (clock == null) {
-            throw new IllegalArgumentException(
-                    "RealtimeRunloop cannot operate without a clock");
-        }
         this.clock = clock;
     }
 
