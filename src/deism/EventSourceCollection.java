@@ -26,7 +26,7 @@ public class EventSourceCollection implements EventSource {
         for (EventSource source : eventSources) {
             source.compute(currentSimtime);
             
-            Event candidate = source.peek(currentSimtime);
+            Event candidate = source.peek();
             if (candidate == null) {
                 continue;
             }
@@ -39,22 +39,22 @@ public class EventSourceCollection implements EventSource {
     }
     
     @Override
-    public Event peek(long currentSimtime) {
+    public Event peek() {
         Event e = null;
         
         if (currentSource != null) {
-            e = currentSource.peek(currentSimtime);
+            e = currentSource.peek();
         }
         
         return e;
     }
 
     @Override
-    public Event poll(long currentSimtime) {
+    public Event poll() {
         Event e = null;
         
         if (currentSource != null) {
-            e = currentSource.poll(currentSimtime);
+            e = currentSource.poll();
         }
         
         return e;

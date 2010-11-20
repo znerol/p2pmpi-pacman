@@ -22,12 +22,12 @@ public interface EventSource {
      * 
      * @return The next event or null
      */
-    Event peek(long currentSimtime);
+    Event peek();
 
     /**
      * Retrieves and removes the next event.
      * 
      * @return The next event or null
      */
-    Event poll(long currentSimtime);
+    Event poll();
 }

@@ -42,7 +42,7 @@ public class FastForwardRunloop implements EventRunloop {
         while (!stop) {
             source.compute(lastsimtime);
             
-            Event peekEvent = source.peek(lastsimtime);
+            Event peekEvent = source.peek();
 
             if (terminationCondition.match(peekEvent)) {
                 break;
@@ -73,7 +73,7 @@ public class FastForwardRunloop implements EventRunloop {
              * one we peeked before. Otherwise it could indicate a bug in the
              * EventSource or some concurrency issue.
              */
-            Event polledEvent = source.poll(lastsimtime);
+            Event polledEvent = source.poll();
             assert peekEvent == polledEvent;
 
             disp.dispatchEvent(polledEvent);

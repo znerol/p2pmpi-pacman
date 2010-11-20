@@ -28,12 +28,12 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
                 terminationCondition);
 
-        when(eventSource.peek(0)).thenReturn(null);
+        when(eventSource.peek()).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
 
         r.run(eventSource, eventDispatcher);
 
-        verify(eventSource).peek(0);
+        verify(eventSource).peek();
         verifyZeroInteractions(eventDispatcher);
         verifyZeroInteractions(eventTimer);
         verify(terminationCondition).match(null);
@@ -55,11 +55,8 @@ public class FastForwardRunloopTest {
          * On each call to poll() eventSource will return event one, then two
          * and finally null.
          */
-        when(eventSource.peek(0)).thenReturn(one);
-        when(eventSource.peek(1)).thenReturn(two);
-        when(eventSource.peek(2)).thenReturn(term);
-        when(eventSource.poll(1)).thenReturn(one);
-        when(eventSource.poll(2)).thenReturn(two);
+        when(eventSource.peek()).thenReturn(one, two, term, null);
+        when(eventSource.poll()).thenReturn(one, two, term, null);
         when(eventTimer.waitForEvent(one)).thenReturn(1L);
         when(eventTimer.waitForEvent(two)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
@@ -67,12 +64,12 @@ public class FastForwardRunloopTest {
         when(terminationCondition.match(term)).thenReturn(true);
 
         r.run(eventSource, eventDispatcher);
-
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(1);
-        verify(eventSource).peek(2);
-        verify(eventSource).poll(1);
-        verify(eventSource).poll(2);
+        
+        verify(eventSource).compute(0);
+        verify(eventSource).compute(1);
+        verify(eventSource).compute(2);
+        verify(eventSource, times(3)).peek();
+        verify(eventSource, times(2)).poll();
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(eventTimer).waitForEvent(one);
@@ -96,14 +93,8 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
                 terminationCondition);
 
-        when(eventSource.peek(0)).thenReturn(one);
-        when(eventSource.peek(1)).thenReturn(two);
-        when(eventSource.peek(2)).thenReturn(three);
-        when(eventSource.peek(3)).thenReturn(term);
-        when(eventSource.poll(1)).thenReturn(one);
-        when(eventSource.poll(2)).thenReturn(two);
-        when(eventSource.poll(3)).thenReturn(three);
-        when(eventSource.poll(4)).thenReturn(term);
+        when(eventSource.peek()).thenReturn(one, two, three, term, null);
+        when(eventSource.poll()).thenReturn(one, two, three, term, null);
         when(eventTimer.waitForEvent(one)).thenReturn(1L);
         when(eventTimer.waitForEvent(two)).thenReturn(2L);
         when(eventTimer.waitForEvent(three)).thenReturn(3L);
@@ -124,10 +115,10 @@ public class FastForwardRunloopTest {
         r.run(eventSource, eventDispatcher);
 
         /* We expect poll being called two times (for Events one and two) */
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(1);
-        verify(eventSource).poll(1);
-        verify(eventSource).poll(2);
+        verify(eventSource).compute(0);
+        verify(eventSource).compute(1);
+        verify(eventSource, times(2)).peek();
+        verify(eventSource, times(2)).poll();
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(eventTimer).waitForEvent(one);
@@ -145,10 +136,8 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
                 terminationCondition);
 
-        when(eventSource.peek(0)).thenReturn(one);
-        when(eventSource.peek(1)).thenReturn(one);
-        when(eventSource.peek(2)).thenReturn(term);
-        when(eventSource.poll(2)).thenReturn(one);
+        when(eventSource.peek()).thenReturn(one, one, term, null);
+        when(eventSource.poll()).thenReturn(one, one, term, null);
         when(eventTimer.waitForEvent(one)).thenReturn(1L, 2L);
         when(eventTimer.waitForEvent(term)).thenReturn(3L);
         
@@ -157,12 +146,13 @@ public class FastForwardRunloopTest {
         
         r.run(eventSource, eventDispatcher);
 
+        verify(eventSource).compute(0);
+        verify(eventSource).compute(1);
+        verify(eventSource).compute(2);
         // We expect poll being called three times (one, one, term) */
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(1);
-        verify(eventSource).peek(2);
-        // We expect poll beeing called only once (the second time for one)
-        verify(eventSource).poll(2);
+        verify(eventSource, times(3)).peek();
+        // We expect poll being called only once (the second time for one)
+        verify(eventSource).poll();
         
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventTimer, times(2)).waitForEvent(one);
@@ -183,9 +173,8 @@ public class FastForwardRunloopTest {
         /*
          * Simulate event source which returns events in the wrong order.
          */
-        when(eventSource.peek(0)).thenReturn(two);
-        when(eventSource.peek(2)).thenReturn(one);
-        when(eventSource.poll(2)).thenReturn(two);
+        when(eventSource.peek()).thenReturn(two, one, null);
+        when(eventSource.poll()).thenReturn(two, one, null);
         
         when(eventTimer.waitForEvent(two)).thenReturn(2L);
         when(eventTimer.waitForEvent(one)).thenReturn(1L);
@@ -194,10 +183,12 @@ public class FastForwardRunloopTest {
 
         r.run(eventSource, eventDispatcher);
 
+        verify(eventSource).compute(0);
+        verify(eventSource).compute(2);
+        
         /* Event two must have been delivered properly */
-        verify(eventSource).poll(2);
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(2);
+        verify(eventSource, times(2)).peek();
+        verify(eventSource).poll();
         verify(eventDispatcher).dispatchEvent(two);
         verify(eventTimer).waitForEvent(two);
         verify(eventTimer).waitForEvent(one);

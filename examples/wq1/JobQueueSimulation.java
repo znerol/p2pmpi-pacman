@@ -166,12 +166,12 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public Event peek(long currentSimtime) {
+        public Event peek() {
             return currentEvent;
         }
 
         @Override
-        public Event poll(long currentSimtime) {
+        public Event poll() {
             Event e = currentEvent;
             currentEvent = null;
             return e;
@@ -201,12 +201,12 @@ public class JobQueueSimulation {
         }
         
         @Override
-        public Event peek(long currentSimtime) {
+        public Event peek() {
             return currentEvent;
         }
 
         @Override
-        public Event poll(long currentSimtime) {
+        public Event poll() {
             Event e = currentEvent;
             currentEvent = null;
             return e;
