@@ -4,7 +4,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
-import deism.AbstractGeneraterorEventSource;
 import deism.Event;
 import deism.EventDispatcher;
 import deism.EventMatcher;
@@ -140,10 +139,10 @@ public class JobQueueSimulation {
         }
     }
 
-    private static class ClientArrivedSource extends
-            AbstractGeneraterorEventSource {
-        long mtbca = 1000;
-        long mstpc = 800;
+    private static class ClientArrivedSource implements EventSource {
+        long mtbca;
+        long mstpc;
+        Event currentEvent;
         final Random rng;
 
         public ClientArrivedSource(Random rng,
@@ -153,34 +152,64 @@ public class JobQueueSimulation {
             this.rng = rng;
             this.mtbca = mean_time_between_customer_arrival;
             this.mstpc = mean_service_time_per_customer;
+            currentEvent = null;
         }
 
         @Override
-        public Event nextEvent(long currentSimtime) {
-            long arrivalTime = getLastEventSimtime()
+        public void compute(long currentSimtime) {
+            if (currentEvent == null) {
+                long arrivalTime = currentSimtime 
                     + (long) (mtbca * -Math.log(rng.nextDouble()));
-            long serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
-            return new ClientArrivedEvent(arrivalTime, serviceTime);
+                long serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
+                currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
+            }
+        }
+
+        @Override
+        public Event peek(long currentSimtime) {
+            return currentEvent;
+        }
+
+        @Override
+        public Event poll(long currentSimtime) {
+            Event e = currentEvent;
+            currentEvent = null;
+            return e;
         }
     }
 
-    private static class ClerkSource extends AbstractGeneraterorEventSource {
+    private static class ClerkSource implements EventSource {
         Queue<ClientArrivedEvent> jobs;
+        Event currentEvent;
 
         public ClerkSource(Queue<ClientArrivedEvent> jobs) {
             super();
             this.jobs = jobs;
+            currentEvent = null;
         }
 
         @Override
-        public Event nextEvent(long currentSimtime) {
-            ClientArrivedEvent job = jobs.poll();
-            if (job == null) {
-                return null;
+        public void compute(long currentSimtime) {
+            if (currentEvent == null) {
+                ClientArrivedEvent job = jobs.poll();
+                if (job != null) {
+                    long nextClerkFreeTime = job.getServiceTime()
+                            + Math.max(currentSimtime, job.getSimtime());
+                    currentEvent = new ClerkFreeEvent(nextClerkFreeTime);
+                }
             }
-            long nextClerkFreeTime = job.getServiceTime()
-                    + Math.max(getLastEventSimtime(), job.getSimtime());
-            return new ClerkFreeEvent(nextClerkFreeTime);
+        }
+        
+        @Override
+        public Event peek(long currentSimtime) {
+            return currentEvent;
+        }
+
+        @Override
+        public Event poll(long currentSimtime) {
+            Event e = currentEvent;
+            currentEvent = null;
+            return e;
         }
     }
 }
