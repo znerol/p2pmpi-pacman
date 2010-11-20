@@ -5,7 +5,7 @@ public abstract class AbstractGeneraterorEventSource implements EventSource {
     private long lastEventSimtime = 0;
 
     @Override
-    public Event peek() {
+    public Event peek(long currentSimtime) {
         if (currentEvent == null) {
             currentEvent = nextEvent();
             if (currentEvent != null) {
@@ -16,8 +16,8 @@ public abstract class AbstractGeneraterorEventSource implements EventSource {
     }
 
     @Override
-    public Event poll() {
-        Event e = peek();
+    public Event poll(long currentSimtime) {
+        Event e = peek(currentSimtime);
         currentEvent = null;
         return e;
     }

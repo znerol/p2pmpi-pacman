@@ -16,10 +16,10 @@ public class EventSourceCollectionTest {
         final ArrayList<EventSource> sources = new ArrayList<EventSource>();
         EventSourceCollection c = new EventSourceCollection(sources);
 
-        Event peek = c.peek();
+        Event peek = c.peek(0);
         assertNull(peek);
 
-        Event poll = c.poll();
+        Event poll = c.poll(0);
         assertNull(poll);
     }
     
@@ -28,10 +28,10 @@ public class EventSourceCollectionTest {
         final EventSource[] sources = {};
         EventSourceCollection c = new EventSourceCollection(sources);
         
-        Event peek = c.peek();
+        Event peek = c.peek(0);
         assertNull(peek);
 
-        Event poll = c.poll();
+        Event poll = c.poll(0);
         assertNull(poll);
     }
     
@@ -64,11 +64,11 @@ public class EventSourceCollectionTest {
 
         final EventSource firstSource = new EventSource(){
             @Override
-            public Event peek() {
+            public Event peek(long currentSimtime) {
                 return firstSourceEvents.peek();
             }
             @Override
-            public Event poll() {
+            public Event poll(long currentSimtime) {
                 return firstSourceEvents.poll();
             }
         };
@@ -79,11 +79,11 @@ public class EventSourceCollectionTest {
 
         final EventSource secondSource = new EventSource(){
             @Override
-            public Event peek() {
+            public Event peek(long currentSimtime) {
                 return secondSourceEvents.peek();
             }
             @Override
-            public Event poll() {
+            public Event poll(long currentSimtime) {
                 return secondSourceEvents.poll();
             }
         };
@@ -97,10 +97,10 @@ public class EventSourceCollectionTest {
         EventSourceCollection c = new EventSourceCollection(sources);
 
         /* verify that events are returned in the expected order */
-        assertEquals(one, c.poll());
-        assertEquals(two, c.poll());
-        assertEquals(three, c.poll());
-        assertEquals(four, c.poll());
-        assertEquals(null, c.poll());
+        assertEquals(one, c.poll(0));
+        assertEquals(two, c.poll(0));
+        assertEquals(three, c.poll(0));
+        assertEquals(four, c.poll(0));
+        assertEquals(null, c.poll(0));
     }
 }

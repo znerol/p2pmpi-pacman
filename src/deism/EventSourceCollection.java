@@ -25,19 +25,19 @@ public class EventSourceCollection implements EventSource {
     }
 
     @Override
-    public Event peek() {
-        return this.getPeekEventAndSource().getEvent();
+    public Event peek(long currentSimtime) {
+        return this.getPeekEventAndSource(currentSimtime).getEvent();
     }
 
     @Override
-    public Event poll() {
-        EventAndSource eas = this.getPeekEventAndSource();
+    public Event poll(long currentSimtime) {
+        EventAndSource eas = this.getPeekEventAndSource(currentSimtime);
         EventSource es = eas.getEventSource();
         if (es == null) {
             return null;
         }
 
-        return es.poll();
+        return es.poll(currentSimtime);
     }
 
     /**
@@ -46,12 +46,12 @@ public class EventSourceCollection implements EventSource {
      * 
      * @return event and event source
      */
-    private EventAndSource getPeekEventAndSource() {
+    private EventAndSource getPeekEventAndSource(long currentSimtime) {
         Event peekEvent = null;
         EventSource peekSource = null;
 
         for (EventSource s : eventSources) {
-            Event candidate = s.peek();
+            Event candidate = s.peek(currentSimtime);
             if (candidate == null) {
                 continue;
             }

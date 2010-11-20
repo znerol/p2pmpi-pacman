@@ -44,7 +44,7 @@ public class FastForwardRunloop implements EventRunloop {
     public void run(EventSource source, EventDispatcher disp)
             throws EventSourceOrderException {
         while (!stop) {
-            Event peekEvent = source.peek();
+            Event peekEvent = source.peek(lastsimtime);
 
             if (terminationCondition.match(peekEvent)) {
                 break;
@@ -53,35 +53,29 @@ public class FastForwardRunloop implements EventRunloop {
             /*
              * Suspend execution until its time to handle the event.
              */
-            long expectSimtime = peekEvent.getSimtime();
-            long currentSimtime = timer.waitForEvent(peekEvent);
-            if (currentSimtime != expectSimtime) {
-                /*
-                 * If wait was interrupted someone called wakeup(). We have to
-                 * check the loop condition and peek again on the source.
-                 */
-                continue;
-            }
+            long newSimtime = timer.waitForEvent(peekEvent);
             
-            if (peekEvent == null) {
-                // If no event was available at the time peek() was called we
-                // must restart the loop and peek again.
-                continue;
-            }
-            
-            if (lastsimtime > currentSimtime) {
+            if (lastsimtime > newSimtime) {
                 throw new EventSourceOrderException(
                         "Event source returns events out of sequence");
             }
-            lastsimtime = currentSimtime;
-
+            
+            lastsimtime = newSimtime;
+            
+            if (peekEvent == null || newSimtime < peekEvent.getSimtime()) {
+                // Restart and reevaluate loop conditions and current event
+                // when the current simulation time is less than that of the
+                // next event.
+                continue;
+            }
+            
             /*
              * This is moderately ugly. We have to remove the peek event and we
              * really want to be sure that this was actually the same like the
              * one we peeked before. Otherwise it could indicate a bug in the
              * EventSource or some concurrency issue.
              */
-            Event polledEvent = source.poll();
+            Event polledEvent = source.poll(lastsimtime);
             assert peekEvent == polledEvent;
 
             disp.dispatchEvent(polledEvent);

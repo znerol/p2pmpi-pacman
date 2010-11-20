@@ -33,9 +33,9 @@ public class AbstractGeneratorEventSourceTest {
         Event e1 = new Event(1);
         events.add(e1);
         
-        assertEquals(e1, source.peek());
-        assertEquals(e1, source.peek());
-        assertEquals(e1, source.peek());
+        assertEquals(e1, source.peek(0));
+        assertEquals(e1, source.peek(0));
+        assertEquals(e1, source.peek(0));
     }
     
     /**
@@ -48,9 +48,9 @@ public class AbstractGeneratorEventSourceTest {
         events.add(e1);
         events.add(e2);
         
-        assertEquals(e1, source.poll());
-        assertEquals(e2, source.poll());
-        assertEquals(null, source.poll());
+        assertEquals(e1, source.poll(0));
+        assertEquals(e2, source.poll(0));
+        assertEquals(null, source.poll(0));
     }
     
     /**
@@ -63,9 +63,9 @@ public class AbstractGeneratorEventSourceTest {
         events.add(e1);
         
         assertEquals(0, source.getLastEventSimtime());
-        assertEquals(e1, source.poll());
+        assertEquals(e1, source.poll(0));
         assertEquals(42, source.getLastEventSimtime());
-        assertEquals(null, source.poll());
+        assertEquals(null, source.poll(0));
         assertEquals(42, source.getLastEventSimtime());
     }
 }
