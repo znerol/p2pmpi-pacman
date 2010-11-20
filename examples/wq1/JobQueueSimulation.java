@@ -39,19 +39,31 @@ public class JobQueueSimulation {
             governor = new ImmediateExecutionGovernor();
         }
 
-        FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond);
-
+        boolean multithread = Boolean.getBoolean("simulationMultithread");
+        EventSource clientSource;
+        if (multithread) {
+            RunnableClientArrivedSource runnableClientSource = 
+                new RunnableClientArrivedSource(rng, governor, 1000, 1600);
+            clientSource = runnableClientSource;
+        
+            Thread producer = new Thread(runnableClientSource);
+            producer.start();
+        }
+        else {
+            clientSource = new ClientArrivedSource(rng, 1000, 1600);
+        }
+        
         PriorityQueue<ClientArrivedEvent> jobs = new PriorityQueue<ClientArrivedEvent>();
-
         /* Define as many customer/clerk sources as you wish */
         EventSource[] sources = {
-                // new ClientArrivedSource(rng),
-                // new ClientArrivedSource(rng),
-                new ClientArrivedSource(rng, 1000, 1600),
-                // new ClerkSource(jobs),
-                new ClerkSource(jobs), new ClerkSource(jobs) };
+                clientSource,
+                new ClerkSource(jobs),
+                new ClerkSource(jobs)
+        };
+        
         EventSource aggSource = new EventSourceCollection(sources);
 
+        FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond);
         EventDispatcher disp = new JobAggregator(jobs);
         runloop.run(aggSource, disp);
     }
@@ -69,7 +81,11 @@ public class JobQueueSimulation {
 
         @Override
         public boolean match(Event e) {
-            return (e.getSimtime() > duration);
+            boolean result = false;
+            if (e != null) {
+                result = (e.getSimtime() > duration);
+            }
+            return result;
         }
 
     }
@@ -140,9 +156,13 @@ public class JobQueueSimulation {
         @Override
         public void compute(long currentSimtime) {
             if (currentEvent == null) {
-                long arrivalTime = currentSimtime
-                        + (long) (mtbca * -Math.log(rng.nextDouble()));
-                long serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
+                long arrivalTime;
+                long serviceTime;
+                synchronized(rng) {
+                    arrivalTime = currentSimtime
+                            + (long) (mtbca * -Math.log(rng.nextDouble()));
+                    serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
+                }
                 currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
             }
         }
@@ -160,6 +180,70 @@ public class JobQueueSimulation {
         }
     }
 
+    private static class RunnableClientArrivedSource
+            implements EventSource, Runnable {
+        long mtbca;
+        long mstpc;
+        ExecutionGovernor governor;
+        Event currentEvent;
+        long currentSimtime;
+        final Random rng;
+
+        public RunnableClientArrivedSource(Random rng,
+                ExecutionGovernor governor,
+                long mean_time_between_customer_arrival,
+                long mean_service_time_per_customer) {
+            super();
+            this.rng = rng;
+            this.governor = governor;
+            this.mtbca = mean_time_between_customer_arrival;
+            this.mstpc = mean_service_time_per_customer;
+            currentEvent = null;
+        }
+
+        @Override
+        public synchronized void compute(long currentSimtime) {
+            this.currentSimtime = currentSimtime;
+            this.notify();
+        }
+
+        @Override
+        public synchronized Event peek() {
+            return currentEvent;
+        }
+
+        @Override
+        public synchronized Event poll() {
+            Event e = currentEvent;
+            currentEvent = null;
+            return e;
+        }
+
+        @Override
+        public synchronized void run() {
+            while(true) {
+                long arrivalTime;
+                long serviceTime;
+                synchronized(rng) {
+                    arrivalTime = currentSimtime
+                            + (long) (mtbca * -Math.log(rng.nextDouble()));
+                    serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
+                }
+                currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
+                governor.resume(currentEvent.getSimtime());
+
+                while (currentEvent != null) {
+                    try {
+                        this.wait();
+                    }
+                    catch (InterruptedException e) {
+                        // do nothing
+                    }
+                }
+            }
+        }
+    }
+    
     private static class ClerkSource implements EventSource {
         Queue<ClientArrivedEvent> jobs;
         Event currentEvent;
