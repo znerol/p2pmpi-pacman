@@ -21,18 +21,23 @@ public class JobQueueSimulation {
      */
     public static void main(String[] args) {
         Random rng = new Random(1234);
+        
         /* exit simulation after n units of simulation time */
-        EventMatcher termCond = new TerminateAfterDuration(1000 * 100);
-
-        /* exit simulation after n events */
-        // EventMatcher termCond = new TerminateAfterEventcount(1000 * 100);
-
-        /* run simulation as fast as possible */
-        ExecutionGovernor governor = new ImmediateExecutionGovernor();
-
-        /* run simulation in realtime */
-        // RealtimeClock clock = new RealtimeClock(10.0);
-        // ExecutionGovernor governor = new RealtimeExecutionGovernor(clock);
+        EventMatcher termCond = new TerminateAfterDuration(1000 * 50);
+        
+        String speedString = System.getProperty("simulationSpeed", "0");
+        double speed = Double.valueOf(speedString).doubleValue();
+        
+        ExecutionGovernor governor;
+        if (speed > 0) {
+            /* run simulation in realtime */
+            RealtimeClock clock = new RealtimeClock(10.0);
+            governor = new RealtimeExecutionGovernor(clock);            
+        }
+        else {
+            /* run simulation as fast as possible */
+            governor = new ImmediateExecutionGovernor();
+        }
 
         FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond);
 
@@ -67,23 +72,6 @@ public class JobQueueSimulation {
             return (e.getSimtime() > duration);
         }
 
-    }
-
-    /**
-     * TerminateAfterEventcount.match will return true after a given number of
-     * events were dispatched.
-     */
-    private static class TerminateAfterEventcount implements EventMatcher {
-        int remaining;
-
-        public TerminateAfterEventcount(int count) {
-            remaining = count;
-        }
-
-        @Override
-        public boolean match(Event e) {
-            return (--remaining < 0);
-        }
     }
 
     private static class JobAggregator implements EventDispatcher {
