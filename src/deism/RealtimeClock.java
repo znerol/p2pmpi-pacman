@@ -1,7 +1,7 @@
 package deism;
 
 /**
- * Clock for RealtimEventTimer
+ * Clock for RealtimeExecutionGovernor
  * 
  * Convert between walltime and simulation time
  */

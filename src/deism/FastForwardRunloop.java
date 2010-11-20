@@ -14,12 +14,12 @@ package deism;
 public class FastForwardRunloop implements EventRunloop {
     private boolean stop = false;
     private EventMatcher terminationCondition = null;
-    private EventTimer timer;
+    private ExecutionGovernor governor;
     private long lastsimtime = 0;
 
-    public FastForwardRunloop(EventTimer timer,
+    public FastForwardRunloop(ExecutionGovernor governor,
             EventMatcher terminationCondition) {
-        this.timer = timer;
+        this.governor = governor;
         this.terminationCondition = terminationCondition;
     }
 
@@ -30,7 +30,7 @@ public class FastForwardRunloop implements EventRunloop {
      * events timestamp lies in the past, the method returns immediately.
      * Suspend indefinitely if event is null.
      * 
-     * Use wakeup() to resume before the timeout is reached.
+     * Use wakeup to resume before the timeout is reached.
      * 
      * @param e
      * @throws InterruptedException
@@ -51,7 +51,13 @@ public class FastForwardRunloop implements EventRunloop {
             /*
              * Suspend execution until its time to handle the event.
              */
-            long newSimtime = timer.waitForEvent(peekEvent);
+            long newSimtime;
+            if (peekEvent != null) {
+                newSimtime = governor.suspendUntil(peekEvent.getSimtime());
+            }
+            else {
+                newSimtime = governor.suspend();
+            }
             
             if (lastsimtime > newSimtime) {
                 throw new EventSourceOrderException(
@@ -82,7 +88,7 @@ public class FastForwardRunloop implements EventRunloop {
 
     @Override
     public void wakeup() {
-        timer.wakeup();
+        governor.resume();
     }
 
     @Override

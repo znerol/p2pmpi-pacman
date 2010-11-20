@@ -15,7 +15,7 @@ public class FastForwardRunloopTest {
     @Mock
     EventDispatcher eventDispatcher;
     @Mock
-    EventTimer eventTimer;
+    ExecutionGovernor governor;
     @Mock
     EventMatcher terminationCondition;
 
@@ -25,7 +25,7 @@ public class FastForwardRunloopTest {
      */
     @Test
     public void runNoEvent() {
-        final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
+        final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition);
 
         when(eventSource.peek()).thenReturn(null);
@@ -35,7 +35,7 @@ public class FastForwardRunloopTest {
 
         verify(eventSource).peek();
         verifyZeroInteractions(eventDispatcher);
-        verifyZeroInteractions(eventTimer);
+        verifyZeroInteractions(governor);
         verify(terminationCondition).match(null);
     }
     
@@ -48,7 +48,7 @@ public class FastForwardRunloopTest {
         final Event one = new Event(1);
         final Event two = new Event(2);
         final Event term = new Event(3);
-        final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
+        final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition);
 
         /*
@@ -57,8 +57,8 @@ public class FastForwardRunloopTest {
          */
         when(eventSource.peek()).thenReturn(one, two, term, null);
         when(eventSource.poll()).thenReturn(one, two, term, null);
-        when(eventTimer.waitForEvent(one)).thenReturn(1L);
-        when(eventTimer.waitForEvent(two)).thenReturn(2L);
+        when(governor.suspendUntil(1)).thenReturn(1L);
+        when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(term)).thenReturn(true);
@@ -72,8 +72,8 @@ public class FastForwardRunloopTest {
         verify(eventSource, times(2)).poll();
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
-        verify(eventTimer).waitForEvent(one);
-        verify(eventTimer).waitForEvent(two);
+        verify(governor).suspendUntil(1);
+        verify(governor).suspendUntil(2);
         verify(terminationCondition).match(one);
         verify(terminationCondition).match(two);
         verify(terminationCondition).match(term);
@@ -90,15 +90,15 @@ public class FastForwardRunloopTest {
         final Event three = new Event(3);
         final Event term = new Event(4);
 
-        final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
+        final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition);
 
         when(eventSource.peek()).thenReturn(one, two, three, term, null);
         when(eventSource.poll()).thenReturn(one, two, three, term, null);
-        when(eventTimer.waitForEvent(one)).thenReturn(1L);
-        when(eventTimer.waitForEvent(two)).thenReturn(2L);
-        when(eventTimer.waitForEvent(three)).thenReturn(3L);
-        when(eventTimer.waitForEvent(term)).thenReturn(4L);
+        when(governor.suspendUntil(1)).thenReturn(1L);
+        when(governor.suspendUntil(2)).thenReturn(2L);
+        when(governor.suspendUntil(3)).thenReturn(3L);
+        when(governor.suspendUntil(4)).thenReturn(4L);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(three)).thenReturn(false);
@@ -121,8 +121,8 @@ public class FastForwardRunloopTest {
         verify(eventSource, times(2)).poll();
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
-        verify(eventTimer).waitForEvent(one);
-        verify(eventTimer).waitForEvent(two);
+        verify(governor).suspendUntil(1);
+        verify(governor).suspendUntil(2);
         verify(terminationCondition).match(one);
         verify(terminationCondition).match(two);
     }
@@ -133,13 +133,13 @@ public class FastForwardRunloopTest {
         final Event one = new Event(2);
         final Event term = new Event(3);
 
-        final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
+        final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition);
 
         when(eventSource.peek()).thenReturn(one, one, term, null);
         when(eventSource.poll()).thenReturn(one, one, term, null);
-        when(eventTimer.waitForEvent(one)).thenReturn(1L, 2L);
-        when(eventTimer.waitForEvent(term)).thenReturn(3L);
+        when(governor.suspendUntil(2)).thenReturn(1L, 2L);
+        when(governor.suspendUntil(3)).thenReturn(3L);
         
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(term)).thenReturn(true);
@@ -155,7 +155,7 @@ public class FastForwardRunloopTest {
         verify(eventSource).poll();
         
         verify(eventDispatcher).dispatchEvent(one);
-        verify(eventTimer, times(2)).waitForEvent(one);
+        verify(governor, times(2)).suspendUntil(2);
         verify(terminationCondition, times(2)).match(one);
         verify(terminationCondition).match(term);
     }
@@ -167,7 +167,7 @@ public class FastForwardRunloopTest {
     public void runSourceWithWrongEventOrder() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final FastForwardRunloop r = new FastForwardRunloop(eventTimer,
+        final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition);
 
         /*
@@ -176,8 +176,8 @@ public class FastForwardRunloopTest {
         when(eventSource.peek()).thenReturn(two, one, null);
         when(eventSource.poll()).thenReturn(two, one, null);
         
-        when(eventTimer.waitForEvent(two)).thenReturn(2L);
-        when(eventTimer.waitForEvent(one)).thenReturn(1L);
+        when(governor.suspendUntil(1)).thenReturn(1L);
+        when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(one)).thenReturn(false);
 
@@ -190,8 +190,8 @@ public class FastForwardRunloopTest {
         verify(eventSource, times(2)).peek();
         verify(eventSource).poll();
         verify(eventDispatcher).dispatchEvent(two);
-        verify(eventTimer).waitForEvent(two);
-        verify(eventTimer).waitForEvent(one);
+        verify(governor).suspendUntil(1);
+        verify(governor).suspendUntil(2);
         verify(terminationCondition).match(two);
         verify(terminationCondition).match(one);
     }

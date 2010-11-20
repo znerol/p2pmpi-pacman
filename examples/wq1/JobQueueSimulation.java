@@ -9,11 +9,11 @@ import deism.EventDispatcher;
 import deism.EventMatcher;
 import deism.EventSource;
 import deism.EventSourceCollection;
-import deism.EventTimer;
+import deism.ExecutionGovernor;
 import deism.FastForwardRunloop;
-import deism.NoDelayEventTimer;
+import deism.ImmediateExecutionGovernor;
 import deism.RealtimeClock;
-import deism.RealtimeEventTimer;
+import deism.RealtimeExecutionGovernor;
 
 public class JobQueueSimulation {
     /**
@@ -22,35 +22,29 @@ public class JobQueueSimulation {
     public static void main(String[] args) {
         Random rng = new Random(1234);
         /* exit simulation after n units of simulation time */
-        /* EventMatcher termCond = new TerminateAfterDuration(1000 * 100); */
+        EventMatcher termCond = new TerminateAfterDuration(1000 * 100);
 
         /* exit simulation after n events */
-        EventMatcher termCond = new TerminateAfterEventcount(1000 * 100);
+        // EventMatcher termCond = new TerminateAfterEventcount(1000 * 100);
 
         /* run simulation as fast as possible */
-        EventTimer eventTimer = new NoDelayEventTimer();
+        ExecutionGovernor governor = new ImmediateExecutionGovernor();
 
         /* run simulation in realtime */
-        /*
-         * RealtimeClock clock = new RealtimeClock(1.0); EventTimer eventTimer =
-         * new RealtimeEventTimer(clock);
-         */
+        // RealtimeClock clock = new RealtimeClock(10.0);
+        // ExecutionGovernor governor = new RealtimeExecutionGovernor(clock);
 
-        FastForwardRunloop runloop = new FastForwardRunloop(eventTimer,
-                termCond);
+        FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond);
 
         PriorityQueue<ClientArrivedEvent> jobs = new PriorityQueue<ClientArrivedEvent>();
 
         /* Define as many customer/clerk sources as you wish */
         EventSource[] sources = {
-        /*
-         * new ClientArrivedSource(rng), new ClientArrivedSource(rng),
-         */
-        new ClientArrivedSource(rng, 1000, 1600),
-        /*
-         * new ClerkSource(jobs),
-         */
-        new ClerkSource(jobs), new ClerkSource(jobs) };
+                // new ClientArrivedSource(rng),
+                // new ClientArrivedSource(rng),
+                new ClientArrivedSource(rng, 1000, 1600),
+                // new ClerkSource(jobs),
+                new ClerkSource(jobs), new ClerkSource(jobs) };
         EventSource aggSource = new EventSourceCollection(sources);
 
         EventDispatcher disp = new JobAggregator(jobs);
@@ -158,8 +152,8 @@ public class JobQueueSimulation {
         @Override
         public void compute(long currentSimtime) {
             if (currentEvent == null) {
-                long arrivalTime = currentSimtime 
-                    + (long) (mtbca * -Math.log(rng.nextDouble()));
+                long arrivalTime = currentSimtime
+                        + (long) (mtbca * -Math.log(rng.nextDouble()));
                 long serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
             }
@@ -199,7 +193,7 @@ public class JobQueueSimulation {
                 }
             }
         }
-        
+
         @Override
         public Event peek() {
             return currentEvent;
