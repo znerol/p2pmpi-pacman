@@ -44,6 +44,8 @@ public class FastForwardRunloop implements EventRunloop {
     public void run(EventSource source, EventDispatcher disp)
             throws EventSourceOrderException {
         while (!stop) {
+            source.compute(lastsimtime);
+            
             Event peekEvent = source.peek(lastsimtime);
 
             if (terminationCondition.match(peekEvent)) {

@@ -7,6 +7,7 @@ import java.util.Arrays;
  */
 public class EventSourceCollection implements EventSource {
     private Iterable<EventSource> eventSources;
+    private EventSource currentSource;
 
     public EventSourceCollection(Iterable<EventSource> eventSources) {
         if (eventSources == null) {
@@ -14,6 +15,7 @@ public class EventSourceCollection implements EventSource {
                     "EventSourceCollection cannot operate without a list of event sources");
         }
         this.eventSources = eventSources;
+        currentSource = null;
     }
 
     public EventSourceCollection(EventSource[] eventSources) {
@@ -25,64 +27,44 @@ public class EventSourceCollection implements EventSource {
     }
 
     @Override
-    public Event peek(long currentSimtime) {
-        return this.getPeekEventAndSource(currentSimtime).getEvent();
-    }
-
-    @Override
-    public Event poll(long currentSimtime) {
-        EventAndSource eas = this.getPeekEventAndSource(currentSimtime);
-        EventSource es = eas.getEventSource();
-        if (es == null) {
-            return null;
-        }
-
-        return es.poll(currentSimtime);
-    }
-
-    /**
-     * Find event with the smallest timestamp and return it together with its
-     * event source.
-     * 
-     * @return event and event source
-     */
-    private EventAndSource getPeekEventAndSource(long currentSimtime) {
+    public void compute(long currentSimtime) {
         Event peekEvent = null;
-        EventSource peekSource = null;
+        currentSource = null;
 
-        for (EventSource s : eventSources) {
-            Event candidate = s.peek(currentSimtime);
+        for (EventSource source : eventSources) {
+            source.compute(currentSimtime);
+            
+            Event candidate = source.peek(currentSimtime);
             if (candidate == null) {
                 continue;
             }
 
             if (peekEvent == null || candidate.compareTo(peekEvent) < 0) {
                 peekEvent = candidate;
-                peekSource = s;
+                currentSource = source;
             }
         }
-
-        return new EventAndSource(peekEvent, peekSource);
+    }
+    
+    @Override
+    public Event peek(long currentSimtime) {
+        Event e = null;
+        
+        if (currentSource != null) {
+            e = currentSource.peek(currentSimtime);
+        }
+        
+        return e;
     }
 
-    /**
-     * Private helper class encapsulating an event and the corresponding source
-     */
-    private class EventAndSource {
-        private final Event event;
-        private final EventSource eventSource;
-
-        public EventAndSource(Event e, EventSource s) {
-            event = e;
-            eventSource = s;
+    @Override
+    public Event poll(long currentSimtime) {
+        Event e = null;
+        
+        if (currentSource != null) {
+            e = currentSource.poll(currentSimtime);
         }
-
-        public Event getEvent() {
-            return event;
-        }
-
-        public EventSource getEventSource() {
-            return eventSource;
-        }
+        
+        return e;
     }
 }

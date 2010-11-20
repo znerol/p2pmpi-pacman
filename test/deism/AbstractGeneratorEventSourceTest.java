@@ -20,7 +20,7 @@ public class AbstractGeneratorEventSourceTest {
     final AbstractGeneraterorEventSource source =
         new AbstractGeneraterorEventSource() {
         @Override
-        public Event nextEvent() {
+        public Event nextEvent(long currentSimtime) {
             return events.poll();
         }
     };
@@ -33,8 +33,11 @@ public class AbstractGeneratorEventSourceTest {
         Event e1 = new Event(1);
         events.add(e1);
         
+        source.compute(0);
         assertEquals(e1, source.peek(0));
+        source.compute(0);
         assertEquals(e1, source.peek(0));
+        source.compute(0);
         assertEquals(e1, source.peek(0));
     }
     
@@ -48,8 +51,11 @@ public class AbstractGeneratorEventSourceTest {
         events.add(e1);
         events.add(e2);
         
+        source.compute(0);
         assertEquals(e1, source.poll(0));
+        source.compute(0);
         assertEquals(e2, source.poll(0));
+        source.compute(0);
         assertEquals(null, source.poll(0));
     }
     
@@ -63,8 +69,12 @@ public class AbstractGeneratorEventSourceTest {
         events.add(e1);
         
         assertEquals(0, source.getLastEventSimtime());
+        
+        source.compute(0);
         assertEquals(e1, source.poll(0));
         assertEquals(42, source.getLastEventSimtime());
+
+        source.compute(42);
         assertEquals(null, source.poll(0));
         assertEquals(42, source.getLastEventSimtime());
     }

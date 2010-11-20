@@ -156,7 +156,7 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public Event nextEvent() {
+        public Event nextEvent(long currentSimtime) {
             long arrivalTime = getLastEventSimtime()
                     + (long) (mtbca * -Math.log(rng.nextDouble()));
             long serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
@@ -173,7 +173,7 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public Event nextEvent() {
+        public Event nextEvent(long currentSimtime) {
             ClientArrivedEvent job = jobs.poll();
             if (job == null) {
                 return null;
