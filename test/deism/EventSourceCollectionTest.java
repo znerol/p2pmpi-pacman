@@ -96,14 +96,19 @@ public class EventSourceCollectionTest {
 
         /* verify that events are returned in the expected order */
         c.compute(0);
+        assertEquals(one, c.peek());
         assertEquals(one, c.poll());
         c.compute(1);
+        assertEquals(two, c.peek());
         assertEquals(two, c.poll());
         c.compute(2);
+        assertEquals(three, c.peek());
         assertEquals(three, c.poll());
         c.compute(3);
+        assertEquals(four, c.peek());
         assertEquals(four, c.poll());
         c.compute(4);
+        assertEquals(null, c.peek());
         assertEquals(null, c.poll());
     }
 }
