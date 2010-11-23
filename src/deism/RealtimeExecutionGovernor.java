@@ -69,4 +69,9 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
         this.wakeupTime = Math.min(this.wakeupTime, clock.getSimtime());
         this.notify();
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

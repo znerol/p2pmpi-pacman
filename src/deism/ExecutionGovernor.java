@@ -4,7 +4,7 @@ package deism;
  * Implementations of execution governors must provide a way to suspend the
  * current thread until the given timestamp is reached.
  */
-public interface ExecutionGovernor {
+public interface ExecutionGovernor extends Cloneable {
     /**
      * Suspend execution until something called resume.
      * 
@@ -32,4 +32,6 @@ public interface ExecutionGovernor {
      * suspendUntil.
      */
     void resume(long wakeupTime);
+
+    public Object clone() throws CloneNotSupportedException;
 }
