@@ -7,9 +7,11 @@ import java.util.Random;
 import deism.Event;
 import deism.EventDispatcher;
 import deism.EventMatcher;
+import deism.EventRunloopRecoveryStrategy;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
+import deism.FailFastRunloopRecoveryStrategy;
 import deism.FastForwardRunloop;
 import deism.ImmediateExecutionGovernor;
 import deism.RealtimeClock;
@@ -62,8 +64,12 @@ public class JobQueueSimulation {
         };
         
         EventSource aggSource = new EventSourceCollection(sources);
+        
+        EventRunloopRecoveryStrategy recoveryStrategy =
+            new FailFastRunloopRecoveryStrategy();
 
-        FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond);
+        FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
+                recoveryStrategy);
         EventDispatcher disp = new JobAggregator(jobs);
         runloop.run(aggSource, disp);
     }

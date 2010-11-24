@@ -15,12 +15,15 @@ public class FastForwardRunloop implements EventRunloop {
     private boolean stop = false;
     private EventMatcher terminationCondition = null;
     private ExecutionGovernor governor;
-    private long lastsimtime = 0;
+    private long currentSimtime = 0;
+    private EventRunloopRecoveryStrategy recoveryStrategy;
 
     public FastForwardRunloop(ExecutionGovernor governor,
-            EventMatcher terminationCondition) {
+            EventMatcher terminationCondition,
+            EventRunloopRecoveryStrategy recoveryStrategy) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
+        this.recoveryStrategy = recoveryStrategy;
     }
 
     /**
@@ -39,10 +42,9 @@ public class FastForwardRunloop implements EventRunloop {
     @Override
     public void run(EventSource source, EventDispatcher disp)
             throws EventSourceOrderException {
-        long lastdispatchtime = lastsimtime;
-        
+
         while (!stop) {
-            source.compute(lastsimtime);
+            source.compute(currentSimtime);
             
             Event peekEvent = source.peek();
 
@@ -61,7 +63,7 @@ public class FastForwardRunloop implements EventRunloop {
                 newSimtime = governor.suspend();
             }
 
-            lastsimtime = newSimtime;
+            currentSimtime = newSimtime;
 
             if (peekEvent == null || newSimtime < peekEvent.getSimtime()) {
                 // Restart and reevaluate loop conditions and current event
@@ -70,9 +72,9 @@ public class FastForwardRunloop implements EventRunloop {
                 continue;
             }
 
-            if (lastdispatchtime > lastsimtime) {
-                throw new EventSourceOrderException(
-                        "Event source returns events out of sequence");
+            if (recoveryStrategy.shouldRollback(peekEvent)) {
+                recoveryStrategy.rollback(currentSimtime);
+                continue;
             }
 
             /*
@@ -85,7 +87,10 @@ public class FastForwardRunloop implements EventRunloop {
             assert peekEvent == polledEvent;
 
             disp.dispatchEvent(polledEvent);
-            lastdispatchtime = lastsimtime;
+            
+            if (recoveryStrategy.shouldSave(polledEvent)) {
+                recoveryStrategy.save(currentSimtime);
+            }
         }
     }
 

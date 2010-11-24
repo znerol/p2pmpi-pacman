@@ -10,15 +10,17 @@ import deism.Event;
 import deism.EventDispatcher;
 import deism.EventMatcher;
 import deism.EventRunloop;
+import deism.EventRunloopRecoveryStrategy;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
+import deism.FastForwardRunloop;
 import deism.RealtimeClock;
 import deism.RealtimeExecutionGovernor;
 import deism.ReproducibleRandom;
 import deism.StateHistory;
+import deism.TimewarpRunloopRecoveryStrategy;
 import deism.TimewarpEventSourceAdapter;
-import deism.TimewarpRunloop;
 
 public class TimewarpJobQueueSimulation {
     /**
@@ -72,9 +74,11 @@ public class TimewarpJobQueueSimulation {
         stateObjects.add(timewarpSources);
         stateObjects.add(rr);
 
-        EventRunloop runloop;
-        runloop = new TimewarpRunloop(governor, termCond, snapshotAll,
-                stateObjects);
+        EventRunloopRecoveryStrategy recoveryStrategy =
+            new TimewarpRunloopRecoveryStrategy(snapshotAll, stateObjects);
+
+        EventRunloop runloop = new FastForwardRunloop(governor, termCond,
+                recoveryStrategy);
         
         EventDispatcher disp = new JobAggregator(jobs);
         runloop.run(allSources, disp);
