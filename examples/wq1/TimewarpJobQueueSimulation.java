@@ -58,8 +58,8 @@ public class TimewarpJobQueueSimulation {
         };
         
         EventSource allSources = new EventSourceCollection(sources);
-        TimewarpEventSourceAdapter<Long> timewarpSources = 
-            new TimewarpEventSourceAdapter<Long>(allSources);
+        TimewarpEventSourceAdapter timewarpSources = 
+            new TimewarpEventSourceAdapter(allSources);
         allSources = timewarpSources;
 
         EventMatcher snapshotAll = new EventMatcher() {
