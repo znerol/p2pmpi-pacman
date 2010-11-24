@@ -59,4 +59,11 @@ public class EventSourceCollection implements EventSource {
         
         return e;
     }
+
+    @Override
+    public void offer(Event event) {
+        if (currentSource != null) {
+            currentSource.offer(event);
+        }
+    }
 }

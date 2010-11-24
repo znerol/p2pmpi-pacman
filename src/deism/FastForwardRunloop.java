@@ -47,10 +47,14 @@ public class FastForwardRunloop implements EventRunloop {
             throws EventSourceOrderException {
 
         long lastSimtime = currentSimtime;
+        
+        // support rollback to before very first event
+        recoveryStrategy.save(currentSimtime);
+        
         while (!stop) {
             source.compute(currentSimtime);
             
-            Event peekEvent = source.peek();
+            Event peekEvent = source.poll();
 
             if (terminationCondition.match(peekEvent)) {
                 break;
@@ -73,27 +77,20 @@ public class FastForwardRunloop implements EventRunloop {
                 // Restart and reevaluate loop conditions and current event
                 // when the current simulation time is less than that of the
                 // next event.
+                source.offer(peekEvent);
                 continue;
             }
 
             if (currentSimtime < lastSimtime) {
+                source.offer(peekEvent);
                 recoveryStrategy.rollback(currentSimtime);
                 lastSimtime = currentSimtime;
                 continue;
             }
 
-            /*
-             * This is moderately ugly. We have to remove the peek event and we
-             * really want to be sure that this was actually the same like the
-             * one we peeked before. Otherwise it could indicate a bug in the
-             * EventSource or some concurrency issue.
-             */
-            Event polledEvent = source.poll();
-            assert peekEvent == polledEvent;
-
-            disp.dispatchEvent(polledEvent);
+            disp.dispatchEvent(peekEvent);
             
-            if (snapshotCondition.match(polledEvent)) {
+            if (snapshotCondition.match(peekEvent)) {
                 recoveryStrategy.save(currentSimtime);
             }
             

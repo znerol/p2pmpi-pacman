@@ -25,22 +25,37 @@ public class TimewarpEventSourceAdapter
 
     @Override
     public Event peek() {
+        Event event;
+        
         if (pendingEventsAvailable()) {
-            return pending.peek();
+            event = pending.peek();
         }
         else {
-            return source.peek();
+            event = source.peek();
         }
+        
+        return event;
     }
 
     @Override
     public Event poll() {
+        Event event;
+        
         if (pendingEventsAvailable()) {
-            return pending.poll();
+            event = pending.poll();
         }
         else {
-            return source.poll();
+            event = source.poll();
         }
+        
+        addToHistory(event);
+        return event;
+    }
+
+    @Override
+    public void offer(Event event) {
+        removeFromHistory(event);
+        this.pending.offer(event);
     }
 
     @Override

@@ -218,6 +218,11 @@ public class TimewarpJobQueueSimulation {
                 currentSimtime = arrivalTime;
             }
         }
+
+        @Override
+        public void offer(Event event) {
+            events.offer(event);
+        }
     }
     
     private static class ClerkSource implements EventSource {
@@ -252,6 +257,12 @@ public class TimewarpJobQueueSimulation {
             Event e = currentEvent;
             currentEvent = null;
             return e;
+        }
+
+        @Override
+        public void offer(Event event) {
+            assert(currentEvent == null);
+            currentEvent = event;
         }
     }
 }

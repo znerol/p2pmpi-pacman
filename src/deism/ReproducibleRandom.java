@@ -25,7 +25,7 @@ public class ReproducibleRandom<K> extends AbstractStateHistory<K, Double> {
             next = new Double(rng.nextDouble());
         }
         
-        addHistory(next);
+        addToHistory(next);
         return next;
     }
 }

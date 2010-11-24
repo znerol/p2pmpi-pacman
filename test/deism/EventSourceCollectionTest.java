@@ -66,6 +66,10 @@ public class EventSourceCollectionTest {
             @Override
             public void compute(long currentSimtime) {
             }
+            @Override
+            public void offer(Event event) {
+                firstSourceEvents.offer(event);
+            }
         };
 
         /* construct second event queue */
@@ -83,6 +87,10 @@ public class EventSourceCollectionTest {
             }
             @Override
             public void compute(long currentSimtime) {
+            }
+            @Override
+            public void offer(Event event) {
+                secondSourceEvents.offer(event);
             }
         };
 

@@ -191,6 +191,12 @@ public class JobQueueSimulation {
             currentEvent = null;
             return e;
         }
+
+        @Override
+        public void offer(Event event) {
+            assert(currentEvent == null);
+            currentEvent = event;
+        }
     }
 
     private static class RunnableClientArrivedSource
@@ -201,6 +207,7 @@ public class JobQueueSimulation {
         Event currentEvent;
         long currentSimtime;
         final Random rng;
+        boolean ready;
 
         public RunnableClientArrivedSource(Random rng,
                 ExecutionGovernor governor,
@@ -217,6 +224,7 @@ public class JobQueueSimulation {
         @Override
         public synchronized void compute(long currentSimtime) {
             this.currentSimtime = currentSimtime;
+            this.ready = (currentEvent == null);
             this.notify();
         }
 
@@ -231,6 +239,12 @@ public class JobQueueSimulation {
             currentEvent = null;
             return e;
         }
+        
+        @Override
+        public synchronized void offer(Event event) {
+            assert(currentEvent == null || currentEvent == event);
+            currentEvent = event;
+        }
 
         @Override
         public synchronized void run() {
@@ -243,9 +257,10 @@ public class JobQueueSimulation {
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
                 currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
+                ready = false;
                 governor.resume(currentEvent.getSimtime());
 
-                while (currentEvent != null) {
+                while (!ready) {
                     try {
                         this.wait();
                     }
@@ -289,6 +304,12 @@ public class JobQueueSimulation {
             Event e = currentEvent;
             currentEvent = null;
             return e;
+        }
+
+        @Override
+        public void offer(Event event) {
+            assert(currentEvent == null);
+            currentEvent = event;
         }
     }
 }

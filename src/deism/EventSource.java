@@ -30,4 +30,9 @@ public interface EventSource {
      * @return The next event or null
      */
     Event poll();
+    
+    /**
+     * Put back an event previously polled from this EventSource
+     */
+    void offer(Event event);
 }
