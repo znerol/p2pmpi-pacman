@@ -8,5 +8,5 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="wq1.JobQueueSimulation"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Pacman"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DsimulationSpeed=10.0 -DsimulationMultithread=true"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DsimulationSpeed=10.0 -DsimulationMultithread=true -ea"/>
 </launchConfiguration>
