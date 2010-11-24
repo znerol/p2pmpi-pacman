@@ -1,5 +1,5 @@
 package deism;
 
-public interface TimewarpEventSource<K> extends EventSource, StateHistory<K> {
+public interface TimewarpEventSource extends EventSource, StateHistory<Long> {
     boolean pendingEventsAvailable();
 }
