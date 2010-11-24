@@ -3,39 +3,23 @@ package deism;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class TimewarpRunloopRecoveryStrategy implements
-        EventRunloopRecoveryStrategy {
+public class TimewarpRunloopRecoveryStrategy
+        implements EventRunloopRecoveryStrategy {
 
-    private EventMatcher snapshotCondition;
     private SortedSet<Long> snapshots;
     private Iterable<StateHistory<Long>> stateObjects;
-    private long lastEventTimestamp;
-
-    public TimewarpRunloopRecoveryStrategy(EventMatcher snapshotCondition,
+    public TimewarpRunloopRecoveryStrategy(
             Iterable<StateHistory<Long>> stateObjects) {
-        this.snapshotCondition = snapshotCondition;
         this.stateObjects = stateObjects;
         this.snapshots = new TreeSet<Long>();
-        this.lastEventTimestamp = 0;
     }
         
-    @Override
-    public boolean shouldSave(Event e) {
-        lastEventTimestamp = e.getSimtime();
-        return snapshotCondition.match(e);
-    }
-    
     @Override
     public void save(Long timestamp) {
         for (StateHistory<Long> s : stateObjects) {
             s.save(timestamp);
         }
         snapshots.add(timestamp);
-    }
-
-    @Override
-    public boolean shouldRollback(Event e) {
-        return e.getSimtime() < lastEventTimestamp;
     }
 
     @Override
@@ -46,8 +30,6 @@ public class TimewarpRunloopRecoveryStrategy implements
         for (StateHistory<Long> s : stateObjects) {
             s.rollback(snapshotKey);
         }
-        
-        lastEventTimestamp = snapshotKey;
     }
 
     @Override
@@ -59,5 +41,4 @@ public class TimewarpRunloopRecoveryStrategy implements
             s.commit(snapshotKey);
         }
     }
-
 }

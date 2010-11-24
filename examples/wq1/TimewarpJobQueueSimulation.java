@@ -75,10 +75,10 @@ public class TimewarpJobQueueSimulation {
         stateObjects.add(rr);
 
         EventRunloopRecoveryStrategy recoveryStrategy =
-            new TimewarpRunloopRecoveryStrategy(snapshotAll, stateObjects);
+            new TimewarpRunloopRecoveryStrategy(stateObjects);
 
         EventRunloop runloop = new FastForwardRunloop(governor, termCond,
-                recoveryStrategy);
+                recoveryStrategy, snapshotAll);
         
         EventDispatcher disp = new JobAggregator(jobs);
         runloop.run(allSources, disp);

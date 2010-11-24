@@ -20,6 +20,8 @@ public class FastForwardRunloopTest {
     EventMatcher terminationCondition;
     @Mock
     EventRunloopRecoveryStrategy recoveryStrategy;
+    @Mock
+    EventMatcher snapshotCondition;
 
     /**
      * FastForwardRunloop.run must return immediately when EventSource.peek
@@ -28,7 +30,7 @@ public class FastForwardRunloopTest {
     @Test
     public void runNoEvent() {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
-                terminationCondition, recoveryStrategy);
+                terminationCondition, recoveryStrategy, snapshotCondition);
 
         when(eventSource.peek()).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
@@ -51,7 +53,7 @@ public class FastForwardRunloopTest {
         final Event two = new Event(2);
         final Event term = new Event(3);
         final FastForwardRunloop r = new FastForwardRunloop(governor,
-                terminationCondition, recoveryStrategy);
+                terminationCondition, recoveryStrategy, snapshotCondition);
 
         /*
          * On each call to poll() eventSource will return event one, then two
@@ -93,7 +95,7 @@ public class FastForwardRunloopTest {
         final Event term = new Event(4);
 
         final FastForwardRunloop r = new FastForwardRunloop(governor,
-                terminationCondition, recoveryStrategy);
+                terminationCondition, recoveryStrategy, snapshotCondition);
 
         when(eventSource.peek()).thenReturn(one, two, three, term, null);
         when(eventSource.poll()).thenReturn(one, two, three, term, null);
@@ -136,7 +138,7 @@ public class FastForwardRunloopTest {
         final Event term = new Event(3);
 
         final FastForwardRunloop r = new FastForwardRunloop(governor,
-                terminationCondition, recoveryStrategy);
+                terminationCondition, recoveryStrategy, snapshotCondition);
 
         when(eventSource.peek()).thenReturn(one, one, term, null);
         when(eventSource.poll()).thenReturn(one, one, term, null);
@@ -170,7 +172,7 @@ public class FastForwardRunloopTest {
         final Event one = new Event(1);
         final Event two = new Event(2);
         final FastForwardRunloop r = new FastForwardRunloop(governor,
-                terminationCondition, recoveryStrategy);
+                terminationCondition, recoveryStrategy, snapshotCondition);
 
         /*
          * Simulate event source which returns events in the wrong order.
@@ -182,8 +184,6 @@ public class FastForwardRunloopTest {
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(one)).thenReturn(false);
-        when(recoveryStrategy.shouldRollback(two)).thenReturn(false);
-        when(recoveryStrategy.shouldRollback(one)).thenReturn(true);
 
         /* throw a state history exception whenever rollback is called */
         doThrow(new StateHistoryException("")).when(

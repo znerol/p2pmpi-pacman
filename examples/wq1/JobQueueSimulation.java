@@ -68,8 +68,15 @@ public class JobQueueSimulation {
         EventRunloopRecoveryStrategy recoveryStrategy =
             new FailFastRunloopRecoveryStrategy();
 
+        EventMatcher noSnapshots = new EventMatcher() {
+            @Override
+            public boolean match(Event e) {
+                return false;
+            }
+        };
+        
         FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
-                recoveryStrategy);
+                recoveryStrategy, noSnapshots);
         EventDispatcher disp = new JobAggregator(jobs);
         runloop.run(aggSource, disp);
     }

@@ -17,13 +17,16 @@ public class FastForwardRunloop implements EventRunloop {
     private ExecutionGovernor governor;
     private long currentSimtime = 0;
     private EventRunloopRecoveryStrategy recoveryStrategy;
+    private EventMatcher snapshotCondition;
 
     public FastForwardRunloop(ExecutionGovernor governor,
             EventMatcher terminationCondition,
-            EventRunloopRecoveryStrategy recoveryStrategy) {
+            EventRunloopRecoveryStrategy recoveryStrategy,
+            EventMatcher snapshotCondition) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.recoveryStrategy = recoveryStrategy;
+        this.snapshotCondition = snapshotCondition;
     }
 
     /**
@@ -43,6 +46,7 @@ public class FastForwardRunloop implements EventRunloop {
     public void run(EventSource source, EventDispatcher disp)
             throws EventSourceOrderException {
 
+        long lastSimtime = currentSimtime;
         while (!stop) {
             source.compute(currentSimtime);
             
@@ -72,8 +76,9 @@ public class FastForwardRunloop implements EventRunloop {
                 continue;
             }
 
-            if (recoveryStrategy.shouldRollback(peekEvent)) {
+            if (currentSimtime < lastSimtime) {
                 recoveryStrategy.rollback(currentSimtime);
+                lastSimtime = currentSimtime;
                 continue;
             }
 
@@ -88,9 +93,11 @@ public class FastForwardRunloop implements EventRunloop {
 
             disp.dispatchEvent(polledEvent);
             
-            if (recoveryStrategy.shouldSave(polledEvent)) {
+            if (snapshotCondition.match(polledEvent)) {
                 recoveryStrategy.save(currentSimtime);
             }
+            
+            lastSimtime = currentSimtime;
         }
     }
 

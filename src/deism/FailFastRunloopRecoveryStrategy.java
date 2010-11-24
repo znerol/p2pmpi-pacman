@@ -7,11 +7,6 @@ public class FailFastRunloopRecoveryStrategy implements
         EventRunloopRecoveryStrategy {
 
     @Override
-    public boolean shouldSave(Event e) {
-        return false;
-    }
-
-    @Override
     public void save(Long key) throws StateHistoryException {
         // do nothing
     }
@@ -19,11 +14,6 @@ public class FailFastRunloopRecoveryStrategy implements
     @Override
     public void commit(Long key) throws StateHistoryException {
         // do nothing
-    }
-
-    @Override
-    public boolean shouldRollback(Event e) {
-        return false;
     }
 
     @Override
