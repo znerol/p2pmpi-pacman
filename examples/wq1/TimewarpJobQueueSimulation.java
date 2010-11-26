@@ -1,11 +1,13 @@
 package wq1;
 
 import java.util.ArrayList;
-import java.util.PriorityQueue;
+import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
+import deism.AbstractStateHistory;
 import deism.Event;
 import deism.EventDispatcher;
 import deism.EventMatcher;
@@ -17,8 +19,8 @@ import deism.ExecutionGovernor;
 import deism.FastForwardRunloop;
 import deism.RealtimeClock;
 import deism.RealtimeExecutionGovernor;
-import deism.ReproducibleRandom;
 import deism.StateHistory;
+import deism.TimewarpEventSource;
 import deism.TimewarpRunloopRecoveryStrategy;
 import deism.TimewarpEventSourceAdapter;
 
@@ -28,7 +30,6 @@ public class TimewarpJobQueueSimulation {
      */
     public static void main(String[] args) {
         Random rng = new Random(1234);
-        ReproducibleRandom<Long> rr = new ReproducibleRandom<Long>(rng);
         
         /* exit simulation after n units of simulation time */
         EventMatcher termCond = new TerminateAfterDuration(1000 * 50);
@@ -42,14 +43,15 @@ public class TimewarpJobQueueSimulation {
 
         EventSource clientSource;
         RunnableClientArrivedSource<Long> runnableClientSource = 
-            new RunnableClientArrivedSource<Long>(rr, governor, 1000, 1600);
+            new RunnableClientArrivedSource<Long>(rng, governor, 1000, 1600);
         clientSource = runnableClientSource;
         
         Thread producer = new Thread(runnableClientSource);
         producer.start();
         
-        PriorityQueue<ClientArrivedEvent> jobs =
-            new PriorityQueue<ClientArrivedEvent>();
+        PriorityBlockingQueue<ClientArrivedEvent> jobs =
+            new PriorityBlockingQueue<ClientArrivedEvent>();
+        
         /* Define as many customer/clerk sources as you wish */
         EventSource[] sources = {
                 clientSource,
@@ -57,10 +59,8 @@ public class TimewarpJobQueueSimulation {
                 new ClerkSource(jobs)
         };
         
-        EventSource allSources = new EventSourceCollection(sources);
-        TimewarpEventSourceAdapter timewarpSources = 
-            new TimewarpEventSourceAdapter(allSources);
-        allSources = timewarpSources;
+        TimewarpEventSource timewarpSources = 
+            new TimewarpEventSourceAdapter(new EventSourceCollection(sources));
 
         EventMatcher snapshotAll = new EventMatcher() {
             @Override
@@ -69,10 +69,12 @@ public class TimewarpJobQueueSimulation {
             }
         };
 
+        EventDispatcher disp = new JobAggregator(jobs);
+
         ArrayList<StateHistory<Long>> stateObjects =
             new ArrayList<StateHistory<Long>>();
+        stateObjects.add(new StateHistoryLogger());
         stateObjects.add(timewarpSources);
-        stateObjects.add(rr);
 
         EventRunloopRecoveryStrategy recoveryStrategy =
             new TimewarpRunloopRecoveryStrategy(stateObjects);
@@ -80,10 +82,36 @@ public class TimewarpJobQueueSimulation {
         EventRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
         
-        EventDispatcher disp = new JobAggregator(jobs);
-        runloop.run(allSources, disp);
+        runloop.run(timewarpSources, disp);
+        
+        runnableClientSource.stop();
+        producer.interrupt();
+        try {
+            producer.join();
+        }
+        catch (InterruptedException e1) {
+        }
     }
 
+    private static class StateHistoryLogger
+            extends AbstractStateHistory<Long, Object> {
+
+        @Override
+        public void rollback(Long timestamp) {
+            super.rollback(timestamp);
+            System.out.println("Rollback time=" + timestamp);
+        }
+
+        @Override
+        public void commit(Long timestamp) {
+            super.rollback(timestamp);
+            System.out.println("Commit time=" + timestamp);
+        }
+        
+        @Override
+        public void addPending(List<Object> pending) {
+        }
+    }
     /**
      * TerminateAfterDuration.match will return true after given amount of
      * simulation time elapsed.
@@ -159,10 +187,12 @@ public class TimewarpJobQueueSimulation {
         long mstpc;
         ExecutionGovernor mainGovernor;
         ExecutionGovernor myGovernor;
-        final ReproducibleRandom<K> rng;
+        final Random rng;
         final Queue<Event> events;
+        boolean done = false;
 
-        public RunnableClientArrivedSource(ReproducibleRandom<K> rng,
+        public RunnableClientArrivedSource(
+                Random rng,
                 ExecutionGovernor governor,
                 long mean_time_between_customer_arrival,
                 long mean_service_time_per_customer) {
@@ -195,10 +225,15 @@ public class TimewarpJobQueueSimulation {
         }
 
         @Override
+        public void offer(Event event) {
+            events.offer(event);
+        }
+        
+        @Override
         public void run() {
             long currentSimtime = 0;
                         
-            while(true) {
+            while(!done) {
                 long arrivalTime;
                 long serviceTime;
                 synchronized(rng) {
@@ -210,18 +245,17 @@ public class TimewarpJobQueueSimulation {
                 events.offer(e);
                 mainGovernor.resume(e.getSimtime());
                 
-                long now;
-                do {
+                long now = 0;
+                while(now < arrivalTime && !done) {
                     now = myGovernor.suspendUntil(arrivalTime);
-                } while (now < arrivalTime);
+                };
                 
                 currentSimtime = arrivalTime;
             }
         }
 
-        @Override
-        public void offer(Event event) {
-            events.offer(event);
+        public void stop() {
+            done = true;
         }
     }
     
