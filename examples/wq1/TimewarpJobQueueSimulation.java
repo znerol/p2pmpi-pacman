@@ -54,8 +54,6 @@ public class TimewarpJobQueueSimulation {
         
         /* Define as many customer/clerk sources as you wish */
         TimewarpEventSource[] sources = {
-//                new TimewarpEventSourceAdapter(
-//                        new ClientArrivedSource(rng, 1000, 1600)),
                 new TimewarpEventSourceAdapter(clientSource),
                 new TimewarpEventSourceAdapter(new ClerkSource(jobs)),
                 new TimewarpEventSourceAdapter(new ClerkSource(jobs)),
@@ -124,10 +122,10 @@ public class TimewarpJobQueueSimulation {
         public Event receive(long currentSimtime) {
             Event result = rejectedEvent;
             
-            if (result == null) {
-//                if (rng.nextInt(32) == 0) {
-                    result = new Event(currentSimtime + rng.nextInt(1024) - 32);
-//                }
+            if (result == null && currentSimtime > 1024) {
+                if (rng.nextInt(32) == 0) {
+                    result = new Event(currentSimtime - rng.nextInt(1024));
+                }
             }
             
             rejectedEvent = null;
@@ -208,49 +206,6 @@ public class TimewarpJobQueueSimulation {
         @Override
         public String toString() {
             return "[ClerkFreeEvent time=" + this.getSimtime() + "]";
-        }
-    }
-
-    private static class ClientArrivedSource implements EventSource {
-        long mtbca;
-        long mstpc;
-        Event rejectedEvent;
-        final Random rng;
-
-        public ClientArrivedSource(Random rng,
-                long mean_time_between_customer_arrival,
-                long mean_service_time_per_customer) {
-            super();
-            this.rng = rng;
-            this.mtbca = mean_time_between_customer_arrival;
-            this.mstpc = mean_service_time_per_customer;
-            rejectedEvent = null;
-        }
-
-        @Override
-        public Event receive(long currentSimtime) {
-            Event result = rejectedEvent;
-            
-            if (result == null) {
-                long arrivalTime;
-                long serviceTime;
-                synchronized(rng) {
-                    arrivalTime = currentSimtime
-                            + (long) (mtbca * -Math.log(rng.nextDouble()));
-                    serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
-                }
-                result = new ClientArrivedEvent(arrivalTime, serviceTime);
-                rejectedEvent = result;
-            }
-            
-            rejectedEvent = null;
-            return result;
-        }
-
-        @Override
-        public void reject(Event event) {
-            assert(rejectedEvent == null);
-            rejectedEvent = event;
         }
     }
 
