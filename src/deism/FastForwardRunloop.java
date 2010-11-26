@@ -73,7 +73,11 @@ public class FastForwardRunloop implements EventRunloop {
 
             currentSimtime = newSimtime;
 
-            if (peekEvent == null || newSimtime < peekEvent.getSimtime()) {
+            if (peekEvent == null) {
+                continue;
+            }
+            
+            if (newSimtime < peekEvent.getSimtime()) {
                 // Restart and reevaluate loop conditions and current event
                 // when the current simulation time is less than that of the
                 // next event.
