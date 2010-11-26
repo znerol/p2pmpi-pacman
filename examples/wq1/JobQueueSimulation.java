@@ -217,7 +217,7 @@ public class JobQueueSimulation {
         Event rejectedEvent;
         long currentSimtime;
         final Random rng;
-        Event newEvent;
+        Event eventReady;
 
         public RunnableClientArrivedSource(Random rng,
                 ExecutionGovernor governor,
@@ -237,9 +237,9 @@ public class JobQueueSimulation {
 
             this.currentSimtime = currentSimtime;
             if (result == null) {
-                newEvent = null;
+                eventReady = null;
                 this.notify();
-                while (!done && newEvent == null) {
+                while (!done && eventReady == null) {
                     try {
                         this.wait();
                     }
@@ -247,7 +247,7 @@ public class JobQueueSimulation {
                         // do nothing
                     }
                 }
-                result = newEvent;
+                result = eventReady;
             }
             
             rejectedEvent = null;
@@ -270,11 +270,11 @@ public class JobQueueSimulation {
                             + (long) (mtbca * -Math.log(rng.nextDouble()));
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
-                newEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
+                eventReady = new ClientArrivedEvent(arrivalTime, serviceTime);
                 governor.resume(rejectedEvent.getSimtime());
                 
                 this.notify();
-                while (!done && newEvent != null) {
+                while (!done && eventReady != null) {
                     try {
                         this.wait();
                     }
