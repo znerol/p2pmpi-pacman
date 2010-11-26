@@ -133,6 +133,7 @@ public class JobQueueSimulation {
         }
     }
 
+    @SuppressWarnings("serial")
     private static class ClientArrivedEvent extends Event {
         long serviceTime;
 
@@ -152,6 +153,7 @@ public class JobQueueSimulation {
         }
     }
 
+    @SuppressWarnings("serial")
     private static class ClerkFreeEvent extends Event {
         public ClerkFreeEvent(long simtime) {
             super(simtime);
