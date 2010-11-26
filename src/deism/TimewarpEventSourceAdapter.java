@@ -63,7 +63,6 @@ public class TimewarpEventSourceAdapter
         this.pending.addAll(pending);
     }
 
-    @Override
     public boolean pendingEventsAvailable() {
         return (pending.size() > 0);
     }
