@@ -28,14 +28,14 @@ public class EventSourceCollection implements EventSource {
     }
     
     @Override
-    public synchronized Event poll() {
+    public synchronized Event receive() {
         SortedMap<Event, EventSource> eventsAndSources =
             new TreeMap<Event, EventSource>();
         
         currentSource = null;
         
         for (EventSource source : eventSources) {
-            Event event = source.poll();
+            Event event = source.receive();
             if (event != null) {
                 eventsAndSources.put(event, source);
             }

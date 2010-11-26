@@ -54,7 +54,7 @@ public class FastForwardRunloop implements EventRunloop {
         while (!stop) {
             source.compute(currentSimtime);
             
-            Event peekEvent = source.poll();
+            Event peekEvent = source.receive();
 
             if (terminationCondition.match(peekEvent)) {
                 break;

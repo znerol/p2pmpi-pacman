@@ -32,12 +32,12 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.poll()).thenReturn(null);
+        when(eventSource.receive()).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
 
         r.run(eventSource, eventDispatcher);
 
-        verify(eventSource).poll();
+        verify(eventSource).receive();
         verifyZeroInteractions(eventDispatcher);
         verifyZeroInteractions(governor);
         verify(terminationCondition).match(null);
@@ -45,7 +45,7 @@ public class FastForwardRunloopTest {
     
     /**
      * FastForwardRunloop.run must execute EventDispatcher.dispatchEvent for
-     * each event returned by EventSource.poll
+     * each event returned by EventSource.receive
      */
     @Test
     public void runSomeEvents() {
@@ -56,10 +56,10 @@ public class FastForwardRunloopTest {
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
         /*
-         * On each call to poll() eventSource will return event one, then two
-         * and finally null.
+         * On each call to receive() eventSource will return event one, then
+         * two and finally null.
          */
-        when(eventSource.poll()).thenReturn(one, two, term, null);
+        when(eventSource.receive()).thenReturn(one, two, term, null);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
@@ -71,7 +71,7 @@ public class FastForwardRunloopTest {
         verify(eventSource).compute(0);
         verify(eventSource).compute(1);
         verify(eventSource).compute(2);
-        verify(eventSource, times(3)).poll();
+        verify(eventSource, times(3)).receive();
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
@@ -82,7 +82,7 @@ public class FastForwardRunloopTest {
     }
 
     /**
-     * After a call to FastForwardRunloop.stop, no more events must be polled
+     * After a call to FastForwardRunloop.stop, no more events must be received
      * from EventSource and delivered to EventDispatcher
      */
     @Test
@@ -95,7 +95,7 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.poll()).thenReturn(one, two, three, term, null);
+        when(eventSource.receive()).thenReturn(one, two, three, term, null);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
@@ -115,10 +115,10 @@ public class FastForwardRunloopTest {
 
         r.run(eventSource, eventDispatcher);
 
-        /* We expect poll being called two times (for Events one and two) */
+        /* We expect receive being called two times (for Events one and two) */
         verify(eventSource).compute(0);
         verify(eventSource).compute(1);
-        verify(eventSource, times(2)).poll();
+        verify(eventSource, times(2)).receive();
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
@@ -136,7 +136,7 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.poll()).thenReturn(one, one, term, null);
+        when(eventSource.receive()).thenReturn(one, one, term, null);
         when(governor.suspendUntil(2)).thenReturn(1L, 2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
         
@@ -148,8 +148,8 @@ public class FastForwardRunloopTest {
         verify(eventSource).compute(0);
         verify(eventSource).compute(1);
         verify(eventSource).compute(2);
-        // We expect poll being called three times (one, one, term) */
-        verify(eventSource, times(3)).poll();
+        // We expect receive being called three times (one, one, term) */
+        verify(eventSource, times(3)).receive();
         // After the first attempt to deliver one, runloop must try to put it 
         // back into the source.
         verify(eventSource).reject(one);
@@ -173,7 +173,7 @@ public class FastForwardRunloopTest {
         /*
          * Simulate event source which returns events in the wrong order.
          */
-        when(eventSource.poll()).thenReturn(two, one, null);
+        when(eventSource.receive()).thenReturn(two, one, null);
         
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
@@ -190,7 +190,7 @@ public class FastForwardRunloopTest {
         verify(eventSource).compute(2);
         
         /* Event two must have been delivered properly */
-        verify(eventSource).poll();
+        verify(eventSource).receive();
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
         verify(governor).suspendUntil(2);

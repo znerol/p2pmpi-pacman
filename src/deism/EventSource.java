@@ -12,20 +12,20 @@ public interface EventSource {
      * Compute current event if necessary.
      * 
      * This method is called before each cycle thru the runloop. An EventSource
-     * may place logic to determine the event returned by subsequent calls
-     * to peek and poll.
+     * may place logic to determine the event returned by the following call
+     * to receive.
      */
     void compute(long currentSimtime);
     
     /**
-     * Retrieves and removes the next event.
+     * Retrieves the next event removing it from the EventSource
      * 
      * @return The next event or null
      */
-    Event poll();
+    Event receive();
     
     /**
-     * Put back the last event polled from this EventSource
+     * Put back the last event received from this EventSource
      */
     void reject(Event event);
 }

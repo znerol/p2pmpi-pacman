@@ -196,7 +196,7 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public Event poll() {
+        public Event receive() {
             Event e = currentEvent;
             currentEvent = null;
             return e;
@@ -250,7 +250,7 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public synchronized Event poll() {
+        public synchronized Event receive() {
             Event e = currentEvent;
             currentEvent = null;
             return e;
@@ -319,7 +319,7 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public Event poll() {
+        public Event receive() {
             Event e = currentEvent;
             currentEvent = null;
             return e;

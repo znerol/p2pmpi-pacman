@@ -218,7 +218,7 @@ public class StupidTimewarpJobQueueSimulation {
         }
 
         @Override
-        public Event poll() {
+        public Event receive() {
             last = events.poll();
             return last;
         }
@@ -285,7 +285,7 @@ public class StupidTimewarpJobQueueSimulation {
         }
 
         @Override
-        public Event poll() {
+        public Event receive() {
             Event e = currentEvent;
             currentEvent = null;
             return e;

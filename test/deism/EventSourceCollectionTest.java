@@ -8,8 +8,8 @@ import static org.junit.Assert.*;
 
 public class EventSourceCollectionTest {
     /**
-     * EventSourceCollection.peek and EventSourceCollection.poll must return
-     * null if list of EventSources is empty.
+     * EventSourceCollection.receive must return null if list of EventSources
+     * is empty.
      */
     @Test
     public void collectionWithoutSources() {
@@ -17,8 +17,8 @@ public class EventSourceCollectionTest {
         EventSourceCollection c = new EventSourceCollection(sources);
         c.compute(0);
 
-        Event poll = c.poll();
-        assertNull(poll);
+        Event event = c.receive();
+        assertNull(event);
     }
     
     @Test
@@ -27,16 +27,16 @@ public class EventSourceCollectionTest {
         EventSourceCollection c = new EventSourceCollection(sources);
         c.compute(0);
         
-        Event poll = c.poll();
-        assertNull(poll);
+        Event event = c.receive();
+        assertNull(event);
     }
     
     /**
-     * EventSourceCollection.peek and EventSourceCollection.poll must return
+     * EventSourceCollection.peek and EventSourceCollection.receive must return
      * events in ascending timestamp-order from any source.
      */
     @Test
-    public void collectionPeekPolltWithTwoSources() {
+    public void collectionReceiveWithTwoSources() {
         final Event one = new Event(1);
         final Event two = new Event(2);
         final Event three = new Event(3);
@@ -50,7 +50,7 @@ public class EventSourceCollectionTest {
 
         final EventSource firstSource = new EventSource(){
             @Override
-            public Event poll() {
+            public Event receive() {
                 return firstSourceEvents.poll();
             }
             @Override
@@ -68,7 +68,7 @@ public class EventSourceCollectionTest {
 
         final EventSource secondSource = new EventSource(){
             @Override
-            public Event poll() {
+            public Event receive() {
                 return secondSourceEvents.poll();
             }
             @Override
@@ -90,14 +90,14 @@ public class EventSourceCollectionTest {
 
         /* verify that events are returned in the expected order */
         c.compute(0);
-        assertEquals(one, c.poll());
+        assertEquals(one, c.receive());
         c.compute(1);
-        assertEquals(two, c.poll());
+        assertEquals(two, c.receive());
         c.compute(2);
-        assertEquals(three, c.poll());
+        assertEquals(three, c.receive());
         c.compute(3);
-        assertEquals(four, c.poll());
+        assertEquals(four, c.receive());
         c.compute(4);
-        assertEquals(null, c.poll());
+        assertEquals(null, c.receive());
     }
 }

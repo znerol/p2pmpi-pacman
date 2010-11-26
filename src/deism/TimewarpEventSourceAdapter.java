@@ -25,7 +25,7 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public synchronized Event poll() {
+    public synchronized Event receive() {
         Event event;
         
         pollOnPending = pendingEventsAvailable();
@@ -33,7 +33,7 @@ public class TimewarpEventSourceAdapter
             event = pending.poll();
         }
         else {
-            event = source.poll();
+            event = source.receive();
         }
         
         addToHistory(event);

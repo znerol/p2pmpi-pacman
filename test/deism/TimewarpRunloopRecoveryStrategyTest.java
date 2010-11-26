@@ -41,7 +41,7 @@ public class TimewarpRunloopRecoveryStrategyTest {
             }
 
             @Override
-            public Event poll() {
+            public Event receive() {
                 return eventQueue.poll();
             }
 
