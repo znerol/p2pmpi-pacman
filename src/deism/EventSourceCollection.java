@@ -9,7 +9,7 @@ import java.util.TreeMap;
  * Special EventSource aggregating the events from multiple EventSources
  */
 public class EventSourceCollection implements EventSource {
-    private Iterable<EventSource> eventSources;
+    protected Iterable<EventSource> eventSources;
     private EventSource currentSource;
 
     public EventSourceCollection(Iterable<EventSource> eventSources) {
