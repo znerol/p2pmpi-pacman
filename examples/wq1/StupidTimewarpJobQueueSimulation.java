@@ -24,7 +24,7 @@ import deism.TimewarpEventSource;
 import deism.TimewarpRunloopRecoveryStrategy;
 import deism.TimewarpEventSourceAdapter;
 
-public class TimewarpJobQueueSimulation {
+public class StupidTimewarpJobQueueSimulation {
     /**
      * @param args
      */
