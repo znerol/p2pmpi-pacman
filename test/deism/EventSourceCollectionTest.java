@@ -67,7 +67,7 @@ public class EventSourceCollectionTest {
             public void compute(long currentSimtime) {
             }
             @Override
-            public void offer(Event event) {
+            public void reject(Event event) {
                 firstSourceEvents.offer(event);
             }
         };
@@ -89,7 +89,7 @@ public class EventSourceCollectionTest {
             public void compute(long currentSimtime) {
             }
             @Override
-            public void offer(Event event) {
+            public void reject(Event event) {
                 secondSourceEvents.offer(event);
             }
         };

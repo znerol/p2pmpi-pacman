@@ -32,7 +32,7 @@ public interface EventSource {
     Event poll();
     
     /**
-     * Put back an event previously polled from this EventSource
+     * Put back the last event polled from this EventSource
      */
-    void offer(Event event);
+    void reject(Event event);
 }

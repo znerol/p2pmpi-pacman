@@ -53,7 +53,7 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public void offer(Event event) {
+    public void reject(Event event) {
         removeFromHistory(event);
         this.pending.offer(event);
     }

@@ -227,7 +227,7 @@ public class StupidTimewarpJobQueueSimulation {
         }
 
         @Override
-        public void offer(Event event) {
+        public void reject(Event event) {
             events.offer(event);
         }
         
@@ -299,7 +299,7 @@ public class StupidTimewarpJobQueueSimulation {
         }
 
         @Override
-        public void offer(Event event) {
+        public void reject(Event event) {
             assert(currentEvent == null);
             currentEvent = event;
         }

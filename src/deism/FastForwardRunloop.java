@@ -81,12 +81,12 @@ public class FastForwardRunloop implements EventRunloop {
                 // Restart and reevaluate loop conditions and current event
                 // when the current simulation time is less than that of the
                 // next event.
-                source.offer(peekEvent);
+                source.reject(peekEvent);
                 continue;
             }
 
             if (currentSimtime < lastSimtime) {
-                source.offer(peekEvent);
+                source.reject(peekEvent);
                 recoveryStrategy.rollback(currentSimtime);
                 lastSimtime = currentSimtime;
                 continue;

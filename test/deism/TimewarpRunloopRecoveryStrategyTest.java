@@ -51,7 +51,7 @@ public class TimewarpRunloopRecoveryStrategyTest {
             }
 
             @Override
-            public void offer(Event event) {
+            public void reject(Event event) {
                 eventQueue.offerFirst(event);
             }
         };

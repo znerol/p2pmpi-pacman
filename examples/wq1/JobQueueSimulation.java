@@ -208,7 +208,7 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public void offer(Event event) {
+        public void reject(Event event) {
             assert(currentEvent == null);
             currentEvent = event;
         }
@@ -267,7 +267,7 @@ public class JobQueueSimulation {
         }
         
         @Override
-        public synchronized void offer(Event event) {
+        public synchronized void reject(Event event) {
             assert(currentEvent == null || currentEvent == event);
             currentEvent = event;
         }
@@ -341,7 +341,7 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public void offer(Event event) {
+        public void reject(Event event) {
             assert(currentEvent == null);
             currentEvent = event;
         }

@@ -61,9 +61,9 @@ public class EventSourceCollection implements EventSource {
     }
 
     @Override
-    public void offer(Event event) {
+    public void reject(Event event) {
         if (currentSource != null) {
-            currentSource.offer(event);
+            currentSource.reject(event);
         }
     }
 }
