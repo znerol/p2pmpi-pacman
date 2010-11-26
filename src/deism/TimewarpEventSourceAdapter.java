@@ -26,7 +26,10 @@ public class TimewarpEventSourceAdapter
             event = source.receive(currentSimtime);
         }
         
-        addToHistory(event);
+        if (event != null) {
+            addToHistory(event);
+        }
+        
         return event;
     }
 

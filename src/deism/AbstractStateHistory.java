@@ -75,10 +75,12 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
     public abstract void addPending(List<V> pending);
     
     public void addToHistory(V item) {
+        assert(item != null);
         history.add(item);
     }
     
     public void removeFromHistory(V item) {
+        assert(item != null);
         history.remove(item);
     }
 }
