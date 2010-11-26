@@ -17,7 +17,7 @@ public class TimewarpEventSourceAdapter
     }
     
     @Override
-    public synchronized void compute(long currentSimtime) {
+    public void compute(long currentSimtime) {
         // only call compute on source when there are no pending events
         if (!pendingEventsAvailable()) {
             source.compute(currentSimtime);
@@ -25,7 +25,7 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public synchronized Event receive() {
+    public Event receive() {
         Event event;
         
         pollOnPending = pendingEventsAvailable();
@@ -41,23 +41,17 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public synchronized void reject(Event event) {
-//        if (pollOnPending) {
-            pending.offer(event);
-//        }
-//        else {
-//            source.reject(event);
-//        }
-        
+    public void reject(Event event) {
+        pending.offer(event);
         removeFromHistory(event);
     }
 
     @Override
-    public synchronized void addPending(List<Event> pending) {
+    public void addPending(List<Event> pending) {
         this.pending.addAll(pending);
     }
 
-    public synchronized boolean pendingEventsAvailable() {
+    public boolean pendingEventsAvailable() {
         return (pending.size() > 0);
     }
 }

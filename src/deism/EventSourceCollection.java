@@ -21,14 +21,14 @@ public class EventSourceCollection implements EventSource {
     }
     
     @Override
-    public synchronized void compute(long currentSimtime) {
+    public void compute(long currentSimtime) {
         for (EventSource source : eventSources) {
             source.compute(currentSimtime);
         }
     }
     
     @Override
-    public synchronized Event receive() {
+    public Event receive() {
         SortedMap<Event, EventSource> eventsAndSources =
             new TreeMap<Event, EventSource>();
         
@@ -56,7 +56,7 @@ public class EventSourceCollection implements EventSource {
     }
 
     @Override
-    public synchronized void reject(Event event) {
+    public void reject(Event event) {
         assert(currentSource != null);
         currentSource.reject(event);
     }
