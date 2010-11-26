@@ -3,6 +3,6 @@ package deism;
 /**
  * EventMatcher implement methods to match an event against a given rule
  */
-public interface EventMatcher {
+public interface EventCondition {
     boolean match(Event e);
 }

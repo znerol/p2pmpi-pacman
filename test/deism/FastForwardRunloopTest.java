@@ -17,11 +17,11 @@ public class FastForwardRunloopTest {
     @Mock
     ExecutionGovernor governor;
     @Mock
-    EventMatcher terminationCondition;
+    EventCondition terminationCondition;
     @Mock
     EventRunloopRecoveryStrategy recoveryStrategy;
     @Mock
-    EventMatcher snapshotCondition;
+    EventCondition snapshotCondition;
 
     /**
      * FastForwardRunloop.run must return immediately when EventSource.peek

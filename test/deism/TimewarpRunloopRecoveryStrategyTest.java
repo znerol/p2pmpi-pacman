@@ -19,9 +19,9 @@ public class TimewarpRunloopRecoveryStrategyTest {
     @Mock
     ExecutionGovernor governor;
     @Mock
-    EventMatcher terminationCondition;
+    EventCondition terminationCondition;
     @Mock
-    EventMatcher snapshotCondition;
+    EventCondition snapshotCondition;
 
     List<StateHistory<Long>> stateObjects;
     EventRunloopRecoveryStrategy recoveryStrategy;

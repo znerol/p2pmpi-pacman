@@ -10,7 +10,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import deism.AbstractStateHistory;
 import deism.Event;
 import deism.EventDispatcher;
-import deism.EventMatcher;
+import deism.EventCondition;
 import deism.EventRunloop;
 import deism.EventRunloopRecoveryStrategy;
 import deism.EventSource;
@@ -32,7 +32,7 @@ public class StupidTimewarpJobQueueSimulation {
         Random rng = new Random(1234);
         
         /* exit simulation after n units of simulation time */
-        EventMatcher termCond = new TerminateAfterDuration(1000 * 50);
+        EventCondition termCond = new TerminateAfterDuration(1000 * 50);
         
         String speedString = System.getProperty("simulationSpeed", "1.0");
         double speed = Double.valueOf(speedString).doubleValue();
@@ -62,7 +62,7 @@ public class StupidTimewarpJobQueueSimulation {
         TimewarpEventSource timewarpSources = 
             new TimewarpEventSourceAdapter(new EventSourceCollection(sources));
 
-        EventMatcher snapshotAll = new EventMatcher() {
+        EventCondition snapshotAll = new EventCondition() {
             @Override
             public boolean match(Event e) {
                 return true;
@@ -116,7 +116,7 @@ public class StupidTimewarpJobQueueSimulation {
      * TerminateAfterDuration.match will return true after given amount of
      * simulation time elapsed.
      */
-    private static class TerminateAfterDuration implements EventMatcher {
+    private static class TerminateAfterDuration implements EventCondition {
         long duration;
 
         public TerminateAfterDuration(long duration) {

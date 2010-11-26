@@ -6,7 +6,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import deism.Event;
 import deism.EventDispatcher;
-import deism.EventMatcher;
+import deism.EventCondition;
 import deism.EventRunloopRecoveryStrategy;
 import deism.EventSource;
 import deism.EventSourceCollection;
@@ -25,7 +25,7 @@ public class JobQueueSimulation {
         Random rng = new Random(1234);
         
         /* exit simulation after n units of simulation time */
-        EventMatcher termCond = new TerminateAfterDuration(1000 * 50);
+        EventCondition termCond = new TerminateAfterDuration(1000 * 50);
         
         String speedString = System.getProperty("simulationSpeed", "0");
         double speed = Double.valueOf(speedString).doubleValue();
@@ -71,7 +71,7 @@ public class JobQueueSimulation {
         EventRunloopRecoveryStrategy recoveryStrategy =
             new FailFastRunloopRecoveryStrategy();
 
-        EventMatcher noSnapshots = new EventMatcher() {
+        EventCondition noSnapshots = new EventCondition() {
             @Override
             public boolean match(Event e) {
                 return false;
@@ -98,7 +98,7 @@ public class JobQueueSimulation {
      * TerminateAfterDuration.match will return true after given amount of
      * simulation time elapsed.
      */
-    private static class TerminateAfterDuration implements EventMatcher {
+    private static class TerminateAfterDuration implements EventCondition {
         long duration;
 
         public TerminateAfterDuration(long duration) {

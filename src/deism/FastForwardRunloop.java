@@ -13,16 +13,16 @@ package deism;
  */
 public class FastForwardRunloop implements EventRunloop {
     private boolean stop = false;
-    private EventMatcher terminationCondition = null;
+    private EventCondition terminationCondition = null;
     private ExecutionGovernor governor;
     private long currentSimtime = 0;
     private EventRunloopRecoveryStrategy recoveryStrategy;
-    private EventMatcher snapshotCondition;
+    private EventCondition snapshotCondition;
 
     public FastForwardRunloop(ExecutionGovernor governor,
-            EventMatcher terminationCondition,
+            EventCondition terminationCondition,
             EventRunloopRecoveryStrategy recoveryStrategy,
-            EventMatcher snapshotCondition) {
+            EventCondition snapshotCondition) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.recoveryStrategy = recoveryStrategy;
