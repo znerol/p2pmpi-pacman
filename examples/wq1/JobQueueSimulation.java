@@ -271,7 +271,7 @@ public class JobQueueSimulation {
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
                 eventReady = new ClientArrivedEvent(arrivalTime, serviceTime);
-                governor.resume(rejectedEvent.getSimtime());
+                governor.resume(eventReady.getSimtime());
                 
                 this.notify();
                 while (!done && eventReady != null) {
