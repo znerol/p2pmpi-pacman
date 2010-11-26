@@ -37,11 +37,7 @@ public class TimewarpRunloopRecoveryStrategyTest {
         
         simpleEventSource = new EventSource() {
             @Override
-            public void compute(long currentSimtime) {
-            }
-
-            @Override
-            public Event receive() {
+            public Event receive(long currentSimtime) {
                 return eventQueue.poll();
             }
 

@@ -21,21 +21,14 @@ public class EventSourceCollection implements EventSource {
     }
     
     @Override
-    public void compute(long currentSimtime) {
-        for (EventSource source : eventSources) {
-            source.compute(currentSimtime);
-        }
-    }
-    
-    @Override
-    public Event receive() {
+    public Event receive(long currentSimtime) {
         SortedMap<Event, EventSource> eventsAndSources =
             new TreeMap<Event, EventSource>();
         
         currentSource = null;
         
         for (EventSource source : eventSources) {
-            Event event = source.receive();
+            Event event = source.receive(currentSimtime);
             if (event != null) {
                 eventsAndSources.put(event, source);
             }

@@ -52,9 +52,7 @@ public class FastForwardRunloop implements EventRunloop {
         recoveryStrategy.save(currentSimtime);
         
         while (!stop) {
-            source.compute(currentSimtime);
-            
-            Event peekEvent = source.receive();
+            Event peekEvent = source.receive(currentSimtime);
 
             if (terminationCondition.match(peekEvent)) {
                 break;

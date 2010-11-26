@@ -15,9 +15,8 @@ public class EventSourceCollectionTest {
     public void collectionWithoutSources() {
         final ArrayList<EventSource> sources = new ArrayList<EventSource>();
         EventSourceCollection c = new EventSourceCollection(sources);
-        c.compute(0);
 
-        Event event = c.receive();
+        Event event = c.receive(0);
         assertNull(event);
     }
     
@@ -25,9 +24,8 @@ public class EventSourceCollectionTest {
     public void collectionWithoutSourcesArray() {
         final EventSource[] sources = {};
         EventSourceCollection c = new EventSourceCollection(sources);
-        c.compute(0);
         
-        Event event = c.receive();
+        Event event = c.receive(0);
         assertNull(event);
     }
     
@@ -50,11 +48,8 @@ public class EventSourceCollectionTest {
 
         final EventSource firstSource = new EventSource(){
             @Override
-            public Event receive() {
+            public Event receive(long currentSimtime) {
                 return firstSourceEvents.poll();
-            }
-            @Override
-            public void compute(long currentSimtime) {
             }
             @Override
             public void reject(Event event) {
@@ -68,11 +63,8 @@ public class EventSourceCollectionTest {
 
         final EventSource secondSource = new EventSource(){
             @Override
-            public Event receive() {
+            public Event receive(long currentSimtime) {
                 return secondSourceEvents.poll();
-            }
-            @Override
-            public void compute(long currentSimtime) {
             }
             @Override
             public void reject(Event event) {
@@ -89,15 +81,10 @@ public class EventSourceCollectionTest {
         EventSourceCollection c = new EventSourceCollection(sources);
 
         /* verify that events are returned in the expected order */
-        c.compute(0);
-        assertEquals(one, c.receive());
-        c.compute(1);
-        assertEquals(two, c.receive());
-        c.compute(2);
-        assertEquals(three, c.receive());
-        c.compute(3);
-        assertEquals(four, c.receive());
-        c.compute(4);
-        assertEquals(null, c.receive());
+        assertEquals(one, c.receive(0));
+        assertEquals(two, c.receive(1));
+        assertEquals(three, c.receive(2));
+        assertEquals(four, c.receive(3));
+        assertEquals(null, c.receive(4));
     }
 }

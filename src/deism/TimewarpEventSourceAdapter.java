@@ -10,30 +10,20 @@ public class TimewarpEventSourceAdapter
 
     private final Queue<Event> pending = new PriorityQueue<Event>();
     private final EventSource source;
-    private boolean pollOnPending;
     
     public TimewarpEventSourceAdapter(EventSource orig) {
         source = orig;
     }
     
     @Override
-    public void compute(long currentSimtime) {
-        // only call compute on source when there are no pending events
-        if (!pendingEventsAvailable()) {
-            source.compute(currentSimtime);
-        }
-    }
-
-    @Override
-    public Event receive() {
+    public Event receive(long currentSimtime) {
         Event event;
         
-        pollOnPending = pendingEventsAvailable();
-        if (pollOnPending) {
+        if (pending.size() > 0) {
             event = pending.poll();
         }
         else {
-            event = source.receive();
+            event = source.receive(currentSimtime);
         }
         
         addToHistory(event);
@@ -49,9 +39,5 @@ public class TimewarpEventSourceAdapter
     @Override
     public void addPending(List<Event> pending) {
         this.pending.addAll(pending);
-    }
-
-    public boolean pendingEventsAvailable() {
-        return (pending.size() > 0);
     }
 }

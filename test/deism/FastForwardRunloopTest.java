@@ -32,12 +32,12 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.receive()).thenReturn(null);
+        when(eventSource.receive(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
 
         r.run(eventSource, eventDispatcher);
 
-        verify(eventSource).receive();
+        verify(eventSource).receive(0);
         verifyZeroInteractions(eventDispatcher);
         verifyZeroInteractions(governor);
         verify(terminationCondition).match(null);
@@ -51,7 +51,6 @@ public class FastForwardRunloopTest {
     public void runSomeEvents() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final Event term = new Event(3);
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
@@ -59,26 +58,26 @@ public class FastForwardRunloopTest {
          * On each call to receive() eventSource will return event one, then
          * two and finally null.
          */
-        when(eventSource.receive()).thenReturn(one, two, term, null);
+        when(eventSource.receive(0)).thenReturn(one);
+        when(eventSource.receive(1)).thenReturn(two);
+        when(eventSource.receive(2)).thenReturn(null);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(two)).thenReturn(false);
-        when(terminationCondition.match(term)).thenReturn(true);
+        when(terminationCondition.match(null)).thenReturn(true);
 
         r.run(eventSource, eventDispatcher);
         
-        verify(eventSource).compute(0);
-        verify(eventSource).compute(1);
-        verify(eventSource).compute(2);
-        verify(eventSource, times(3)).receive();
+        verify(eventSource).receive(0);
+        verify(eventSource).receive(1);
+        verify(eventSource).receive(2);
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
         verify(governor).suspendUntil(2);
-        verify(terminationCondition).match(one);
-        verify(terminationCondition).match(two);
-        verify(terminationCondition).match(term);
+        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
+        when(terminationCondition.match(null)).thenReturn(true);
     }
 
     /**
@@ -90,20 +89,19 @@ public class FastForwardRunloopTest {
         final Event one = new Event(1);
         final Event two = new Event(2);
         final Event three = new Event(3);
-        final Event term = new Event(4);
 
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.receive()).thenReturn(one, two, three, term, null);
+        when(eventSource.receive(0)).thenReturn(one);
+        when(eventSource.receive(1)).thenReturn(two);
+        when(eventSource.receive(2)).thenReturn(three);
+        when(eventSource.receive(3)).thenReturn(null);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
-        when(governor.suspendUntil(4)).thenReturn(4L);
-        when(terminationCondition.match(one)).thenReturn(false);
-        when(terminationCondition.match(two)).thenReturn(false);
-        when(terminationCondition.match(three)).thenReturn(false);
-        when(terminationCondition.match(term)).thenReturn(true);
+        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
+        when(terminationCondition.match(null)).thenReturn(true);
 
         /* call r.stop() when eventDispatcher.dispatchEvent(two) is called */
         doAnswer(new Answer<Object>() {
@@ -116,9 +114,8 @@ public class FastForwardRunloopTest {
         r.run(eventSource, eventDispatcher);
 
         /* We expect receive being called two times (for Events one and two) */
-        verify(eventSource).compute(0);
-        verify(eventSource).compute(1);
-        verify(eventSource, times(2)).receive();
+        verify(eventSource).receive(0);
+        verify(eventSource).receive(1);
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
@@ -131,25 +128,24 @@ public class FastForwardRunloopTest {
     public void testReevaluateWhenTimeoutNotReached()
     {
         final Event one = new Event(2);
-        final Event term = new Event(3);
 
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.receive()).thenReturn(one, one, term, null);
+        when(eventSource.receive(0)).thenReturn(one);
+        when(eventSource.receive(1)).thenReturn(one);
+        when(eventSource.receive(2)).thenReturn(null);
         when(governor.suspendUntil(2)).thenReturn(1L, 2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
-        
-        when(terminationCondition.match(one)).thenReturn(false);
-        when(terminationCondition.match(term)).thenReturn(true);
+        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
+        when(terminationCondition.match(null)).thenReturn(true);
         
         r.run(eventSource, eventDispatcher);
 
-        verify(eventSource).compute(0);
-        verify(eventSource).compute(1);
-        verify(eventSource).compute(2);
         // We expect receive being called three times (one, one, term) */
-        verify(eventSource, times(3)).receive();
+        verify(eventSource).receive(0);
+        verify(eventSource).receive(1);
+        verify(eventSource).receive(2);
         // After the first attempt to deliver one, runloop must try to put it 
         // back into the source.
         verify(eventSource).reject(one);
@@ -157,11 +153,12 @@ public class FastForwardRunloopTest {
         verify(eventDispatcher).dispatchEvent(one);
         verify(governor, times(2)).suspendUntil(2);
         verify(terminationCondition, times(2)).match(one);
-        verify(terminationCondition).match(term);
+        verify(terminationCondition).match(null);
     }
     /**
      * If an EventSource returns events which are not ordered by ascending
-     * timestamp we expect FastWordwardRunloop to throw an exception.
+     * timestamp we expect FastWordwardRunloop to try a
+     * recoveryStrategy.rollback()
      */
     @Test(expected = StateHistoryException.class)
     public void runSourceWithWrongEventOrder() {
@@ -173,7 +170,9 @@ public class FastForwardRunloopTest {
         /*
          * Simulate event source which returns events in the wrong order.
          */
-        when(eventSource.receive()).thenReturn(two, one, null);
+        when(eventSource.receive(0)).thenReturn(two);
+        when(eventSource.receive(2)).thenReturn(one);
+        when(eventSource.receive(3)).thenReturn(null);
         
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
@@ -186,11 +185,10 @@ public class FastForwardRunloopTest {
 
         r.run(eventSource, eventDispatcher);
 
-        verify(eventSource).compute(0);
-        verify(eventSource).compute(2);
+        verify(eventSource).receive(0);
+        verify(eventSource).receive(2);
         
         /* Event two must have been delivered properly */
-        verify(eventSource).receive();
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
         verify(governor).suspendUntil(2);

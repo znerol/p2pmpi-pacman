@@ -9,20 +9,12 @@ package deism;
  */
 public interface EventSource {
     /**
-     * Compute current event if necessary.
-     * 
-     * This method is called before each cycle thru the runloop. An EventSource
-     * may place logic to determine the event returned by the following call
-     * to receive.
-     */
-    void compute(long currentSimtime);
-    
-    /**
      * Retrieves the next event removing it from the EventSource
      * 
+     * @param currentSimtime current timestamp in simulation time units
      * @return The next event or null
      */
-    Event receive();
+    Event receive(long currentSimtime);
     
     /**
      * Put back the last event received from this EventSource

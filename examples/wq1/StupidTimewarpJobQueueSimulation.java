@@ -192,7 +192,7 @@ public class StupidTimewarpJobQueueSimulation {
         final Random rng;
         final Queue<Event> events;
         boolean done = false;
-        Event last;
+        Event lastEvent;
 
         public RunnableClientArrivedSource(
                 Random rng,
@@ -214,18 +214,14 @@ public class StupidTimewarpJobQueueSimulation {
         }
 
         @Override
-        public void compute(long currentSimtime) {
-        }
-
-        @Override
-        public Event receive() {
-            last = events.poll();
-            return last;
+        public Event receive(long currentSimtime) {
+            lastEvent = events.poll();
+            return lastEvent;
         }
 
         @Override
         public void reject(Event event) {
-            assert (event == last);
+            assert (event == lastEvent);
             events.offer(event);
         }
         
@@ -261,17 +257,19 @@ public class StupidTimewarpJobQueueSimulation {
     
     private static class ClerkSource implements EventSource {
         Queue<ClientArrivedEvent> jobs;
-        Event currentEvent;
+        Event rejectedEvent;
 
         public ClerkSource(Queue<ClientArrivedEvent> jobs) {
             super();
             this.jobs = jobs;
-            currentEvent = null;
+            rejectedEvent = null;
         }
 
         @Override
-        public void compute(long currentSimtime) {
-            if (currentEvent == null) {
+        public Event receive(long currentSimtime) {
+            Event result = rejectedEvent;
+            
+            if (result == null) {
                 ClientArrivedEvent job = jobs.poll();
                 if (job != null) {
                     System.out.println("[ClerkAccept: time=" + currentSimtime
@@ -279,22 +277,19 @@ public class StupidTimewarpJobQueueSimulation {
                     System.out.println("Queue Length: " + jobs.size());
                     long nextClerkFreeTime = job.getServiceTime()
                             + Math.max(currentSimtime, job.getSimtime());
-                    currentEvent = new ClerkFreeEvent(nextClerkFreeTime);
+                    result = new ClerkFreeEvent(nextClerkFreeTime);
+                    rejectedEvent = result;
                 }
             }
-        }
-
-        @Override
-        public Event receive() {
-            Event e = currentEvent;
-            currentEvent = null;
-            return e;
+            
+            rejectedEvent = null;
+            return result;
         }
 
         @Override
         public void reject(Event event) {
-            assert(currentEvent == null);
-            currentEvent = event;
+            assert(rejectedEvent == null);
+            rejectedEvent = event;
         }
     }
 }

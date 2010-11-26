@@ -168,7 +168,7 @@ public class JobQueueSimulation {
     private static class ClientArrivedSource implements EventSource {
         long mtbca;
         long mstpc;
-        Event currentEvent;
+        Event rejectedEvent;
         final Random rng;
 
         public ClientArrivedSource(Random rng,
@@ -178,12 +178,14 @@ public class JobQueueSimulation {
             this.rng = rng;
             this.mtbca = mean_time_between_customer_arrival;
             this.mstpc = mean_service_time_per_customer;
-            currentEvent = null;
+            rejectedEvent = null;
         }
 
         @Override
-        public void compute(long currentSimtime) {
-            if (currentEvent == null) {
+        public Event receive(long currentSimtime) {
+            Event result = rejectedEvent;
+            
+            if (result == null) {
                 long arrivalTime;
                 long serviceTime;
                 synchronized(rng) {
@@ -191,21 +193,18 @@ public class JobQueueSimulation {
                             + (long) (mtbca * -Math.log(rng.nextDouble()));
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
-                currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
+                result = new ClientArrivedEvent(arrivalTime, serviceTime);
+                rejectedEvent = result;
             }
-        }
-
-        @Override
-        public Event receive() {
-            Event e = currentEvent;
-            currentEvent = null;
-            return e;
+            
+            rejectedEvent = null;
+            return result;
         }
 
         @Override
         public void reject(Event event) {
-            assert(currentEvent == null);
-            currentEvent = event;
+            assert(rejectedEvent == null);
+            rejectedEvent = event;
         }
     }
 
@@ -215,10 +214,10 @@ public class JobQueueSimulation {
         long mtbca;
         long mstpc;
         ExecutionGovernor governor;
-        Event currentEvent;
+        Event rejectedEvent;
         long currentSimtime;
         final Random rng;
-        boolean ready;
+        boolean eventReady;
 
         public RunnableClientArrivedSource(Random rng,
                 ExecutionGovernor governor,
@@ -229,16 +228,18 @@ public class JobQueueSimulation {
             this.governor = governor;
             this.mtbca = mean_time_between_customer_arrival;
             this.mstpc = mean_service_time_per_customer;
-            currentEvent = null;
+            rejectedEvent = null;
         }
 
         @Override
-        public synchronized void compute(long currentSimtime) {
+        public synchronized Event receive(long currentSimtime) {
+            Event result = rejectedEvent;
+
             this.currentSimtime = currentSimtime;
-            if (ready == false && currentEvent == null) {
-                ready = true;
+            if (result == null) {
+                eventReady = false;
                 this.notify();
-                while (!done && ready) {
+                while (!done && !eventReady) {
                     try {
                         this.wait();
                     }
@@ -246,20 +247,17 @@ public class JobQueueSimulation {
                         // do nothing
                     }
                 }
+                result = rejectedEvent;
             }
-        }
-
-        @Override
-        public synchronized Event receive() {
-            Event e = currentEvent;
-            currentEvent = null;
-            return e;
+            
+            rejectedEvent = null;
+            return result;
         }
         
         @Override
         public synchronized void reject(Event event) {
-            assert(currentEvent == null || currentEvent == event);
-            currentEvent = event;
+            assert(rejectedEvent == null);
+            rejectedEvent = event;
         }
 
         @Override
@@ -272,12 +270,12 @@ public class JobQueueSimulation {
                             + (long) (mtbca * -Math.log(rng.nextDouble()));
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
-                currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
-                governor.resume(currentEvent.getSimtime());
+                rejectedEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
+                governor.resume(rejectedEvent.getSimtime());
                 
-                ready = false;
+                eventReady = true;
                 this.notify();
-                while (!done && !ready) {
+                while (!done && eventReady) {
                     try {
                         this.wait();
                     }
@@ -295,17 +293,19 @@ public class JobQueueSimulation {
     
     private static class ClerkSource implements EventSource {
         Queue<ClientArrivedEvent> jobs;
-        Event currentEvent;
+        Event rejectedEvent;
 
         public ClerkSource(Queue<ClientArrivedEvent> jobs) {
             super();
             this.jobs = jobs;
-            currentEvent = null;
+            rejectedEvent = null;
         }
 
         @Override
-        public void compute(long currentSimtime) {
-            if (currentEvent == null) {
+        public Event receive(long currentSimtime) {
+            Event result = rejectedEvent;
+            
+            if (result == null) {
                 ClientArrivedEvent job = jobs.poll();
                 if (job != null) {
                     System.out.println("[ClerkAccept: time=" + currentSimtime
@@ -313,22 +313,18 @@ public class JobQueueSimulation {
                     System.out.println("Queue Length: " + jobs.size());
                     long nextClerkFreeTime = job.getServiceTime()
                             + Math.max(currentSimtime, job.getSimtime());
-                    currentEvent = new ClerkFreeEvent(nextClerkFreeTime);
+                    result = new ClerkFreeEvent(nextClerkFreeTime);
                 }
             }
-        }
-
-        @Override
-        public Event receive() {
-            Event e = currentEvent;
-            currentEvent = null;
-            return e;
+            
+            rejectedEvent = null;
+            return result;
         }
 
         @Override
         public void reject(Event event) {
-            assert(currentEvent == null);
-            currentEvent = event;
+            assert(rejectedEvent == null);
+            rejectedEvent = event;
         }
     }
 }
