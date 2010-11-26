@@ -316,6 +316,9 @@ public class JobQueueSimulation {
             if (currentEvent == null) {
                 ClientArrivedEvent job = jobs.poll();
                 if (job != null) {
+                    System.out.println("[ClerkAccept: time=" + currentSimtime
+                            + " " + job + "]");
+                    System.out.println("Queue Length: " + jobs.size());
                     long nextClerkFreeTime = job.getServiceTime()
                             + Math.max(currentSimtime, job.getSimtime());
                     currentEvent = new ClerkFreeEvent(nextClerkFreeTime);
