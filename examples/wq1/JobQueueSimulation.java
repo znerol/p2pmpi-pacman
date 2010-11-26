@@ -1,8 +1,8 @@
 package wq1;
 
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import deism.Event;
 import deism.EventDispatcher;
@@ -43,19 +43,22 @@ public class JobQueueSimulation {
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         EventSource clientSource;
+        Thread producer = null;
+        RunnableClientArrivedSource runnableClientSource = null;
         if (multithread) {
-            RunnableClientArrivedSource runnableClientSource = 
+            runnableClientSource = 
                 new RunnableClientArrivedSource(rng, governor, 1000, 1600);
             clientSource = runnableClientSource;
         
-            Thread producer = new Thread(runnableClientSource);
+            producer = new Thread(runnableClientSource);
             producer.start();
         }
         else {
             clientSource = new ClientArrivedSource(rng, 1000, 1600);
         }
         
-        PriorityQueue<ClientArrivedEvent> jobs = new PriorityQueue<ClientArrivedEvent>();
+        PriorityBlockingQueue<ClientArrivedEvent> jobs =
+            new PriorityBlockingQueue<ClientArrivedEvent>();
         /* Define as many customer/clerk sources as you wish */
         EventSource[] sources = {
                 clientSource,
@@ -79,6 +82,16 @@ public class JobQueueSimulation {
                 recoveryStrategy, noSnapshots);
         EventDispatcher disp = new JobAggregator(jobs);
         runloop.run(aggSource, disp);
+        
+        if (producer != null && runnableClientSource != null) {
+            runnableClientSource.stop();
+            producer.interrupt();
+            try {
+                producer.join();
+            }
+            catch (InterruptedException e1) {
+            }
+        }
     }
 
     /**
@@ -201,6 +214,7 @@ public class JobQueueSimulation {
 
     private static class RunnableClientArrivedSource
             implements EventSource, Runnable {
+        boolean done = false;
         long mtbca;
         long mstpc;
         ExecutionGovernor governor;
@@ -224,8 +238,18 @@ public class JobQueueSimulation {
         @Override
         public synchronized void compute(long currentSimtime) {
             this.currentSimtime = currentSimtime;
-            this.ready = (currentEvent == null);
-            this.notify();
+            if (ready == false && currentEvent == null) {
+                ready = true;
+                this.notify();
+                while (!done && ready) {
+                    try {
+                        this.wait();
+                    }
+                    catch (InterruptedException e) {
+                        // do nothing
+                    }
+                }
+            }
         }
 
         @Override
@@ -248,7 +272,7 @@ public class JobQueueSimulation {
 
         @Override
         public synchronized void run() {
-            while(true) {
+            while(!done) {
                 long arrivalTime;
                 long serviceTime;
                 synchronized(rng) {
@@ -257,10 +281,11 @@ public class JobQueueSimulation {
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
                 currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
-                ready = false;
                 governor.resume(currentEvent.getSimtime());
-
-                while (!ready) {
+                
+                ready = false;
+                this.notify();
+                while (!done && !ready) {
                     try {
                         this.wait();
                     }
@@ -269,6 +294,10 @@ public class JobQueueSimulation {
                     }
                 }
             }
+        }
+        
+        public void stop() {
+            done = true;
         }
     }
     
