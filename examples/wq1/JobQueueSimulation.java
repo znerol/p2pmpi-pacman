@@ -196,11 +196,6 @@ public class JobQueueSimulation {
         }
 
         @Override
-        public Event peek() {
-            return currentEvent;
-        }
-
-        @Override
         public Event poll() {
             Event e = currentEvent;
             currentEvent = null;
@@ -252,11 +247,6 @@ public class JobQueueSimulation {
                     }
                 }
             }
-        }
-
-        @Override
-        public synchronized Event peek() {
-            return currentEvent;
         }
 
         @Override
@@ -326,11 +316,6 @@ public class JobQueueSimulation {
                     currentEvent = new ClerkFreeEvent(nextClerkFreeTime);
                 }
             }
-        }
-
-        @Override
-        public Event peek() {
-            return currentEvent;
         }
 
         @Override

@@ -173,7 +173,6 @@ public class FastForwardRunloopTest {
         /*
          * Simulate event source which returns events in the wrong order.
          */
-        when(eventSource.peek()).thenReturn(two, one, null);
         when(eventSource.poll()).thenReturn(two, one, null);
         
         when(governor.suspendUntil(1)).thenReturn(1L);
@@ -191,7 +190,6 @@ public class FastForwardRunloopTest {
         verify(eventSource).compute(2);
         
         /* Event two must have been delivered properly */
-        verify(eventSource, times(2)).peek();
         verify(eventSource).poll();
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);

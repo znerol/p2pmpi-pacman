@@ -1,6 +1,9 @@
 package deism;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Special EventSource aggregating the events from multiple EventSources
@@ -11,7 +14,6 @@ public class EventSourceCollection implements EventSource {
 
     public EventSourceCollection(Iterable<EventSource> eventSources) {
         this.eventSources = eventSources;
-        currentSource = null;
     }
 
     public EventSourceCollection(EventSource[] eventSources) {
@@ -19,51 +21,43 @@ public class EventSourceCollection implements EventSource {
     }
     
     @Override
-    public void compute(long currentSimtime) {
-        Event peekEvent = null;
-        currentSource = null;
-
+    public synchronized void compute(long currentSimtime) {
         for (EventSource source : eventSources) {
             source.compute(currentSimtime);
-            
-            Event candidate = source.peek();
-            if (candidate == null) {
-                continue;
-            }
-
-            if (peekEvent == null || candidate.compareTo(peekEvent) < 0) {
-                peekEvent = candidate;
-                currentSource = source;
-            }
         }
     }
     
     @Override
-    public Event peek() {
-        Event e = null;
+    public synchronized Event poll() {
+        SortedMap<Event, EventSource> eventsAndSources =
+            new TreeMap<Event, EventSource>();
         
-        if (currentSource != null) {
-            e = currentSource.peek();
+        currentSource = null;
+        
+        for (EventSource source : eventSources) {
+            Event event = source.poll();
+            if (event != null) {
+                eventsAndSources.put(event, source);
+            }
+        }
+
+        Event result = null;
+        Iterator<Event> it = eventsAndSources.keySet().iterator();
+        if (it.hasNext()) {
+            result = it.next();
+            currentSource = eventsAndSources.get(result);
+            while (it.hasNext()) {
+                Event event = it.next();
+                eventsAndSources.get(event).reject(event);
+            }
         }
         
-        return e;
+        return result;
     }
 
     @Override
-    public Event poll() {
-        Event e = null;
-        
-        if (currentSource != null) {
-            e = currentSource.poll();
-        }
-        
-        return e;
-    }
-
-    @Override
-    public void reject(Event event) {
-        if (currentSource != null) {
-            currentSource.reject(event);
-        }
+    public synchronized void reject(Event event) {
+        assert(currentSource != null);
+        currentSource.reject(event);
     }
 }

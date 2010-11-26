@@ -192,6 +192,7 @@ public class StupidTimewarpJobQueueSimulation {
         final Random rng;
         final Queue<Event> events;
         boolean done = false;
+        Event last;
 
         public RunnableClientArrivedSource(
                 Random rng,
@@ -217,17 +218,14 @@ public class StupidTimewarpJobQueueSimulation {
         }
 
         @Override
-        public Event peek() {
-            return events.peek();
-        }
-
-        @Override
         public Event poll() {
-            return events.poll();
+            last = events.poll();
+            return last;
         }
 
         @Override
         public void reject(Event event) {
+            assert (event == last);
             events.offer(event);
         }
         
@@ -284,11 +282,6 @@ public class StupidTimewarpJobQueueSimulation {
                     currentEvent = new ClerkFreeEvent(nextClerkFreeTime);
                 }
             }
-        }
-
-        @Override
-        public Event peek() {
-            return currentEvent;
         }
 
         @Override

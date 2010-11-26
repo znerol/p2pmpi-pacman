@@ -41,11 +41,6 @@ public class TimewarpRunloopRecoveryStrategyTest {
             }
 
             @Override
-            public Event peek() {
-                return eventQueue.peek();
-            }
-
-            @Override
             public Event poll() {
                 return eventQueue.poll();
             }

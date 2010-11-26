@@ -18,13 +18,6 @@ public interface EventSource {
     void compute(long currentSimtime);
     
     /**
-     * Retrieves, but does not remove, the next event.
-     * 
-     * @return The next event or null
-     */
-    Event peek();
-
-    /**
      * Retrieves and removes the next event.
      * 
      * @return The next event or null
