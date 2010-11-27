@@ -49,7 +49,7 @@ public class FastForwardRunloop implements EventRunloop {
         long lastSimtime = currentSimtime;
         
         // support rollback to before very first event
-        recoveryStrategy.save(currentSimtime);
+        recoveryStrategy.save(currentSimtime - 1);
         
         while (!stop) {
             Event peekEvent = source.receive(currentSimtime);
