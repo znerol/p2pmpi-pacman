@@ -194,7 +194,6 @@ public class JobQueueSimulation {
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
                 result = new ClientArrivedEvent(arrivalTime, serviceTime);
-                rejectedEvent = result;
             }
             
             rejectedEvent = null;

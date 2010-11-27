@@ -278,7 +278,6 @@ public class StupidTimewarpJobQueueSimulation {
                     long nextClerkFreeTime = job.getServiceTime()
                             + Math.max(currentSimtime, job.getSimtime());
                     result = new ClerkFreeEvent(nextClerkFreeTime);
-                    rejectedEvent = result;
                 }
             }
             
