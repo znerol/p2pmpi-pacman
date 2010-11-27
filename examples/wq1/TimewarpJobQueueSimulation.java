@@ -2,25 +2,27 @@ package wq1;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 
 import deism.AbstractStateHistory;
 import deism.Event;
 import deism.EventDispatcher;
 import deism.EventCondition;
+import deism.EventDispatcherCollection;
 import deism.EventRunloop;
 import deism.EventRunloopRecoveryStrategy;
 import deism.EventSource;
+import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
 import deism.FastForwardRunloop;
 import deism.RealtimeClock;
 import deism.RealtimeExecutionGovernor;
 import deism.StateHistory;
+import deism.StateHistoryException;
 import deism.TimewarpEventSource;
-import deism.TimewarpEventSourceCollection;
 import deism.TimewarpRunloopRecoveryStrategy;
 import deism.TimewarpEventSourceAdapter;
 
@@ -41,41 +43,56 @@ public class TimewarpJobQueueSimulation {
         RealtimeClock clock = new RealtimeClock(speed);
         governor = new RealtimeExecutionGovernor(clock);            
 
-        EventSource clientSource;
-        RunnableClientArrivedSource<Long> runnableClientSource = 
-            new RunnableClientArrivedSource<Long>(rng, governor, 1000, 1600);
-        clientSource = runnableClientSource;
+//        RunnableClientArrivedSource<Long> runnableClientSource = 
+//            new RunnableClientArrivedSource<Long>(rng, governor, 1000, 1600);
+//        Thread producer = new Thread(runnableClientSource);
+//        producer.start();
         
-        Thread producer = new Thread(runnableClientSource);
-        producer.start();
+        EventSource clientSource = new ClientArrivedSource(rng, 1000, 1600);
+        TimewarpEventSource timewarpClientSource =
+            new TimewarpEventSourceAdapter(clientSource);
         
-        PriorityBlockingQueue<ClientArrivedEvent> jobs =
-            new PriorityBlockingQueue<ClientArrivedEvent>();
+        WaitingRoom waitingRoom = new WaitingRoom();
+        Counter counterOne = new Counter();
+        Counter counterTwo = new Counter();
         
-        /* Define as many customer/clerk sources as you wish */
-        TimewarpEventSource[] sources = {
-                new TimewarpEventSourceAdapter(clientSource),
-                new TimewarpEventSourceAdapter(new ClerkSource(jobs)),
-                new TimewarpEventSourceAdapter(new ClerkSource(jobs)),
-                new TimewarpEventSourceAdapter(new JitterEventSource())
+        TimewarpEventSource jitterSource = new TimewarpEventSourceAdapter(
+                new JitterEventSource());
+
+        EventSource[] sources = {
+                timewarpClientSource,
+                waitingRoom.source,
+                counterOne.source,
+                counterTwo.source,
+                jitterSource,
         };
         
-        TimewarpEventSource timewarpSources = 
-            new TimewarpEventSourceCollection(sources);
-
+        EventDispatcher eventLogger = new EventLogger(waitingRoom);
+        EventDispatcher[] dispatchers = {
+                waitingRoom.dispatcher,
+                counterOne.dispatcher,
+                counterTwo.dispatcher,
+                eventLogger,
+        };
+        
         EventCondition snapshotAll = new EventCondition() {
             @Override
             public boolean match(Event e) {
                 return true;
             }
         };
-
-        EventDispatcher disp = new JobAggregator(jobs);
-
+        
         ArrayList<StateHistory<Long>> stateObjects =
             new ArrayList<StateHistory<Long>>();
         stateObjects.add(new StateHistoryLogger());
-        stateObjects.add(timewarpSources);
+        stateObjects.add(timewarpClientSource);
+        stateObjects.add(waitingRoom.dispatcher);
+        stateObjects.add(waitingRoom.source);
+        stateObjects.add(counterOne.dispatcher);
+        stateObjects.add(counterOne.source);
+        stateObjects.add(counterTwo.dispatcher);
+        stateObjects.add(counterTwo.source);
+        stateObjects.add(jitterSource);
 
         EventRunloopRecoveryStrategy recoveryStrategy =
             new TimewarpRunloopRecoveryStrategy(stateObjects);
@@ -83,40 +100,41 @@ public class TimewarpJobQueueSimulation {
         EventRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
         
-        runloop.run(timewarpSources, disp);
+        EventSource eventSource = new EventSourceCollection(sources);
+        EventDispatcher eventDispatcher =
+            new EventDispatcherCollection(dispatchers);
         
-        runnableClientSource.stop();
-        producer.interrupt();
-        try {
-            producer.join();
-        }
-        catch (InterruptedException e1) {
-        }
+        runloop.run(eventSource, eventDispatcher);
+        
+//        runnableClientSource.stop();
+//        producer.interrupt();
+//        try {
+//            producer.join();
+//        }
+//        catch (InterruptedException e1) {
+//        }
     }
 
-    private static class StateHistoryLogger
-            extends AbstractStateHistory<Long, Object> {
+    private static class StateHistoryLogger implements StateHistory<Long> {
 
         @Override
+        public void save(Long timestamp) throws StateHistoryException {
+        }
+        
+        @Override
         public void rollback(Long timestamp) {
-            super.rollback(timestamp);
-            System.out.println("Rollback time=" + timestamp);
+            System.out.println("** Rollback time=" + timestamp);
         }
 
         @Override
         public void commit(Long timestamp) {
-            super.rollback(timestamp);
-            System.out.println("Commit time=" + timestamp);
-        }
-        
-        @Override
-        public void addPending(List<Object> pending) {
+            System.out.println("** Commit time=" + timestamp);
         }
     }
     
     private static class JitterEventSource implements EventSource {
-        Event rejectedEvent;
-        Random rng = new Random(0);
+        private Event rejectedEvent;
+        private final Random rng = new Random(0);
         
         @Override
         public Event receive(long currentSimtime) {
@@ -138,12 +156,27 @@ public class TimewarpJobQueueSimulation {
             rejectedEvent = event;
         }
     }
+    
+    private static class EventLogger implements EventDispatcher {
+        private final WaitingRoom waitingRoom;
+        
+        public EventLogger(WaitingRoom waitingRoom) {
+            this.waitingRoom = waitingRoom;
+        }
+        
+        @Override
+        public void dispatchEvent(Event e) {
+            System.out.println(e);
+            waitingRoom.dumpStatistics();
+        }
+    }
+    
     /**
      * TerminateAfterDuration.match will return true after given amount of
      * simulation time elapsed.
      */
     private static class TerminateAfterDuration implements EventCondition {
-        long duration;
+        private long duration;
 
         public TerminateAfterDuration(long duration) {
             this.duration = duration;
@@ -159,21 +192,107 @@ public class TimewarpJobQueueSimulation {
         }
 
     }
-
-    private static class JobAggregator implements EventDispatcher {
-        Queue<ClientArrivedEvent> waitingQueue;
-
-        public JobAggregator(Queue<ClientArrivedEvent> events) {
-            waitingQueue = events;
+    
+    @SuppressWarnings("serial")
+    private static class CounterServiceEvent extends Event {
+        public final CounterAvailableEvent counterAvailableEvent;
+        public final ClientArrivedEvent clientArrivedEvent;
+        
+        public CounterServiceEvent(CounterAvailableEvent counter,
+                ClientArrivedEvent client) {
+            super(Math.max(counter.getSimtime(), client.getSimtime()));
+            this.counterAvailableEvent = counter;
+            this.clientArrivedEvent = client;
         }
-
+        
         @Override
-        public void dispatchEvent(Event e) {
-            System.out.println(e);
-            if (e instanceof ClientArrivedEvent) {
-                waitingQueue.offer((ClientArrivedEvent) e);
-            }
+        public String toString() {
+            return "[CounterServiceEvent time=" + this.getSimtime() + " " +
+                counterAvailableEvent + " " + clientArrivedEvent + "]";
+        }
+    }
+
+    private static class WaitingRoom {
+        private Queue<ClientArrivedEvent> waitingQueue;
+        private Queue<CounterAvailableEvent> availableCounters;
+        public final WaitingRoom.Source source = new WaitingRoom.Source();
+        public final WaitingRoom.Dispatcher dispatcher =
+            new WaitingRoom.Dispatcher();
+
+        public WaitingRoom() {
+            waitingQueue = new PriorityQueue<ClientArrivedEvent>();
+            availableCounters = new PriorityQueue<CounterAvailableEvent>();            
+        }
+        
+        public void dumpStatistics() {
             System.out.println("Queue Length: " + waitingQueue.size());
+        }
+        
+        public class Source extends AbstractStateHistory<Long, Event>
+                implements TimewarpEventSource {
+            
+            private Event rejectedEvent;
+            
+            @Override
+            public Event receive(long currentSimtime) {
+                Event result = rejectedEvent;
+                rejectedEvent = null;
+
+                if (result == null && waitingQueue.peek() != null
+                        && availableCounters.peek() != null) {
+                    result = new CounterServiceEvent(availableCounters.poll(),
+                            waitingQueue.poll());
+                    addToHistory(result);
+                }
+
+                return result;
+            }
+
+            @Override
+            public void reject(Event event) {
+                assert (rejectedEvent == null);
+                removeFromHistory(event);
+                rejectedEvent = event;
+            }
+
+            @Override
+            public void addPending(List<Event> pending) {
+                for (Event event : pending) {
+                    assert (event instanceof CounterServiceEvent);
+                    CounterServiceEvent serviceEvent =
+                        (CounterServiceEvent) event;
+                    waitingQueue.offer(serviceEvent.clientArrivedEvent);
+                    availableCounters.offer(serviceEvent.counterAvailableEvent);
+                }
+            }
+        }
+        
+        public class Dispatcher extends AbstractStateHistory<Long, Event>
+                implements EventDispatcher {
+            
+            @Override
+            public void dispatchEvent(Event event) {
+                if (event instanceof ClientArrivedEvent) {
+                    waitingQueue.offer((ClientArrivedEvent) event);
+                    addToHistory(event);
+                }
+                else if (event instanceof CounterAvailableEvent) {
+                    availableCounters.offer((CounterAvailableEvent) event);
+                    addToHistory(event);
+                }
+            }
+
+            @Override
+            public void addPending(List<Event> pending) {
+                for (Event event : pending) {
+                    if (event instanceof ClientArrivedEvent) {
+                        waitingQueue.remove((ClientArrivedEvent) event);
+                    }
+                    else if (event instanceof CounterAvailableEvent) {
+                        availableCounters.remove((CounterAvailableEvent) event);
+                    }
+                }
+            }
         }
     }
 
@@ -198,14 +317,59 @@ public class TimewarpJobQueueSimulation {
     }
 
     @SuppressWarnings("serial")
-    private static class ClerkFreeEvent extends Event {
-        public ClerkFreeEvent(long simtime) {
+    private static class CounterAvailableEvent extends Event {
+        public final Counter counter;
+        
+        public CounterAvailableEvent(long simtime, Counter counter) {
             super(simtime);
+            this.counter = counter;
         }
 
         @Override
         public String toString() {
-            return "[ClerkFreeEvent time=" + this.getSimtime() + "]";
+            return "[CounterAvailableEvent time=" + this.getSimtime() + "]";
+        }
+    }
+    
+    private static class ClientArrivedSource implements EventSource {
+        long mtbca;
+        long mstpc;
+        Event rejectedEvent;
+        final Random rng;
+
+        public ClientArrivedSource(Random rng,
+                long mean_time_between_customer_arrival,
+                long mean_service_time_per_customer) {
+            super();
+            this.rng = rng;
+            this.mtbca = mean_time_between_customer_arrival;
+            this.mstpc = mean_service_time_per_customer;
+            rejectedEvent = null;
+        }
+
+        @Override
+        public Event receive(long currentSimtime) {
+            Event result = rejectedEvent;
+            
+            if (result == null) {
+                long arrivalTime;
+                long serviceTime;
+                synchronized(rng) {
+                    arrivalTime = currentSimtime
+                            + (long) (mtbca * -Math.log(rng.nextDouble()));
+                    serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
+                }
+                result = new ClientArrivedEvent(arrivalTime, serviceTime);
+            }
+            
+            rejectedEvent = null;
+            return result;
+        }
+
+        @Override
+        public void reject(Event event) {
+            assert(rejectedEvent == null);
+            rejectedEvent = event;
         }
     }
 
@@ -281,40 +445,77 @@ public class TimewarpJobQueueSimulation {
         }
     }
     
-    private static class ClerkSource implements EventSource {
-        Queue<ClientArrivedEvent> jobs;
-        Event rejectedEvent;
+    private static class Counter {
+        private final Queue<CounterServiceEvent> waitingQueue =
+            new PriorityQueue<CounterServiceEvent>();
+        public final Counter.Source source = new Counter.Source();
+        public final Counter.Dispatcher dispatcher = new Counter.Dispatcher();
 
-        public ClerkSource(Queue<ClientArrivedEvent> jobs) {
-            super();
-            this.jobs = jobs;
-            rejectedEvent = null;
-        }
+        public class Source extends AbstractStateHistory<Long, Event> implements
+                TimewarpEventSource {
 
-        @Override
-        public Event receive(long currentSimtime) {
-            Event result = rejectedEvent;
-            
-            if (result == null) {
-                ClientArrivedEvent job = jobs.poll();
-                if (job != null) {
-                    System.out.println("[ClerkAccept: time=" + currentSimtime
-                            + " " + job + "]");
-                    System.out.println("Queue Length: " + jobs.size());
-                    long nextClerkFreeTime = job.getServiceTime()
-                            + Math.max(currentSimtime, job.getSimtime());
-                    result = new ClerkFreeEvent(nextClerkFreeTime);
+            private Event rejectedEvent =
+                new CounterAvailableEvent(0, Counter.this);
+
+            @Override
+            public Event receive(long currentSimtime) {
+                Event result = rejectedEvent;
+                rejectedEvent = null;
+
+                if (result == null && waitingQueue.peek() != null) {
+                    CounterServiceEvent job = waitingQueue.poll();
+                    long nextClerkFreeTime =
+                        job.clientArrivedEvent.getServiceTime()
+                        + Math.max(currentSimtime, job.getSimtime());
+                    result = new CounterAvailableEvent(
+                            nextClerkFreeTime, Counter.this);
+                    addToHistory(job);
+                }
+
+                return result;
+            }
+
+            @Override
+            public void reject(Event event) {
+                assert (rejectedEvent == null);
+                removeFromHistory(event);
+                rejectedEvent = event;
+            }
+
+            @Override
+            public void addPending(List<Event> pending) {
+                for (Event event : pending) {
+                    assert (event instanceof CounterServiceEvent);
+                    waitingQueue.offer((CounterServiceEvent) event);
+                }
+                if (pending.size() > 0) {
+                    rejectedEvent = null;
                 }
             }
-            
-            rejectedEvent = null;
-            return result;
         }
 
-        @Override
-        public void reject(Event event) {
-            assert(rejectedEvent == null);
-            rejectedEvent = event;
+        public class Dispatcher extends AbstractStateHistory<Long, Event>
+                implements EventDispatcher {
+
+            @Override
+            public void dispatchEvent(Event event) {
+                if (event instanceof CounterServiceEvent) {
+                    CounterServiceEvent cse = (CounterServiceEvent)event;
+                    if (cse.counterAvailableEvent.counter == Counter.this) {
+                        waitingQueue.offer(cse);
+                        addToHistory(event);
+                    }
+                }
+            }
+
+            @Override
+            public void addPending(List<Event> pending) {
+                for (Event event : pending) {
+                    if (event instanceof CounterServiceEvent) {
+                        waitingQueue.remove((CounterServiceEvent) event);
+                    }
+                }
+            }
         }
     }
 }
