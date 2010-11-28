@@ -185,14 +185,13 @@ public class StupidTimewarpJobQueueSimulation {
 
     private static class RunnableClientArrivedSource<K>
             implements EventSource, Runnable {
-        long mtbca;
-        long mstpc;
-        ExecutionGovernor mainGovernor;
-        ExecutionGovernor myGovernor;
-        final Random rng;
-        final Queue<Event> events;
-        boolean done = false;
-        Event lastEvent;
+        private long mtbca;
+        private long mstpc;
+        private ExecutionGovernor mainGovernor;
+        private ExecutionGovernor myGovernor;
+        private final Random rng;
+        private final Queue<Event> events;
+        private boolean done = false;
 
         public RunnableClientArrivedSource(
                 Random rng,
@@ -215,14 +214,16 @@ public class StupidTimewarpJobQueueSimulation {
 
         @Override
         public Event receive(long currentSimtime) {
-            lastEvent = events.poll();
-            return lastEvent;
+            return events.peek();
         }
 
         @Override
         public void reject(Event event) {
-            assert (event == lastEvent);
-            events.offer(event);
+        }
+        
+        @Override
+        public void accept(Event event) {
+            events.remove(event);
         }
         
         @Override
@@ -256,20 +257,16 @@ public class StupidTimewarpJobQueueSimulation {
     }
     
     private static class ClerkSource implements EventSource {
-        Queue<ClientArrivedEvent> jobs;
-        Event rejectedEvent;
+        private final Queue<ClientArrivedEvent> jobs;
+        private Event currentEvent = null;
 
         public ClerkSource(Queue<ClientArrivedEvent> jobs) {
-            super();
             this.jobs = jobs;
-            rejectedEvent = null;
         }
 
         @Override
         public Event receive(long currentSimtime) {
-            Event result = rejectedEvent;
-            
-            if (result == null) {
+            if (currentEvent == null) {
                 ClientArrivedEvent job = jobs.poll();
                 if (job != null) {
                     System.out.println("[ClerkAccept: time=" + currentSimtime
@@ -277,18 +274,21 @@ public class StupidTimewarpJobQueueSimulation {
                     System.out.println("Queue Length: " + jobs.size());
                     long nextClerkFreeTime = job.getServiceTime()
                             + Math.max(currentSimtime, job.getSimtime());
-                    result = new ClerkFreeEvent(nextClerkFreeTime);
+                    currentEvent = new ClerkFreeEvent(nextClerkFreeTime);
                 }
             }
             
-            rejectedEvent = null;
-            return result;
+            return currentEvent;
         }
 
         @Override
         public void reject(Event event) {
-            assert(rejectedEvent == null);
-            rejectedEvent = event;
+        }
+
+        @Override
+        public void accept(Event event) {
+            assert(currentEvent == event);
+            currentEvent = null;
         }
     }
 }
