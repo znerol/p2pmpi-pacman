@@ -133,27 +133,28 @@ public class TimewarpJobQueueSimulation {
     }
     
     private static class JitterEventSource implements EventSource {
-        private Event rejectedEvent;
+        private Event currentEvent;
         private final Random rng = new Random(0);
         
         @Override
         public Event receive(long currentSimtime) {
-            Event result = rejectedEvent;
-            
-            if (result == null && currentSimtime > 1024) {
+            if (currentEvent == null && currentSimtime > 1024) {
                 if (rng.nextInt(32) == 0) {
-                    result = new Event(currentSimtime - rng.nextInt(1024));
+                    currentEvent = new Event(currentSimtime - rng.nextInt(1024));
                 }
             }
             
-            rejectedEvent = null;
-            return result;
+            return currentEvent;
         }
 
         @Override
         public void reject(Event event) {
-            assert(event == null);
-            rejectedEvent = event;
+        }
+
+        @Override
+        public void accept(Event event) {
+            assert(currentEvent == event);
+            currentEvent = null;
         }
     }
     
@@ -228,37 +229,42 @@ public class TimewarpJobQueueSimulation {
             System.out.println("Queue Length: " + waitingQueue.size());
         }
         
-        public class Source extends AbstractStateHistory<Long, Event>
+        public class Source
+                extends AbstractStateHistory<Long, CounterServiceEvent>
                 implements TimewarpEventSource {
             
-            private Event rejectedEvent;
+            private CounterServiceEvent currentEvent;
             
             @Override
             public Event receive(long currentSimtime) {
-                Event result = rejectedEvent;
-                rejectedEvent = null;
-
-                if (result == null && waitingQueue.peek() != null
-                        && availableCounters.peek() != null) {
-                    result = new CounterServiceEvent(availableCounters.poll(),
-                            waitingQueue.poll());
-                    addToHistory(result);
+                if (currentEvent == null) {
+                    ClientArrivedEvent client = waitingQueue.peek();
+                    CounterAvailableEvent counter = availableCounters.peek();
+                    if (client != null && counter != null) {
+                        currentEvent = new CounterServiceEvent(
+                                availableCounters.poll(), waitingQueue.poll());
+                    }
                 }
 
-                return result;
+                return currentEvent;
+            }
+
+            @Override
+            public void accept(Event event) {
+                assert(event == currentEvent);
+                waitingQueue.remove(currentEvent.clientArrivedEvent);
+                availableCounters.remove(currentEvent.counterAvailableEvent);
+                addToHistory(currentEvent);
+                currentEvent = null;
             }
 
             @Override
             public void reject(Event event) {
-                assert (rejectedEvent == null);
-                removeFromHistory(event);
-                rejectedEvent = event;
             }
 
             @Override
-            public void addPending(List<Event> pending) {
-                for (Event event : pending) {
-                    assert (event instanceof CounterServiceEvent);
+            public void addPending(List<CounterServiceEvent> pending) {
+                for (CounterServiceEvent event : pending) {
                     CounterServiceEvent serviceEvent =
                         (CounterServiceEvent) event;
                     waitingQueue.offer(serviceEvent.clientArrivedEvent);
@@ -332,10 +338,10 @@ public class TimewarpJobQueueSimulation {
     }
     
     private static class ClientArrivedSource implements EventSource {
-        long mtbca;
-        long mstpc;
-        Event rejectedEvent;
-        final Random rng;
+        private long mtbca;
+        private long mstpc;
+        private Event currentEvent;
+        private final Random rng;
 
         public ClientArrivedSource(Random rng,
                 long mean_time_between_customer_arrival,
@@ -344,14 +350,11 @@ public class TimewarpJobQueueSimulation {
             this.rng = rng;
             this.mtbca = mean_time_between_customer_arrival;
             this.mstpc = mean_service_time_per_customer;
-            rejectedEvent = null;
         }
 
         @Override
         public Event receive(long currentSimtime) {
-            Event result = rejectedEvent;
-            
-            if (result == null) {
+            if (currentEvent == null) {
                 long arrivalTime;
                 long serviceTime;
                 synchronized(rng) {
@@ -359,30 +362,32 @@ public class TimewarpJobQueueSimulation {
                             + (long) (mtbca * -Math.log(rng.nextDouble()));
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
-                result = new ClientArrivedEvent(arrivalTime, serviceTime);
+                currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
             }
-            
-            rejectedEvent = null;
-            return result;
+
+            return currentEvent;
+        }
+
+        @Override
+        public void accept(Event event) {
+            assert(event == currentEvent);
+            currentEvent = null;
         }
 
         @Override
         public void reject(Event event) {
-            assert(rejectedEvent == null);
-            rejectedEvent = event;
         }
     }
 
     private static class RunnableClientArrivedSource<K>
             implements EventSource, Runnable {
-        long mtbca;
-        long mstpc;
-        ExecutionGovernor mainGovernor;
-        ExecutionGovernor myGovernor;
-        final Random rng;
-        final Queue<Event> events;
-        boolean done = false;
-        Event lastEvent;
+        private long mtbca;
+        private long mstpc;
+        private ExecutionGovernor mainGovernor;
+        private ExecutionGovernor myGovernor;
+        private final Random rng;
+        private final Queue<Event> events;
+        private boolean done = false;
 
         public RunnableClientArrivedSource(
                 Random rng,
@@ -405,14 +410,16 @@ public class TimewarpJobQueueSimulation {
 
         @Override
         public Event receive(long currentSimtime) {
-            lastEvent = events.poll();
-            return lastEvent;
+            return events.peek();
+        }
+
+        @Override
+        public void accept(Event event) {
+            events.remove(event);
         }
 
         @Override
         public void reject(Event event) {
-            assert (event == lastEvent);
-            events.offer(event);
         }
         
         @Override
@@ -451,50 +458,74 @@ public class TimewarpJobQueueSimulation {
         public final Counter.Source source = new Counter.Source();
         public final Counter.Dispatcher dispatcher = new Counter.Dispatcher();
 
-        public class Source extends AbstractStateHistory<Long, Event> implements
-                TimewarpEventSource {
+        private class SourceState {
+            public final CounterServiceEvent counterServiceEvent;
+            public final CounterAvailableEvent counterAvailableEvent;
+            
+            public SourceState(CounterServiceEvent cause,
+                    CounterAvailableEvent result)
+            {
+                this.counterServiceEvent = cause;
+                this.counterAvailableEvent = result;
+            }
+        }
 
-            private Event rejectedEvent =
-                new CounterAvailableEvent(0, Counter.this);
+        public class Source extends AbstractStateHistory<Long, SourceState>
+                implements TimewarpEventSource {
+
+            private SourceState currentState;
+            
+            public Source() {
+                waitingQueue.offer(new CounterServiceEvent(
+                        new CounterAvailableEvent(0, Counter.this),
+                        new ClientArrivedEvent(0, 0)));
+            }
 
             @Override
             public Event receive(long currentSimtime) {
-                Event result = rejectedEvent;
-                rejectedEvent = null;
-
-                if (result == null && waitingQueue.peek() != null) {
-                    CounterServiceEvent job = waitingQueue.poll();
-                    long nextClerkFreeTime =
-                        job.clientArrivedEvent.getServiceTime()
-                        + Math.max(currentSimtime, job.getSimtime());
-                    result = new CounterAvailableEvent(
-                            nextClerkFreeTime, Counter.this);
-                    addToHistory(job);
+                if (currentState == null) {
+                    CounterServiceEvent serviceEvent = waitingQueue.peek();
+                    if (serviceEvent != null) {
+                        long nextClerkFreeTime = 
+                            serviceEvent.clientArrivedEvent.getServiceTime()
+                            + Math.max(currentSimtime, serviceEvent.getSimtime());
+                        currentState = new SourceState(
+                                serviceEvent,
+                                new CounterAvailableEvent(nextClerkFreeTime,
+                                        Counter.this));
+                    }
                 }
-
-                return result;
+                
+                if (currentState != null) {
+                    return currentState.counterAvailableEvent;
+                }
+                else {
+                    return null;
+                }
+            }
+            
+            @Override
+            public void accept(Event event) {
+                assert (event == currentState.counterAvailableEvent);
+                waitingQueue.remove(currentState.counterServiceEvent);
+                addToHistory(currentState);
+                currentState = null;
             }
 
             @Override
             public void reject(Event event) {
-                assert (rejectedEvent == null);
-                removeFromHistory(event);
-                rejectedEvent = event;
             }
 
             @Override
-            public void addPending(List<Event> pending) {
-                for (Event event : pending) {
-                    assert (event instanceof CounterServiceEvent);
-                    waitingQueue.offer((CounterServiceEvent) event);
-                }
-                if (pending.size() > 0) {
-                    rejectedEvent = null;
+            public void addPending(List<SourceState> pending) {
+                for (SourceState entry : pending) {
+                    waitingQueue.offer(entry.counterServiceEvent);
                 }
             }
         }
 
-        public class Dispatcher extends AbstractStateHistory<Long, Event>
+        public class Dispatcher
+                extends AbstractStateHistory<Long, CounterServiceEvent>
                 implements EventDispatcher {
 
             @Override
@@ -503,17 +534,15 @@ public class TimewarpJobQueueSimulation {
                     CounterServiceEvent cse = (CounterServiceEvent)event;
                     if (cse.counterAvailableEvent.counter == Counter.this) {
                         waitingQueue.offer(cse);
-                        addToHistory(event);
+                        addToHistory(cse);
                     }
                 }
             }
 
             @Override
-            public void addPending(List<Event> pending) {
+            public void addPending(List<CounterServiceEvent> pending) {
                 for (Event event : pending) {
-                    if (event instanceof CounterServiceEvent) {
-                        waitingQueue.remove((CounterServiceEvent) event);
-                    }
+                    waitingQueue.remove((CounterServiceEvent) event);
                 }
             }
         }
