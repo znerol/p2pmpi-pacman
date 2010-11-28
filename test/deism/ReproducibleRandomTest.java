@@ -33,12 +33,14 @@ public class ReproducibleRandomTest {
         r.rollback(1);
     }
     
+    /*
     @Test(expected=StateHistoryException.class)
     public void testSnapshotKeyMustBeUnique() {
         ReproducibleRandom<Integer> r = new ReproducibleRandom<Integer>(rng);
         r.save(1);
         r.save(1);
     }
+    */
 
     @Test(expected=StateHistoryException.class)
     public void testCommitWithUnknownKeyMustFail() {
