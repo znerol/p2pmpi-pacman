@@ -45,6 +45,11 @@ public class TimewarpRunloopRecoveryStrategyTest {
             public void reject(Event event) {
                 eventQueue.offerFirst(event);
             }
+
+            @Override
+            public void accept(Event event) {
+                eventQueue.remove(event);
+            }
         };
         eventSource = new TimewarpEventSourceAdapter(simpleEventSource);
         
