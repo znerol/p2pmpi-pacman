@@ -47,6 +47,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
         try {
             long delay = clock.getRealtime(wakeupTime)-clock.getRealtime();
             if (delay > 0) {
+                System.out.println("** Wait delay=" + delay);
                 this.wait(delay);
             }
         }
