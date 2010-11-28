@@ -55,6 +55,10 @@ public class EventSourceCollectionTest {
             public void reject(Event event) {
                 firstSourceEvents.offer(event);
             }
+            @Override
+            public void accept(Event event) {
+                firstSourceEvents.remove(event);
+            }
         };
 
         /* construct second event queue */
@@ -69,6 +73,10 @@ public class EventSourceCollectionTest {
             @Override
             public void reject(Event event) {
                 secondSourceEvents.offer(event);
+            }
+            @Override
+            public void accept(Event event) {
+                secondSourceEvents.remove(event);
             }
         };
 

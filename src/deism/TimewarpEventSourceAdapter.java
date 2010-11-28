@@ -10,6 +10,7 @@ public class TimewarpEventSourceAdapter
 
     private final Queue<Event> pending = new PriorityQueue<Event>();
     private final EventSource source;
+    private Event lastEventFromSource;
     
     public TimewarpEventSourceAdapter(EventSource orig) {
         source = orig;
@@ -17,26 +18,30 @@ public class TimewarpEventSourceAdapter
     
     @Override
     public Event receive(long currentSimtime) {
-        Event event;
-        
-        if (pending.size() > 0) {
-            event = pending.poll();
+        if (pending.peek() == null) {
+            lastEventFromSource = source.receive(currentSimtime);
+            if (lastEventFromSource != null) {
+                pending.offer(lastEventFromSource);
+            }
         }
-        else {
-            event = source.receive(currentSimtime);
+
+        return pending.peek();
+    }
+
+    @Override
+    public void accept(Event event) {
+        if (event == lastEventFromSource) {
+            source.accept(event);
         }
-        
-        if (event != null) {
-            addToHistory(event);
-        }
-        
-        return event;
+        pending.remove(event);
+        addToHistory(event);
     }
 
     @Override
     public void reject(Event event) {
-        pending.offer(event);
-        removeFromHistory(event);
+        if (event == lastEventFromSource) {
+            source.reject(event);
+        }
     }
 
     @Override

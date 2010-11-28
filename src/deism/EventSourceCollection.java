@@ -55,6 +55,12 @@ public class EventSourceCollection implements EventSource {
     }
 
     @Override
+    public void accept(Event event) {
+        assert(currentSource != null);
+        currentSource.accept(event);
+    }
+
+    @Override
     public void reject(Event event) {
         assert(currentSource != null);
         currentSource.reject(event);

@@ -15,7 +15,12 @@ public interface EventSource {
      * @return The next event or null
      */
     Event receive(long currentSimtime);
-    
+
+    /**
+     * Accept the last event received from this EventSource
+     */
+    void accept(Event event);
+
     /**
      * Put back the last event received from this EventSource
      */

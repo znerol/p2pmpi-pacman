@@ -90,6 +90,7 @@ public class FastForwardRunloop implements EventRunloop {
                 continue;
             }
 
+            source.accept(peekEvent);
             disp.dispatchEvent(peekEvent);
             
             if (snapshotCondition.match(peekEvent)) {
