@@ -34,7 +34,7 @@ public class TimewarpEventSourceAdapter
             source.accept(event);
         }
         pending.remove(event);
-        addToHistory(event);
+        pushHistory(event);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public void addPending(List<Event> pending) {
-        this.pending.addAll(pending);
+    public void revertHistory(List<Event> tail) {
+        this.pending.addAll(tail);
     }
 }

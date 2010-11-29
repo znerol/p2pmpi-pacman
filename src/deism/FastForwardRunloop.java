@@ -16,6 +16,7 @@ public class FastForwardRunloop implements EventRunloop {
     private EventCondition terminationCondition = null;
     private ExecutionGovernor governor;
     private long currentSimtime = 0;
+    private long maxSimtime;
     private EventRunloopRecoveryStrategy recoveryStrategy;
     private EventCondition snapshotCondition;
 
@@ -47,6 +48,7 @@ public class FastForwardRunloop implements EventRunloop {
             throws EventSourceOrderException {
 
         long lastSimtime = currentSimtime;
+        maxSimtime = currentSimtime;
         
         // support rollback to before very first event
         recoveryStrategy.save(currentSimtime - 1);
@@ -63,9 +65,14 @@ public class FastForwardRunloop implements EventRunloop {
              */
             long newSimtime;
             if (peekEvent != null) {
+                if (peekEvent.getSimtime() > maxSimtime) {
+                    System.out.println("** Flush");
+                    maxSimtime = peekEvent.getSimtime();
+                }
                 newSimtime = governor.suspendUntil(peekEvent.getSimtime());
             }
             else {
+                System.out.println("** Flush");
                 newSimtime = governor.suspend();
             }
 

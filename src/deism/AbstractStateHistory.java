@@ -56,7 +56,7 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
         
         Integer nextIndex = snapshots.get(key);
         List<V> tail = history.subList(nextIndex, history.size());
-        addPending(tail);
+        revertHistory(tail);
         tail.clear();
         
         // loop thru snapshots and remove the ones beyond key
@@ -72,16 +72,24 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
         }
     }
     
-    public abstract void addPending(List<V> pending);
+    /**
+     * During a rollback AbstractStateHistory splits off the items following
+     * the rollback key in the history stack and calls revertHistory giving the
+     * subclass a chance to restore state.
+     * 
+     * The first element of tail represents the state for rollback key
+     * 
+     * @param tail
+     */
+    public abstract void revertHistory(List<V> tail);
     
-    public void addToHistory(V item) {
+    /**
+     * Push one item onto the history stack
+     * 
+     * @param item
+     */
+    public void pushHistory(V item) {
         assert(item != null);
         history.add(item);
     }
-    /*
-    public void removeFromHistory(V item) {
-        assert(item != null);
-        history.remove(item);
-    }
-    */
 }

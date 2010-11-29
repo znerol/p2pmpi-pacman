@@ -14,8 +14,8 @@ public class ReproducibleRandom<K> extends AbstractStateHistory<K, Double> {
     }
 
     @Override
-    public void addPending(List<Double> pending) {
-        this.pending.addAll(pending);
+    public void revertHistory(List<Double> tail) {
+        this.pending.addAll(tail);
     }
 
     public double nextDouble() {
@@ -25,7 +25,7 @@ public class ReproducibleRandom<K> extends AbstractStateHistory<K, Double> {
             next = new Double(rng.nextDouble());
         }
         
-        addToHistory(next);
+        pushHistory(next);
         return next;
     }
 }

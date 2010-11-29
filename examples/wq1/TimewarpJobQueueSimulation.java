@@ -257,7 +257,7 @@ public class TimewarpJobQueueSimulation {
                 assert(event == currentEvent);
                 waitingQueue.remove(currentEvent.clientArrivedEvent);
                 availableCounters.remove(currentEvent.counterAvailableEvent);
-                addToHistory(currentEvent);
+                pushHistory(currentEvent);
                 currentEvent = null;
             }
 
@@ -266,8 +266,8 @@ public class TimewarpJobQueueSimulation {
             }
 
             @Override
-            public void addPending(List<CounterServiceEvent> pending) {
-                for (CounterServiceEvent event : pending) {
+            public void revertHistory(List<CounterServiceEvent> tail) {
+                for (CounterServiceEvent event : tail) {
                     CounterServiceEvent serviceEvent =
                         (CounterServiceEvent) event;
                     waitingQueue.offer(serviceEvent.clientArrivedEvent);
@@ -283,17 +283,17 @@ public class TimewarpJobQueueSimulation {
             public void dispatchEvent(Event event) {
                 if (event instanceof ClientArrivedEvent) {
                     waitingQueue.offer((ClientArrivedEvent) event);
-                    addToHistory(event);
+                    pushHistory(event);
                 }
                 else if (event instanceof CounterAvailableEvent) {
                     availableCounters.offer((CounterAvailableEvent) event);
-                    addToHistory(event);
+                    pushHistory(event);
                 }
             }
 
             @Override
-            public void addPending(List<Event> pending) {
-                for (Event event : pending) {
+            public void revertHistory(List<Event> tail) {
+                for (Event event : tail) {
                     if (event instanceof ClientArrivedEvent) {
                         waitingQueue.remove((ClientArrivedEvent) event);
                     }
@@ -485,7 +485,7 @@ public class TimewarpJobQueueSimulation {
         @Override
         public void accept(Event event) {
             currentState = new CounterState(currentState.event, true);
-            addToHistory(currentState);
+            pushHistory(currentState);
         }
 
         @Override
@@ -500,15 +500,15 @@ public class TimewarpJobQueueSimulation {
                     assert (currentState.event == cse.counterAvailableEvent);
                     currentState = new CounterState(
                             createCounterAvailableEvent(cse), false);
-                    addToHistory(currentState);
+                    pushHistory(currentState);
                 }
             }
         }
 
         @Override
-        public void addPending(List<CounterState> pending) {
-            if (pending.size() > 0) {
-                currentState = pending.get(0);
+        public void revertHistory(List<CounterState> tail) {
+            if (tail.size() > 0) {
+                currentState = tail.get(0);
             }
         }
         

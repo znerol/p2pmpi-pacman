@@ -109,7 +109,7 @@ public class StupidTimewarpJobQueueSimulation {
         }
         
         @Override
-        public void addPending(List<Object> pending) {
+        public void revertHistory(List<Object> tail) {
         }
     }
     /**
