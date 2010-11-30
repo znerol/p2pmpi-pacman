@@ -4,6 +4,8 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import util.TerminateAfterDuration;
+
 import deism.Event;
 import deism.EventDispatcher;
 import deism.EventCondition;
@@ -92,28 +94,6 @@ public class JobQueueSimulation {
             catch (InterruptedException e1) {
             }
         }
-    }
-
-    /**
-     * TerminateAfterDuration.match will return true after given amount of
-     * simulation time elapsed.
-     */
-    private static class TerminateAfterDuration implements EventCondition {
-        long duration;
-
-        public TerminateAfterDuration(long duration) {
-            this.duration = duration;
-        }
-
-        @Override
-        public boolean match(Event e) {
-            boolean result = false;
-            if (e != null) {
-                result = (e.getSimtime() > duration);
-            }
-            return result;
-        }
-
     }
 
     private static class JobAggregator implements EventDispatcher {

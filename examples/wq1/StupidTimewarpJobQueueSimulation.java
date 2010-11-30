@@ -1,13 +1,14 @@
 package wq1;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import deism.AbstractStateHistory;
+import util.StateHistoryLogger;
+import util.TerminateAfterDuration;
+
 import deism.Event;
 import deism.EventDispatcher;
 import deism.EventCondition;
@@ -91,47 +92,6 @@ public class StupidTimewarpJobQueueSimulation {
         }
         catch (InterruptedException e1) {
         }
-    }
-
-    private static class StateHistoryLogger
-            extends AbstractStateHistory<Long, Object> {
-
-        @Override
-        public void rollback(Long timestamp) {
-            super.rollback(timestamp);
-            System.out.println("Rollback time=" + timestamp);
-        }
-
-        @Override
-        public void commit(Long timestamp) {
-            super.rollback(timestamp);
-            System.out.println("Commit time=" + timestamp);
-        }
-        
-        @Override
-        public void revertHistory(List<Object> tail) {
-        }
-    }
-    /**
-     * TerminateAfterDuration.match will return true after given amount of
-     * simulation time elapsed.
-     */
-    private static class TerminateAfterDuration implements EventCondition {
-        long duration;
-
-        public TerminateAfterDuration(long duration) {
-            this.duration = duration;
-        }
-
-        @Override
-        public boolean match(Event e) {
-            boolean result = false;
-            if (e != null) {
-                result = (e.getSimtime() > duration);
-            }
-            return result;
-        }
-
     }
 
     private static class JobAggregator implements EventDispatcher {

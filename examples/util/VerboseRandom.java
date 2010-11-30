@@ -1,4 +1,4 @@
-package wq1;
+package util;
 
 import java.util.Random;
 

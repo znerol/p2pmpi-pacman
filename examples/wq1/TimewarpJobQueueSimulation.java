@@ -7,6 +7,10 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import util.JitterEventSource;
+import util.StateHistoryLogger;
+import util.TerminateAfterDuration;
+
 import deism.AbstractStateHistory;
 import deism.Event;
 import deism.EventDispatcher;
@@ -23,7 +27,6 @@ import deism.ImmediateExecutionGovernor;
 import deism.RealtimeClock;
 import deism.RealtimeExecutionGovernor;
 import deism.StateHistory;
-import deism.StateHistoryException;
 import deism.TimewarpEventSource;
 import deism.TimewarpRunloopRecoveryStrategy;
 import deism.TimewarpEventSourceAdapter;
@@ -117,49 +120,6 @@ public class TimewarpJobQueueSimulation {
 //        catch (InterruptedException e1) {
 //        }
     }
-
-    private static class StateHistoryLogger implements StateHistory<Long> {
-
-        @Override
-        public void save(Long timestamp) throws StateHistoryException {
-        }
-        
-        @Override
-        public void rollback(Long timestamp) {
-            System.out.println("** Rollback time=" + timestamp);
-        }
-
-        @Override
-        public void commit(Long timestamp) {
-            System.out.println("** Commit time=" + timestamp);
-        }
-    }
-    
-    private static class JitterEventSource implements EventSource {
-        private Event currentEvent;
-        private final Random rng = new Random(0);
-        
-        @Override
-        public Event receive(long currentSimtime) {
-            if (currentEvent == null && currentSimtime > 1024) {
-                if (rng.nextInt(32) == 0) {
-                    currentEvent = new Event(currentSimtime - rng.nextInt(1024));
-                }
-            }
-            
-            return currentEvent;
-        }
-
-        @Override
-        public void reject(Event event) {
-        }
-
-        @Override
-        public void accept(Event event) {
-            assert(currentEvent == event);
-            currentEvent = null;
-        }
-    }
     
     private static class EventLogger implements EventDispatcher {
         private final WaitingRoom waitingRoom;
@@ -173,28 +133,6 @@ public class TimewarpJobQueueSimulation {
             System.out.println(e);
             waitingRoom.dumpStatistics();
         }
-    }
-    
-    /**
-     * TerminateAfterDuration.match will return true after given amount of
-     * simulation time elapsed.
-     */
-    private static class TerminateAfterDuration implements EventCondition {
-        private long duration;
-
-        public TerminateAfterDuration(long duration) {
-            this.duration = duration;
-        }
-
-        @Override
-        public boolean match(Event e) {
-            boolean result = false;
-            if (e != null) {
-                result = (e.getSimtime() > duration);
-            }
-            return result;
-        }
-
     }
     
     @SuppressWarnings("serial")
