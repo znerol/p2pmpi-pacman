@@ -8,6 +8,7 @@ import p2pmpi.mpi.MPI;
 
 import deism.AbstractStateHistory;
 import deism.Event;
+import deism.EventCondition;
 import deism.EventDispatcher;
 
 public class MpiEventDispatcher extends AbstractStateHistory<Long, Event>
@@ -17,26 +18,28 @@ public class MpiEventDispatcher extends AbstractStateHistory<Long, Event>
     private final int mpireceiver;
     private final int mpitag;
     private final IntraComm mpicomm;
+    private final EventCondition filter;
     private final List<Event> pending = new ArrayList<Event>();
 
     public MpiEventDispatcher(IntraComm comm, int mpisender, int mpireceiver,
-            int mpitag) {
+            int mpitag, EventCondition filter) {
         this.mpicomm = comm;
         this.mpisender = mpisender;
         this.mpireceiver = mpireceiver;
         this.mpitag = mpitag;
+        this.filter = filter;
     }
 
     @Override
     public void dispatchEvent(Event event) {
-        if (mpicomm.Rank() == mpisender) {
+        if (mpicomm.Rank() == mpisender && filter.match(event)) {
             if (pending.contains(event)) {
                 pending.remove(event);
             }
             else {
                 Event[] buffer = new Event[1];
                 buffer[0] = event;
-                mpicomm.Isend(buffer, 0, 1, MPI.OBJECT, mpireceiver, mpitag);
+                mpicomm.Send(buffer, 0, 1, MPI.OBJECT, mpireceiver, mpitag);
             }
             pushHistory(event);
         }
