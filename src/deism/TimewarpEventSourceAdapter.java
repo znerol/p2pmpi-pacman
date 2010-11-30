@@ -15,6 +15,16 @@ public class TimewarpEventSourceAdapter
     public TimewarpEventSourceAdapter(EventSource orig) {
         source = orig;
     }
+
+    @Override
+    public void start(long startSimtime) {
+        source.start(startSimtime);
+    }
+
+    @Override
+    public void stop() {
+        source.stop();
+    }
     
     @Override
     public Event receive(long currentSimtime) {

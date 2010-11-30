@@ -67,6 +67,14 @@ public class WaitingRoom {
                 availableCounters.offer(serviceEvent.counterAvailableEvent);
             }
         }
+
+        @Override
+        public void start(long startSimtime) {
+        }
+
+        @Override
+        public void stop() {
+        }
     }
     
     public class Dispatcher extends AbstractStateHistory<Long, Event>

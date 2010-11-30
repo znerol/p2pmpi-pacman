@@ -50,6 +50,14 @@ public class TimewarpRunloopRecoveryStrategyTest {
             public void accept(Event event) {
                 eventQueue.remove(event);
             }
+
+            @Override
+            public void start(long startSimtime) {
+            }
+
+            @Override
+            public void stop() {
+            }
         };
         eventSource = new TimewarpEventSourceAdapter(simpleEventSource);
         

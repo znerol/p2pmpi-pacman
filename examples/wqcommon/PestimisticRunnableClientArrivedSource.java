@@ -6,9 +6,7 @@ import deism.Event;
 import deism.EventSource;
 import deism.ExecutionGovernor;
 
-public class PestimisticRunnableClientArrivedSource implements EventSource,
-        Runnable {
-    private boolean done = false;
+public class PestimisticRunnableClientArrivedSource implements EventSource {
     private long mtbca;
     private long mstpc;
     private final ExecutionGovernor governor;
@@ -16,6 +14,7 @@ public class PestimisticRunnableClientArrivedSource implements EventSource,
     private long currentSimtime;
     private final Random rng;
     private Event eventReady;
+    private final Worker worker = new Worker();
 
     public PestimisticRunnableClientArrivedSource(Random rng,
             ExecutionGovernor governor,
@@ -29,12 +28,22 @@ public class PestimisticRunnableClientArrivedSource implements EventSource,
     }
 
     @Override
+    public void start(long startSimtime) {
+        worker.start();
+    }
+
+    @Override
+    public void stop() {
+        worker.terminate();
+    }
+
+    @Override
     public synchronized Event receive(long currentSimtime) {
         this.currentSimtime = currentSimtime;
         if (currentEvent == null) {
             eventReady = null;
             this.notify();
-            while (!done && eventReady == null) {
+            while (eventReady == null) {
                 try {
                     this.wait();
                 }
@@ -58,32 +67,45 @@ public class PestimisticRunnableClientArrivedSource implements EventSource,
         currentEvent = null;
     }
 
-    @Override
-    public synchronized void run() {
-        while (!done) {
-            long arrivalTime;
-            long serviceTime;
-            synchronized (rng) {
-                arrivalTime = currentSimtime
-                        + (long) (mtbca * -Math.log(rng.nextDouble()));
-                serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
-            }
-            eventReady = new ClientArrivedEvent(arrivalTime, serviceTime);
-            governor.resume(eventReady.getSimtime());
+    private class Worker extends Thread {
+        private boolean done = false;
 
-            this.notify();
-            while (!done && eventReady != null) {
-                try {
-                    this.wait();
-                }
-                catch (InterruptedException e) {
-                    // do nothing
+        @Override
+        public void run() {
+            synchronized (PestimisticRunnableClientArrivedSource.this) {
+                while (!done) {
+                    long arrivalTime;
+                    long serviceTime;
+                    synchronized (rng) {
+                        arrivalTime = currentSimtime
+                                + (long) (mtbca * -Math.log(rng.nextDouble()));
+                        serviceTime = (long) (mstpc * -Math.log(rng
+                                .nextDouble()));
+                    }
+                    eventReady = new ClientArrivedEvent(arrivalTime,
+                            serviceTime);
+                    governor.resume(eventReady.getSimtime());
+
+                    PestimisticRunnableClientArrivedSource.this.notify();
+                    while (!done && eventReady != null) {
+                        try {
+                            PestimisticRunnableClientArrivedSource.this.wait();
+                        }
+                        catch (InterruptedException e) {
+                            // do nothing
+                        }
+                    }
                 }
             }
         }
-    }
 
-    public void stop() {
-        done = true;
+        public void terminate() {
+            synchronized (PestimisticRunnableClientArrivedSource.this) {
+                done = true;
+                if (isAlive()) {
+                    interrupt();
+                }
+            }
+        }
     }
 }

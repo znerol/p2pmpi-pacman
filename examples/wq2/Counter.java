@@ -75,4 +75,12 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
             return new CounterAvailableEvent(endTime, this);
         }
     }
+
+    @Override
+    public void start(long startSimtime) {
+    }
+
+    @Override
+    public void stop() {
+    }
 }

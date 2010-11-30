@@ -59,6 +59,12 @@ public class EventSourceCollectionTest {
             public void accept(Event event) {
                 firstSourceEvents.remove(event);
             }
+            @Override
+            public void start(long startSimtime) {
+            }
+            @Override
+            public void stop() {
+            }
         };
 
         /* construct second event queue */
@@ -77,6 +83,12 @@ public class EventSourceCollectionTest {
             @Override
             public void accept(Event event) {
                 secondSourceEvents.remove(event);
+            }
+            @Override
+            public void start(long startSimtime) {
+            }
+            @Override
+            public void stop() {
             }
         };
 

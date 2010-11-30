@@ -47,15 +47,9 @@ public class JobQueueSimulation {
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         EventSource clientSource;
-        Thread producer = null;
-        PestimisticRunnableClientArrivedSource runnableClientSource = null;
         if (multithread) {
-            runnableClientSource = 
-                new PestimisticRunnableClientArrivedSource(rng, governor, 1000, 1600);
-            clientSource = runnableClientSource;
-        
-            producer = new Thread(runnableClientSource);
-            producer.start();
+            clientSource = new PestimisticRunnableClientArrivedSource(rng,
+                    governor, 1000, 1600);
         }
         else {
             clientSource = new ClientArrivedSource(rng, 1000, 1600);
@@ -86,15 +80,5 @@ public class JobQueueSimulation {
                 recoveryStrategy, noSnapshots);
         EventDispatcher disp = new JobAggregator(jobs);
         runloop.run(aggSource, disp);
-        
-        if (producer != null && runnableClientSource != null) {
-            runnableClientSource.stop();
-            producer.interrupt();
-            try {
-                producer.join();
-            }
-            catch (InterruptedException e1) {
-            }
-        }
     }
 }

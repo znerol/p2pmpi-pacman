@@ -8,15 +8,14 @@ import deism.Event;
 import deism.EventSource;
 import deism.ExecutionGovernor;
 
-public class OptimisticRunnableClientArrivedSource implements EventSource,
-        Runnable {
+public class OptimisticRunnableClientArrivedSource implements EventSource {
     private long mtbca;
     private long mstpc;
     private ExecutionGovernor mainGovernor;
     private ExecutionGovernor myGovernor;
     private final Random rng;
     private final Queue<Event> events;
-    private boolean done = false;
+    private final Worker worker = new Worker();
 
     public OptimisticRunnableClientArrivedSource(Random rng,
             ExecutionGovernor governor,
@@ -38,6 +37,16 @@ public class OptimisticRunnableClientArrivedSource implements EventSource,
     }
 
     @Override
+    public void start(long startSimtime) {
+        worker.start();
+    }
+
+    @Override
+    public void stop() {
+        worker.terminate();
+    }
+
+    @Override
     public Event receive(long currentSimtime) {
         return events.peek();
     }
@@ -51,32 +60,39 @@ public class OptimisticRunnableClientArrivedSource implements EventSource,
         events.remove(event);
     }
 
-    @Override
-    public void run() {
-        long currentSimtime = 0;
+    private class Worker extends Thread {
+        private boolean done = false;
 
-        while (!done) {
-            long arrivalTime;
-            long serviceTime;
-            synchronized (rng) {
-                arrivalTime = currentSimtime
-                        + (long) (mtbca * -Math.log(rng.nextDouble()));
-                serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
-            }
-            Event e = new ClientArrivedEvent(arrivalTime, serviceTime);
-            events.offer(e);
-            mainGovernor.resume(e.getSimtime());
+        @Override
+        public void run() {
+            long currentSimtime = 0;
 
-            long now = 0;
-            while (now < arrivalTime && !done) {
-                now = myGovernor.suspendUntil(arrivalTime);
+            while (!done) {
+                long arrivalTime;
+                long serviceTime;
+                synchronized (rng) {
+                    arrivalTime = currentSimtime
+                            + (long) (mtbca * -Math.log(rng.nextDouble()));
+                    serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
+                }
+                Event e = new ClientArrivedEvent(arrivalTime, serviceTime);
+                events.offer(e);
+                mainGovernor.resume(e.getSimtime());
+
+                long now = 0;
+                while (now < arrivalTime && !done) {
+                    now = myGovernor.suspendUntil(arrivalTime);
+                }
+
+                currentSimtime = arrivalTime;
             }
-            
-            currentSimtime = arrivalTime;
         }
-    }
 
-    public void stop() {
-        done = true;
+        public void terminate() {
+            done = true;
+            if (isAlive()) {
+                interrupt();
+            }
+        }
     }
 }

@@ -18,6 +18,20 @@ public class EventSourceCollection implements EventSource {
     public EventSourceCollection(EventSource[] eventSources) {
         this(Arrays.asList(eventSources));
     }
+
+    @Override
+    public void start(long startSimtime) {
+        for (EventSource source : eventSources) {
+            source.start(startSimtime);
+        }
+    }
+
+    @Override
+    public void stop() {
+        for (EventSource source : eventSources) {
+            source.stop();
+        }
+    }
     
     @Override
     public Event receive(long currentSimtime) {

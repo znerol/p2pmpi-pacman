@@ -42,13 +42,8 @@ public class StupidTimewarpJobQueueSimulation {
         RealtimeClock clock = new RealtimeClock(speed);
         governor = new RealtimeExecutionGovernor(clock);            
 
-        EventSource clientSource;
-        OptimisticRunnableClientArrivedSource runnableClientSource = 
-            new OptimisticRunnableClientArrivedSource(rng, governor, 1000, 1600);
-        clientSource = runnableClientSource;
-        
-        Thread producer = new Thread(runnableClientSource);
-        producer.start();
+        EventSource clientSource = new OptimisticRunnableClientArrivedSource(
+                rng, governor, 1000, 1600);
         
         PriorityBlockingQueue<ClientArrivedEvent> jobs =
             new PriorityBlockingQueue<ClientArrivedEvent>();
@@ -84,13 +79,5 @@ public class StupidTimewarpJobQueueSimulation {
                 recoveryStrategy, snapshotAll);
         
         runloop.run(timewarpSources, disp);
-        
-        runnableClientSource.stop();
-        producer.interrupt();
-        try {
-            producer.join();
-        }
-        catch (InterruptedException e1) {
-        }
     }
 }

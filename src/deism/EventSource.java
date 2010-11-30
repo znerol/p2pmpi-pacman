@@ -25,4 +25,14 @@ public interface EventSource {
      * Put back the last event received from this EventSource
      */
     void reject(Event event);
+
+    /**
+     * Prepare the EventSource (spawn threads etc.)
+     */
+    void start(long startSimtime);
+
+    /**
+     * Cleanup EventSource (terminate threads etc.)
+     */
+    void stop();
 }
