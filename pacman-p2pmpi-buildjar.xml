@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="pacman-p2pmpi" default="jar" basedir=".">
+    <target name="jar">
+    	<jar destfile="pacman-p2pmpi.jar" basedir="bin"/>
+    </target>
+	<target name="clean">
+        <delete file="pacman-p2pmpi.jar"/>
+    </target>
+</project> 
