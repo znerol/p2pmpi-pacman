@@ -1,12 +1,20 @@
 package deism;
 
 import java.util.ArrayList;
-import java.util.PriorityQueue;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+@RunWith(MockitoJUnitRunner.class)
 public class EventSourceCollectionTest {
+    @Mock EventSource firstSource;
+    @Mock EventSource secondSource;
+
     /**
      * EventSourceCollection.receive must return null if list of EventSources
      * is empty.
@@ -29,6 +37,26 @@ public class EventSourceCollectionTest {
         assertNull(event);
     }
     
+    @Test
+    public void collectionStartStop() {
+        /* construct sources list */
+        final EventSource[] sources = {
+            firstSource,
+            secondSource,
+        };
+
+        /* test EventSourceController */
+        EventSourceCollection c = new EventSourceCollection(sources);
+
+        c.start(0);
+        verify(firstSource).start(0);
+        verify(secondSource).start(0);
+
+        c.stop();
+        verify(firstSource).stop();
+        verify(secondSource).stop();
+    }
+    
     /**
      * EventSourceCollection.peek and EventSourceCollection.receive must return
      * events in ascending timestamp-order from any source.
@@ -38,59 +66,21 @@ public class EventSourceCollectionTest {
         final Event one = new Event(1);
         final Event two = new Event(2);
         final Event three = new Event(3);
-        final Event four = new Event(4);
+        final Event four = new Event(5);
 
-        /* construct first event queue */
-        final PriorityQueue<Event> firstSourceEvents = new PriorityQueue<Event>();
-        firstSourceEvents.add(one);
-        firstSourceEvents.add(two);
-        firstSourceEvents.add(four);
+        when(firstSource.receive(0)).thenReturn(one);
+        when(firstSource.receive(1)).thenReturn(two);
+        when(firstSource.receive(2)).thenReturn(four);
+        when(firstSource.receive(3)).thenReturn(four);
+        when(firstSource.receive(4)).thenReturn(four);
+        when(firstSource.receive(5)).thenReturn(null);
 
-        final EventSource firstSource = new EventSource(){
-            @Override
-            public Event receive(long currentSimtime) {
-                return firstSourceEvents.poll();
-            }
-            @Override
-            public void reject(Event event) {
-                firstSourceEvents.offer(event);
-            }
-            @Override
-            public void accept(Event event) {
-                firstSourceEvents.remove(event);
-            }
-            @Override
-            public void start(long startSimtime) {
-            }
-            @Override
-            public void stop() {
-            }
-        };
-
-        /* construct second event queue */
-        final PriorityQueue<Event> secondSourceEvents = new PriorityQueue<Event>();
-        secondSourceEvents.add(three);
-
-        final EventSource secondSource = new EventSource(){
-            @Override
-            public Event receive(long currentSimtime) {
-                return secondSourceEvents.poll();
-            }
-            @Override
-            public void reject(Event event) {
-                secondSourceEvents.offer(event);
-            }
-            @Override
-            public void accept(Event event) {
-                secondSourceEvents.remove(event);
-            }
-            @Override
-            public void start(long startSimtime) {
-            }
-            @Override
-            public void stop() {
-            }
-        };
+        when(secondSource.receive(0)).thenReturn(three);
+        when(secondSource.receive(1)).thenReturn(three);
+        when(secondSource.receive(2)).thenReturn(three);
+        when(secondSource.receive(3)).thenReturn(null);
+        when(secondSource.receive(4)).thenReturn(null);
+        when(secondSource.receive(5)).thenReturn(null);
 
         /* construct sources list */
         final ArrayList<EventSource> sources = new ArrayList<EventSource>();
@@ -102,9 +92,37 @@ public class EventSourceCollectionTest {
 
         /* verify that events are returned in the expected order */
         assertEquals(one, c.receive(0));
+        c.accept(one);
         assertEquals(two, c.receive(1));
+        c.accept(two);
         assertEquals(three, c.receive(2));
+        c.accept(three);
         assertEquals(four, c.receive(3));
-        assertEquals(null, c.receive(4));
+        c.reject(four);
+        assertEquals(four, c.receive(4));
+        c.accept(four);
+        assertEquals(null, c.receive(5));
+        
+        // verify that both of the sources were polled 5 times
+        verify(firstSource).receive(0);
+        verify(firstSource).receive(1);
+        verify(firstSource).receive(2);
+        verify(firstSource).receive(3);
+        verify(firstSource).receive(4);
+        verify(firstSource).receive(5);
+        verify(secondSource).receive(0);
+        verify(secondSource).receive(1);
+        verify(secondSource).receive(2);
+        verify(secondSource).receive(3);
+        verify(secondSource).receive(4);
+        verify(secondSource).receive(5);
+
+        // verify accept and reject
+        verify(firstSource).accept(one);
+        verify(firstSource).accept(two);
+        verify(firstSource).accept(four);
+        verify(firstSource, times(2)).reject(four);
+        verify(secondSource).accept(three);
+        verify(secondSource, times(2)).reject(three);
     }
 }
