@@ -1,7 +1,7 @@
 package deism;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -14,115 +14,61 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TimewarpRunloopRecoveryStrategyTest {
-    @Mock
-    EventDispatcher eventDispatcher;
-    @Mock
-    ExecutionGovernor governor;
-    @Mock
-    EventCondition terminationCondition;
-    @Mock
-    EventCondition snapshotCondition;
-
+    @Mock TimewarpEventSource eventSource;
     List<StateHistory<Long>> stateObjects;
-    EventRunloopRecoveryStrategy recoveryStrategy;
-    FastForwardRunloop runloop;
-    
-    ArrayDeque<Event> eventQueue;
-    EventSource simpleEventSource;
-    TimewarpEventSource eventSource;
-    
+    TimewarpRunloopRecoveryStrategy strategy;
+
     @Before
-    public void setup() {
-        eventQueue = new ArrayDeque<Event>();
-        
-        simpleEventSource = new EventSource() {
-            @Override
-            public Event receive(long currentSimtime) {
-                return eventQueue.poll();
-            }
-
-            @Override
-            public void reject(Event event) {
-                eventQueue.offerFirst(event);
-            }
-
-            @Override
-            public void accept(Event event) {
-                eventQueue.remove(event);
-            }
-
-            @Override
-            public void start(long startSimtime) {
-            }
-
-            @Override
-            public void stop() {
-            }
-        };
-        eventSource = new TimewarpEventSourceAdapter(simpleEventSource);
-        
-        stateObjects = new ArrayList<StateHistory<Long>>();
-        stateObjects.add(eventSource);
-        recoveryStrategy = new TimewarpRunloopRecoveryStrategy(stateObjects);
-        runloop = new FastForwardRunloop(governor, terminationCondition,
-                recoveryStrategy, snapshotCondition);
+    public void setUp() {
+        List<StateHistory<Long>> stateObjects =
+            new ArrayList<StateHistory<Long>>();
+        stateObjects.add(eventSource);        
+        strategy = new TimewarpRunloopRecoveryStrategy(stateObjects);
     }
 
     @Test
-    public void runSourceWithWrongEventOrderRollbackToLoopStart() {
-        final Event one = new Event(1);
-        final Event two = new Event(2);
-
-        eventQueue.add(two);
-        eventQueue.add(one);
+    public void testSaveRollback() {
+        // FIXME: tbd, the current RunloopRecoveryStrategy.rollback tries to
+        // rollback to the state preceding the timestamp argument. Therefore
+        // its impossible to rollback to the first state recorded.
+        // This is actually an odd behavior but matches the needs of
+        // EventRunloop best.
+        strategy.save(-1L);
+        strategy.save(0L);
+        strategy.save(42L);
         
-        /*
-         * Simulate event source which returns events in the wrong order.
-         */
-        when(governor.suspendUntil(1)).thenReturn(1L);
-        when(governor.suspendUntil(2)).thenReturn(2L);
-        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
-        when(terminationCondition.match(null)).thenReturn(true);
-        when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
+        strategy.rollback(42L);
+        strategy.rollback(0L);
 
-        runloop.run(eventSource, eventDispatcher);
+        verify(eventSource).save(-1L);
+        verify(eventSource).save(0L);
+        verify(eventSource).save(42L);
 
-        // All events must have been delivered properly. However event four
-        // will be emitted twice.
-        verify(eventDispatcher).dispatchEvent(one);
-        verify(eventDispatcher, times(2)).dispatchEvent(two);
-    }    
+        verify(eventSource).rollback(-1L);
+        verify(eventSource).rollback(0L);
+    }
 
     @Test
-    public void runSourceWithWrongEventOrder() {
-        final Event one = new Event(1);
-        final Event two = new Event(2);
-        final Event three = new Event(3);
-        final Event four = new Event(4);
-
-        eventQueue.add(one);
-        eventQueue.add(two);
-        eventQueue.add(four);
-        eventQueue.add(three);
+    public void testSaveCommit() {
+        strategy.save(0L);
+        strategy.save(42L);
         
-        /*
-         * Simulate event source which returns events in the wrong order.
-         */
-        when(governor.suspendUntil(1)).thenReturn(1L);
-        when(governor.suspendUntil(2)).thenReturn(2L);
-        when(governor.suspendUntil(3)).thenReturn(3L);
-        when(governor.suspendUntil(4)).thenReturn(4L);
-        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
-        when(terminationCondition.match(null)).thenReturn(true);
-        when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
+        strategy.commit(0L);
+        strategy.commit(42L);
 
-        runloop.run(eventSource, eventDispatcher);
+        verify(eventSource).save(0L);
+        verify(eventSource).save(42L);
+        verify(eventSource).commit(0L);
+        verify(eventSource).commit(42L);
+    }
 
-        // All events must have been delivered properly. However event four
-        // will be emitted twice.
-        verify(eventDispatcher).dispatchEvent(one);
-        verify(eventDispatcher).dispatchEvent(two);
-        verify(eventDispatcher).dispatchEvent(three);
-        verify(eventDispatcher, times(2)).dispatchEvent(four);
-    }    
+    @Test(expected = StateHistoryException.class)
+    public void testCommitWithInvalidKey() {
+        strategy.commit(23L);
+    }
+
+    @Test(expected = StateHistoryException.class)
+    public void testRollbackWithInvalidKey() {
+        strategy.rollback(23L);
+    }
 }

@@ -25,8 +25,12 @@ public class TimewarpRunloopRecoveryStrategy
     @Override
     public void rollback(Long timestamp) {
         snapshots.tailSet(timestamp).clear();
+        if (snapshots.size() == 0) {
+            throw new StateHistoryException(
+                    "Attempt to rollback to a timestamp which was never recorded");
+        }
+
         Long snapshotKey = snapshots.last();
-        
         for (StateHistory<Long> s : stateObjects) {
             s.rollback(snapshotKey);
         }
@@ -35,8 +39,12 @@ public class TimewarpRunloopRecoveryStrategy
     @Override
     public void commit(Long timestamp) throws StateHistoryException {
         snapshots.headSet(timestamp).clear();
-        Long snapshotKey = snapshots.first();
+        if (snapshots.size() == 0) {
+            throw new StateHistoryException(
+                    "Attempt to rollback to a timestamp which was never recorded");
+        }
         
+        Long snapshotKey = snapshots.first();
         for (StateHistory<Long> s : stateObjects) {
             s.commit(snapshotKey);
         }
