@@ -1,8 +1,5 @@
 package deism;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -17,7 +14,7 @@ public class Event implements Comparable<Event>, Serializable {
     /**
      * Simulation time
      */
-    private long simtime;
+    private final long simtime;
 
     public Event(long simtime) {
         this.simtime = simtime;
@@ -35,14 +32,5 @@ public class Event implements Comparable<Event>, Serializable {
     @Override
     public String toString() {
         return "Event [simtime = " + simtime + "]";
-    }
-
-    protected void writeObject(ObjectOutputStream out) throws IOException {
-        out.writeLong(simtime);
-    }
-
-    protected void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        simtime = in.readLong();
     }
 }
