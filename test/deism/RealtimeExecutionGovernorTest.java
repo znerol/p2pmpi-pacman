@@ -17,11 +17,30 @@ import static org.mockito.Mockito.*;
 public class RealtimeExecutionGovernorTest {
     @Mock Clock clock;
     RealtimeExecutionGovernor governor;
-    long wakeupTime;
 
     @Before
     public void setUp() {
         governor = new RealtimeExecutionGovernor(clock);
+    }
+
+    private class GovernorSuspendCallable implements Callable<Long> {
+        @Override
+        public Long call() throws Exception {
+            return governor.suspend();
+        }
+    }
+
+    private class GovernorSuspendUntilCallable implements Callable<Long> {
+        private final long wakeupTime;
+
+        public GovernorSuspendUntilCallable(long wakeupTime) {
+            this.wakeupTime = wakeupTime;
+        }
+
+        @Override
+        public Long call() throws Exception {
+            return governor.suspendUntil(wakeupTime);
+        }
     }
 
     public void busyWaitForThreadState(Thread thread, Thread.State state)
@@ -45,12 +64,7 @@ public class RealtimeExecutionGovernorTest {
 
         // setup a future task wrapping governor.suspend
         RunnableFuture<Long> suspender = new FutureTask<Long>(
-                new Callable<Long>() {
-                    @Override
-                    public Long call() throws Exception {
-                        return governor.suspend();
-                    }
-                });
+                new GovernorSuspendCallable());
         Thread thread = new Thread(suspender);
         thread.start();
 
@@ -110,12 +124,7 @@ public class RealtimeExecutionGovernorTest {
 
         // setup a future task wrapping governor.suspend
         RunnableFuture<Long> suspender = new FutureTask<Long>(
-                new Callable<Long>() {
-                    @Override
-                    public Long call() throws Exception {
-                        return governor.suspendUntil(1000L);
-                    }
-                });
+                new GovernorSuspendUntilCallable(1000L));
         Thread thread = new Thread(suspender);
         thread.start();
 
@@ -143,12 +152,7 @@ public class RealtimeExecutionGovernorTest {
 
         // setup a future task wrapping governor.suspend
         RunnableFuture<Long> suspender = new FutureTask<Long>(
-                new Callable<Long>() {
-                    @Override
-                    public Long call() throws Exception {
-                        return governor.suspendUntil(1000L);
-                    }
-                });
+                new GovernorSuspendUntilCallable(1000L));
         Thread thread = new Thread(suspender);
         thread.start();
 
