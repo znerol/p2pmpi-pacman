@@ -35,9 +35,4 @@ public class ImmediateExecutionGovernor implements ExecutionGovernor {
     public void resume(long wakeupTime) {
         /* Intentionally left empty */
     }
-    
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
 }

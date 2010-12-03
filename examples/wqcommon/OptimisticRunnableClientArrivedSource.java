@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import deism.Event;
 import deism.EventSource;
 import deism.ExecutionGovernor;
+import deism.RealtimeExecutionGovernor;
 
 public class OptimisticRunnableClientArrivedSource implements EventSource {
     private long mtbca;
@@ -19,6 +20,7 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
 
     public OptimisticRunnableClientArrivedSource(Random rng,
             ExecutionGovernor governor,
+            double speed,
             long mean_time_between_customer_arrival,
             long mean_service_time_per_customer) {
         super();
@@ -27,13 +29,7 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
         this.mtbca = mean_time_between_customer_arrival;
         this.mstpc = mean_service_time_per_customer;
         this.events = new ConcurrentLinkedQueue<Event>();
-        try {
-            this.myGovernor = (ExecutionGovernor) governor.clone();
-        }
-        catch (CloneNotSupportedException e) {
-            throw new Error(
-                    "Classes implementing ExecutionGovernor must be clonable");
-        }
+        this.myGovernor = new RealtimeExecutionGovernor(speed);
     }
 
     @Override
@@ -67,6 +63,7 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
         public void run() {
             long currentSimtime = 0;
 
+            myGovernor.start(currentSimtime);
             while (!done) {
                 long arrivalTime;
                 long serviceTime;

@@ -4,7 +4,7 @@ package deism;
  * Implementations of execution governors must provide a way to suspend the
  * current thread until the given timestamp is reached.
  */
-public interface ExecutionGovernor extends Cloneable {
+public interface ExecutionGovernor{
     /**
      * Start the governor with the given simulation time.
      *
@@ -44,6 +44,4 @@ public interface ExecutionGovernor extends Cloneable {
      * suspendUntil.
      */
     public void resume(long wakeupTime);
-
-    public Object clone() throws CloneNotSupportedException;
 }

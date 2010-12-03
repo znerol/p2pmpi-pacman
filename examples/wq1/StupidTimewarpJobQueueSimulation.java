@@ -41,7 +41,7 @@ public class StupidTimewarpJobQueueSimulation {
         governor = new RealtimeExecutionGovernor(speed);
 
         EventSource clientSource = new OptimisticRunnableClientArrivedSource(
-                rng, governor, 1000, 1600);
+                rng, governor, speed, 1000, 1600);
         
         PriorityBlockingQueue<ClientArrivedEvent> jobs =
             new PriorityBlockingQueue<ClientArrivedEvent>();
