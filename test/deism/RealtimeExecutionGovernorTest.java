@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RealtimeExecutionGovernorTest {
-    @Mock private RealtimeClock clock;
+    @Mock private TimeBase clock;
     @Mock private SystemTimeProxy systime;
     @InjectMocks private RealtimeExecutionGovernor governor =
         new RealtimeExecutionGovernor(1.0);

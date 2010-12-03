@@ -7,12 +7,12 @@ package deism;
  * timestamp of an event is reached by means of a RealtimeClock instance.
  */
 public class RealtimeExecutionGovernor implements ExecutionGovernor {
-    private RealtimeClock clock;
+    private TimeBase clock;
     private SystemTimeProxy systime;
     private long wakeupTime;
 
     public RealtimeExecutionGovernor(double scale) {
-        clock = new RealtimeClock(scale);
+        clock = new TimeBase(scale);
         systime = new SystemTimeProxy();
     }
 

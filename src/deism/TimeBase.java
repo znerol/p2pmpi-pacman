@@ -5,16 +5,16 @@ package deism;
  * 
  * Convert between walltime and simulation time
  */
-public class RealtimeClock {
+public class TimeBase {
     private long startRealtime;
     private long startSimtime;
     private double scale;
 
-    public RealtimeClock() {
+    public TimeBase() {
         this(1.0);
     }
 
-    public RealtimeClock(double scale) {
+    public TimeBase(double scale) {
         this.scale = scale;
     }
 
