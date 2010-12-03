@@ -6,22 +6,31 @@ package deism;
  * Convert between walltime and simulation time
  */
 public class RealtimeClock implements Clock {
-    long startRealtime;
-    long startSimtime;
-    double scale;
+    private long startRealtime;
+    private long startSimtime;
+    private double scale;
 
     public RealtimeClock() {
-        this(RealtimeClock.getWallclock(), 0L, 1.0);
+        this(1.0);
     }
 
     public RealtimeClock(double scale) {
-        this(RealtimeClock.getWallclock(), 0L, scale);
+        this.scale = scale;
     }
 
-    public RealtimeClock(long startRealtime, long startSimtime, double scale) {
-        this.startRealtime = startRealtime;
-        this.startSimtime = startSimtime;
+    public double getScale() {
+        return scale;
+    }
+
+    public void setScale(double scale) {
         this.scale = scale;
+    }
+
+    /**
+     * Set simulation time baseline to given timestamp
+     */
+    public void setSimtime(long simtime) {
+        startSimtime = simtime;
     }
 
     /**
@@ -45,6 +54,13 @@ public class RealtimeClock implements Clock {
     public long getSimtime(long currentTimeMillis) {
         long duration = (long) (scale * (currentTimeMillis - startRealtime));
         return startSimtime + duration;
+    }
+
+    /**
+     * Set wallclock baseline to given timestamp
+     */
+    public void setRealtime(long realtime) {
+        startRealtime = realtime;
     }
 
     /**
@@ -74,7 +90,7 @@ public class RealtimeClock implements Clock {
      * Return current system time in milliseconds
      * @return walltime
      */
-    private static long getWallclock() {
+    public static long getWallclock() {
         return System.currentTimeMillis();
     }
 }

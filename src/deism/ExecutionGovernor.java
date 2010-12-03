@@ -6,11 +6,23 @@ package deism;
  */
 public interface ExecutionGovernor extends Cloneable {
     /**
+     * Start the governor with the given simulation time.
+     *
+     * @param simtime initial timestamp in simulation time units
+     */
+    public void start(long simtime);
+
+    /**
+     * Stop the governor
+     */
+    public void stop();
+
+    /**
      * Suspend execution until something called resume.
      * 
      * @return Simulation time reached
      */
-    long suspend();
+    public long suspend();
     
     /**
      * Wait until the given timestamp is reached. Return the simulation time
@@ -19,19 +31,19 @@ public interface ExecutionGovernor extends Cloneable {
      * 
      * @return Simulation time reached
      */
-    long suspendUntil(long simtime);
+    public long suspendUntil(long simtime);
 
     /**
      * Interrupt suspend or suspendUntil method immediately.
      */
-    void resume();
+    public void resume();
     
     /**
      * Interrupt suspend or suspendUntil method immediately with the given
      * simulation timestamp. The timestamp will be returned by suspend or
      * suspendUntil.
      */
-    void resume(long wakeupTime);
+    public void resume(long wakeupTime);
 
     public Object clone() throws CloneNotSupportedException;
 }

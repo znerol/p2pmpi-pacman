@@ -9,6 +9,14 @@ package deism;
  */
 public class ImmediateExecutionGovernor implements ExecutionGovernor {
     @Override
+    public void start(long timestamp) {
+    }
+
+    @Override
+    public void stop() {
+    }
+
+    @Override
     public long suspend() {
         return Long.MAX_VALUE;
     }

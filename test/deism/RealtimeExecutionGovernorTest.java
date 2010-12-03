@@ -4,9 +4,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -15,13 +15,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RealtimeExecutionGovernorTest {
-    @Mock Clock clock;
-    RealtimeExecutionGovernor governor;
-
-    @Before
-    public void setUp() {
-        governor = new RealtimeExecutionGovernor(clock);
-    }
+    @Mock private RealtimeClock clock;
+    @InjectMocks private RealtimeExecutionGovernor governor =
+        new RealtimeExecutionGovernor(1.0);
 
     private class GovernorSuspendCallable implements Callable<Long> {
         @Override
@@ -54,6 +50,19 @@ public class RealtimeExecutionGovernorTest {
                 fail("Governor must suspend execution of its thread.");
             }
         }
+    }
+
+    @Test
+    public void testStart() {
+        governor.start(42L);
+        verify(clock).setSimtime(42L);
+        verify(clock).setRealtime(anyLong());
+    }
+
+    @Test
+    public void testStop() {
+        // This is actually a no-op...
+        governor.stop();
     }
 
     @Test

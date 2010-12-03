@@ -21,7 +21,6 @@ import deism.ExecutionGovernor;
 import deism.FailFastRunloopRecoveryStrategy;
 import deism.FastForwardRunloop;
 import deism.ImmediateExecutionGovernor;
-import deism.RealtimeClock;
 import deism.RealtimeExecutionGovernor;
 import deism.StateHistory;
 import deism.TimewarpEventSource;
@@ -42,8 +41,7 @@ public class TimewarpJobQueueSimulation {
         double speed = Double.valueOf(speedString).doubleValue();
         
         ExecutionGovernor governor;
-        RealtimeClock clock = new RealtimeClock(speed);
-//        governor = new RealtimeExecutionGovernor(clock); 
+//        governor = new RealtimeExecutionGovernor(speed);
         governor = new ImmediateExecutionGovernor();
 
 //        RunnableClientArrivedSource<Long> runnableClientSource = 

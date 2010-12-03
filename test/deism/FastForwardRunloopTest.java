@@ -39,7 +39,8 @@ public class FastForwardRunloopTest {
 
         verify(eventSource).receive(0);
         verifyZeroInteractions(eventDispatcher);
-        verifyZeroInteractions(governor);
+        verify(governor).start(0);
+        verify(governor).stop();
         verify(terminationCondition).match(null);
     }
     

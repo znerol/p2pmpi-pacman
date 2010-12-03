@@ -19,7 +19,6 @@ import deism.ExecutionGovernor;
 import deism.FailFastRunloopRecoveryStrategy;
 import deism.FastForwardRunloop;
 import deism.ImmediateExecutionGovernor;
-import deism.RealtimeClock;
 import deism.RealtimeExecutionGovernor;
 
 public class Pingpong {
@@ -40,8 +39,7 @@ public class Pingpong {
         ExecutionGovernor governor;
         if (speed > 0) {
             /* run simulation in realtime */
-            RealtimeClock clock = new RealtimeClock(10.0);
-            governor = new RealtimeExecutionGovernor(clock);
+            governor = new RealtimeExecutionGovernor(speed);
         }
         else {
             /* run simulation as fast as possible */

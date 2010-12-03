@@ -18,7 +18,6 @@ import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
 import deism.FastForwardRunloop;
-import deism.RealtimeClock;
 import deism.RealtimeExecutionGovernor;
 import deism.StateHistory;
 import deism.TimewarpEventSource;
@@ -39,8 +38,7 @@ public class StupidTimewarpJobQueueSimulation {
         double speed = Double.valueOf(speedString).doubleValue();
         
         ExecutionGovernor governor;
-        RealtimeClock clock = new RealtimeClock(speed);
-        governor = new RealtimeExecutionGovernor(clock);            
+        governor = new RealtimeExecutionGovernor(speed);
 
         EventSource clientSource = new OptimisticRunnableClientArrivedSource(
                 rng, governor, 1000, 1600);

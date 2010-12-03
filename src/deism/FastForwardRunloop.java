@@ -51,6 +51,7 @@ public class FastForwardRunloop implements EventRunloop {
         // support rollback to before very first event
         recoveryStrategy.save(currentSimtime - 1);
 
+        governor.start(currentSimtime);
         source.start(currentSimtime);
 
         while (!stop) {
@@ -104,6 +105,7 @@ public class FastForwardRunloop implements EventRunloop {
         }
 
         source.stop();
+        governor.stop();
     }
 
     @Override

@@ -7,13 +7,23 @@ package deism;
  * timestamp of an event is reached by means of a RealtimeClock instance.
  */
 public class RealtimeExecutionGovernor implements ExecutionGovernor {
-    Clock clock;
-    long wakeupTime;
+    private RealtimeClock clock;
+    private long wakeupTime;
 
-    public RealtimeExecutionGovernor(Clock clock) {
-        this.clock = clock;
+    public RealtimeExecutionGovernor(double scale) {
+        clock = new RealtimeClock(scale);
     }
-    
+
+    @Override
+    public synchronized void start(long simtime) {
+        clock.setSimtime(simtime);
+        clock.setRealtime(RealtimeClock.getWallclock());
+    }
+
+    @Override
+    public synchronized void stop() {
+    }
+
     /**
      * Delays execution of current thread until something calls resume.
      */
