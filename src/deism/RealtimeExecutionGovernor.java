@@ -8,16 +8,18 @@ package deism;
  */
 public class RealtimeExecutionGovernor implements ExecutionGovernor {
     private RealtimeClock clock;
+    private SystemTimeProxy systime;
     private long wakeupTime;
 
     public RealtimeExecutionGovernor(double scale) {
         clock = new RealtimeClock(scale);
+        systime = new SystemTimeProxy();
     }
 
     @Override
     public synchronized void start(long simtime) {
-        clock.setSimtime(simtime);
-        clock.setRealtime(RealtimeClock.getWallclock());
+        clock.setTimebase(simtime);
+        clock.setSystemTimeBase(systime.get());
     }
 
     @Override
@@ -55,7 +57,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
         wakeupTime = simtime;
         
         try {
-            long delay = clock.getRealtime(wakeupTime)-clock.getRealtime();
+            long delay = clock.toSystemTimeUnits(wakeupTime)-systime.get();
             if (delay > 0) {
                 System.out.println("** Wait delay=" + delay);
                 this.wait(delay);
@@ -70,14 +72,16 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
 
     @Override
     public synchronized void resume() {
-        this.wakeupTime = Math.min(this.wakeupTime, clock.getSimtime());
+        this.wakeupTime = Math.min(this.wakeupTime,
+                clock.toSimulationTimeUnits(systime.get()));
         this.notify();
     }
     
     @Override
     public synchronized void resume(long wakeupTime) {
         this.wakeupTime = Math.min(this.wakeupTime, wakeupTime);
-        this.wakeupTime = Math.min(this.wakeupTime, clock.getSimtime());
+        this.wakeupTime = Math.min(this.wakeupTime,
+                clock.toSimulationTimeUnits(systime.get()));
         this.notify();
     }
 }

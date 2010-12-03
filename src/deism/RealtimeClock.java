@@ -5,7 +5,7 @@ package deism;
  * 
  * Convert between walltime and simulation time
  */
-public class RealtimeClock implements Clock {
+public class RealtimeClock {
     private long startRealtime;
     private long startSimtime;
     private double scale;
@@ -29,18 +29,8 @@ public class RealtimeClock implements Clock {
     /**
      * Set simulation time baseline to given timestamp
      */
-    public void setSimtime(long simtime) {
+    public void setTimebase(long simtime) {
         startSimtime = simtime;
-    }
-
-    /**
-     * Return current walltime converted to simulation time
-     * 
-     * @return current walltime converted to simtime
-     */
-    @Override
-    public long getSimtime() {
-        return getSimtime(getRealtime());
     }
 
     /**
@@ -50,8 +40,7 @@ public class RealtimeClock implements Clock {
      *            walltime
      * @return walltime converted to simtime
      */
-    @Override
-    public long getSimtime(long currentTimeMillis) {
+    public long toSimulationTimeUnits(long currentTimeMillis) {
         long duration = (long) (scale * (currentTimeMillis - startRealtime));
         return startSimtime + duration;
     }
@@ -59,18 +48,8 @@ public class RealtimeClock implements Clock {
     /**
      * Set wallclock baseline to given timestamp
      */
-    public void setRealtime(long realtime) {
+    public void setSystemTimeBase(long realtime) {
         startRealtime = realtime;
-    }
-
-    /**
-     * Return current walltime
-     * 
-     * @return current walltime
-     */
-    @Override
-    public long getRealtime() {
-        return RealtimeClock.getWallclock();
     }
 
     /**
@@ -80,17 +59,8 @@ public class RealtimeClock implements Clock {
      *            simulation time
      * @return walltime
      */
-    @Override
-    public long getRealtime(long simtime) {
+    public long toSystemTimeUnits(long simtime) {
         long duration = (long) ((simtime - startSimtime) / scale);
         return startRealtime + duration;
-    }
-    
-    /**
-     * Return current system time in milliseconds
-     * @return walltime
-     */
-    public static long getWallclock() {
-        return System.currentTimeMillis();
     }
 }
