@@ -7,19 +7,21 @@ package deism;
  * timestamp of an event is reached by means of a RealtimeClock instance.
  */
 public class RealtimeExecutionGovernor implements ExecutionGovernor {
-    private TimeBase clock;
-    private SystemTimeProxy systime;
+    private Timebase simulationTimebase;
+    private Timebase systemTimebase;
+    private SystemTimeProxy systemTime;
     private long wakeupTime;
 
     public RealtimeExecutionGovernor(double scale) {
-        clock = new TimeBase(scale);
-        systime = new SystemTimeProxy();
+        simulationTimebase = new Timebase(scale);
+        systemTimebase = new Timebase();
+        systemTime = new SystemTimeProxy();
     }
 
     @Override
     public synchronized void start(long simtime) {
-        clock.setTimebase(simtime);
-        clock.setSystemTimeBase(systime.get());
+        simulationTimebase.setTimebase(simtime);
+        systemTimebase.setTimebase(systemTime.get());
     }
 
     @Override
@@ -56,8 +58,9 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     public synchronized long suspendUntil(long simtime) {
         wakeupTime = simtime;
         
+        long delay = simulationTimebase.convert(wakeupTime, systemTimebase) -
+                systemTime.get();
         try {
-            long delay = clock.toSystemTimeUnits(wakeupTime)-systime.get();
             if (delay > 0) {
                 System.out.println("** Wait delay=" + delay);
                 this.wait(delay);
@@ -73,7 +76,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     @Override
     public synchronized void resume() {
         this.wakeupTime = Math.min(this.wakeupTime,
-                clock.toSimulationTimeUnits(systime.get()));
+                systemTimebase.convert(systemTime.get(), simulationTimebase));
         this.notify();
     }
     
@@ -81,7 +84,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     public synchronized void resume(long wakeupTime) {
         this.wakeupTime = Math.min(this.wakeupTime, wakeupTime);
         this.wakeupTime = Math.min(this.wakeupTime,
-                clock.toSimulationTimeUnits(systime.get()));
+                systemTimebase.convert(systemTime.get(), simulationTimebase));
         this.notify();
     }
 }

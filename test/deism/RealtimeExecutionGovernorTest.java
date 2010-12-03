@@ -15,8 +15,10 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RealtimeExecutionGovernorTest {
-    @Mock private TimeBase clock;
-    @Mock private SystemTimeProxy systime;
+    @Mock private Timebase simulationTimebase;
+    @Mock private Timebase systemTimebase;
+    @Mock private SystemTimeProxy systemTime;
+
     @InjectMocks private RealtimeExecutionGovernor governor =
         new RealtimeExecutionGovernor(1.0);
 
@@ -55,23 +57,35 @@ public class RealtimeExecutionGovernorTest {
 
     @Test
     public void testStart() {
+        when(systemTime.get()).thenReturn(7L);
+
         governor.start(42L);
-        verify(clock).setTimebase(42L);
-        verify(clock).setSystemTimeBase(anyLong());
+
+        verify(systemTime).get();
+        verify(systemTimebase).setTimebase(7L);
+        verify(simulationTimebase).setTimebase(42L);
+
+        verifyNoMoreInteractions(simulationTimebase);
+        verifyNoMoreInteractions(systemTimebase);
+        verifyNoMoreInteractions(systemTime);
     }
 
     @Test
     public void testStop() {
         // This is actually a no-op...
         governor.stop();
+
+        verifyNoMoreInteractions(simulationTimebase);
+        verifyNoMoreInteractions(systemTimebase);
+        verifyNoMoreInteractions(systemTime);
     }
 
     @Test
     public void testSuspendResume() throws Exception {
         // define a timestamp returned by clock and therefore by governor
         // suspend when wakeup is called
-        when(systime.get()).thenReturn(7L);
-        when(clock.toSimulationTimeUnits(7L)).thenReturn(42L);
+        when(systemTime.get()).thenReturn(7L);
+        when(systemTimebase.convert(7L, simulationTimebase)).thenReturn(42L);
 
         // setup a future task wrapping governor.suspend
         RunnableFuture<Long> suspender = new FutureTask<Long>(
@@ -90,16 +104,21 @@ public class RealtimeExecutionGovernorTest {
         long result = suspender.get();
         assertEquals(42L, result);
 
-        verify(clock).toSimulationTimeUnits(7L);
-        verify(systime).get();
+        // called in resume
+        verify(systemTime).get();
+        verify(systemTimebase).convert(7L, simulationTimebase);
+
+        verifyNoMoreInteractions(simulationTimebase);
+        verifyNoMoreInteractions(systemTimebase);
+        verifyNoMoreInteractions(systemTime);
     }
 
     @Test
     public void testSuspendUntilButContinueImmediately() throws Exception {
         // define a timestamp returned by clock and therefore by governor
         // suspend when wakeup is called
-        when(systime.get()).thenReturn(10L);
-        when(clock.toSystemTimeUnits(10L)).thenReturn(10L);
+        when(systemTime.get()).thenReturn(10L);
+        when(systemTimebase.convert(10L, simulationTimebase)).thenReturn(10L);
 
         // we don't expect governor.suspend(10L) to suspend (wait) at all
         // because the delay (clock.getRealtime(10L) - clock.getRealtime())
@@ -107,32 +126,42 @@ public class RealtimeExecutionGovernorTest {
         long result = governor.suspendUntil(10L);
         assertEquals(10L, result);
 
-        verify(clock).toSystemTimeUnits(10L);
-        verify(systime).get();
+        // called in suspendUntil
+        verify(systemTime).get();
+        verify(simulationTimebase).convert(10L, systemTimebase);
+
+        verifyNoMoreInteractions(simulationTimebase);
+        verifyNoMoreInteractions(systemTimebase);
+        verifyNoMoreInteractions(systemTime);
     }
 
     @Test
     public void testSuspendUntilReturnAtTime() throws Exception {
         // define a timestamp returned by clock and therefore by governor
         // suspend when wakeup is called
-        when(systime.get()).thenReturn(0L);
-        when(clock.toSystemTimeUnits(10L)).thenReturn(10L);
+        when(systemTime.get()).thenReturn(7L);
+        when(simulationTimebase.convert(10L, systemTimebase)).thenReturn(10L);
 
         // we expect that the junit thread is delayed for 10 milliseconds.
         long result = governor.suspendUntil(10L);
         assertEquals(10L, result);
 
-        verify(clock).toSystemTimeUnits(10L);
-        verify(systime).get();
+        // called in suspendUntil
+        verify(systemTime).get();
+        verify(simulationTimebase).convert(10L, systemTimebase);
+
+        verifyNoMoreInteractions(simulationTimebase);
+        verifyNoMoreInteractions(systemTimebase);
+        verifyNoMoreInteractions(systemTime);
     }
 
     @Test
     public void testSuspendUntilResumeEarly() throws Exception {
         // define a timestamp returned by clock and therefore by governor
         // suspend when wakeup is called
-        when(systime.get()).thenReturn(7L);
-        when(clock.toSimulationTimeUnits(7L)).thenReturn(42L);
-        when(clock.toSystemTimeUnits(1000L)).thenReturn(1000L);
+        when(systemTime.get()).thenReturn(7L);
+        when(systemTimebase.convert(7L, simulationTimebase)).thenReturn(42L);
+        when(simulationTimebase.convert(1000L, systemTimebase)).thenReturn(1000L);
 
         // setup a future task wrapping governor.suspend
         RunnableFuture<Long> suspender = new FutureTask<Long>(
@@ -151,18 +180,25 @@ public class RealtimeExecutionGovernorTest {
         long result = suspender.get();
         assertEquals(10L, result);
 
-        verify(clock).toSystemTimeUnits(1000L);
-        verify(clock).toSimulationTimeUnits(7L);
-        verify(systime, times(2)).get();
+        // suspendUntil
+        verify(simulationTimebase).convert(1000L, systemTimebase);
+        // resume
+        verify(systemTimebase).convert(7L, simulationTimebase);
+        // suspendUntil / resume
+        verify(systemTime, times(2)).get();
+
+        verifyNoMoreInteractions(simulationTimebase);
+        verifyNoMoreInteractions(systemTimebase);
+        verifyNoMoreInteractions(systemTime);
     }
 
     @Test
     public void testSuspendUntilResumeEarlyClockWins() throws Exception {
         // define a timestamp returned by clock and therefore by governor
         // suspend when wakeup is called
-        when(systime.get()).thenReturn(7L);
-        when(clock.toSimulationTimeUnits(7L)).thenReturn(10L);
-        when(clock.toSystemTimeUnits(1000L)).thenReturn(1000L);
+        when(systemTime.get()).thenReturn(7L);
+        when(systemTimebase.convert(7L, simulationTimebase)).thenReturn(10L);
+        when(simulationTimebase.convert(1000L, systemTimebase)).thenReturn(1000L);
 
         // setup a future task wrapping governor.suspend
         RunnableFuture<Long> suspender = new FutureTask<Long>(
@@ -181,8 +217,15 @@ public class RealtimeExecutionGovernorTest {
         long result = suspender.get();
         assertEquals(10L, result);
 
-        verify(clock).toSystemTimeUnits(1000L);
-        verify(clock).toSimulationTimeUnits(7L);
-        verify(systime, times(2)).get();
+        // suspendUntil
+        verify(simulationTimebase).convert(1000L, systemTimebase);
+        // resume
+        verify(systemTimebase).convert(7L, simulationTimebase);
+        // suspendUntil / resume
+        verify(systemTime, times(2)).get();
+
+        verifyNoMoreInteractions(simulationTimebase);
+        verifyNoMoreInteractions(systemTimebase);
+        verifyNoMoreInteractions(systemTime);
     }
 }
