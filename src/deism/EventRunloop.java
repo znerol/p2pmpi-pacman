@@ -11,8 +11,7 @@ public interface EventRunloop {
      * @param eventSource
      * @param eventDispatcher
      */
-    void run(EventSource eventSource, EventDispatcher eventDispatcher)
-            throws EventSourceOrderException;
+    void run(EventSource eventSource, EventDispatcher eventDispatcher);
 
     /**
      * Signals the EventLoop to continue processing events if the loop was

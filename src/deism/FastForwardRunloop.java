@@ -43,8 +43,7 @@ public class FastForwardRunloop implements EventRunloop {
      */
 
     @Override
-    public void run(EventSource source, EventDispatcher disp)
-            throws EventSourceOrderException {
+    public void run(EventSource source, EventDispatcher disp) {
 
         long lastSimtime = currentSimtime;
         
