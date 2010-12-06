@@ -44,4 +44,38 @@ public class EventTest {
         Event result = (Event)in.readObject();
         assertTrue(result.compareTo(event) == 0);
     }
+
+    @Test
+    public void testInvertEvent() {
+        Event event = new Event(7L);
+        Event inverse = event.inverseEvent();
+
+        assertEquals(event.getSimtime(), inverse.getSimtime());
+        assertEquals(true, inverse.isAntimessage());
+        assertEquals(false, event.isAntimessage());
+    }
+
+    @SuppressWarnings("serial")
+    private class Subevent extends Event {
+        private final long subvalue;
+
+        public Subevent(long timestamp, long subvalue, boolean antimessage) {
+            super(timestamp, antimessage);
+            this.subvalue = subvalue;
+        }
+
+        public long getSubvalue() {
+            return subvalue;
+        }
+    }
+
+    @Test
+    public void testSubeventInvert() {
+        Subevent event = new Subevent(7L, 8L, false);
+        Event inverse = event.inverseEvent();
+
+        assertTrue(inverse instanceof Subevent);
+        Subevent invsub = (Subevent)inverse;
+        assertEquals(8L, invsub.getSubvalue());
+    }
 }
