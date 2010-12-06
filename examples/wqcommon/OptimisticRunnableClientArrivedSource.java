@@ -48,10 +48,6 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
     }
 
     @Override
-    public void reject(Event event) {
-    }
-
-    @Override
     public void accept(Event event) {
         events.remove(event);
     }

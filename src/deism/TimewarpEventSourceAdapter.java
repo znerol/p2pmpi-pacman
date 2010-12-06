@@ -48,13 +48,6 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public void reject(Event event) {
-        if (event == lastEventFromSource) {
-            source.reject(event);
-        }
-    }
-
-    @Override
     public void revertHistory(List<Event> tail) {
         this.pending.addAll(tail);
     }

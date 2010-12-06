@@ -55,10 +55,6 @@ public class WaitingRoom {
         }
 
         @Override
-        public void reject(Event event) {
-        }
-
-        @Override
         public void revertHistory(List<CounterServiceEvent> tail) {
             for (CounterServiceEvent event : tail) {
                 CounterServiceEvent serviceEvent =

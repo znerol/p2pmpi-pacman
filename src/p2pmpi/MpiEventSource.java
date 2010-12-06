@@ -58,10 +58,6 @@ public class MpiEventSource implements EventSource {
         events.remove(event);
     }
 
-    @Override
-    public void reject(Event event) {
-    }
-
     private class Worker extends Thread {
         private boolean done = false;
 

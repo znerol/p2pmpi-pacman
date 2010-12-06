@@ -46,7 +46,7 @@ public class EventSourceCollection implements EventSource {
                 candidates.put(source, candidateEvent);
             }
         }
-        
+
         // find the event with the least timestamp
         currentSource = null;
         for (EventSource source : candidates.keySet()) {
@@ -56,15 +56,7 @@ public class EventSourceCollection implements EventSource {
                 currentSource = source;
             }
         }
-        
-        // reject the events from all the other sources
-        if (currentSource != null) {
-            candidates.remove(currentSource);
-            for (EventSource source : candidates.keySet()) {
-                source.reject(candidates.get(source));
-            }
-        }
-                
+
         return result;
     }
 
@@ -72,11 +64,5 @@ public class EventSourceCollection implements EventSource {
     public void accept(Event event) {
         assert(currentSource != null);
         currentSource.accept(event);
-    }
-
-    @Override
-    public void reject(Event event) {
-        assert(currentSource != null);
-        currentSource.reject(event);
     }
 }

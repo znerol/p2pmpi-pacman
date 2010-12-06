@@ -58,10 +58,6 @@ public class PestimisticRunnableClientArrivedSource implements EventSource {
     }
 
     @Override
-    public synchronized void reject(Event event) {
-    }
-
-    @Override
     public synchronized void accept(Event event) {
         assert (currentEvent == event);
         currentEvent = null;

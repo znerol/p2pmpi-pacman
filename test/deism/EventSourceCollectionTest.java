@@ -98,7 +98,6 @@ public class EventSourceCollectionTest {
         assertEquals(three, c.receive(2));
         c.accept(three);
         assertEquals(four, c.receive(3));
-        c.reject(four);
         assertEquals(four, c.receive(4));
         c.accept(four);
         assertEquals(null, c.receive(5));
@@ -121,8 +120,6 @@ public class EventSourceCollectionTest {
         verify(firstSource).accept(one);
         verify(firstSource).accept(two);
         verify(firstSource).accept(four);
-        verify(firstSource, times(2)).reject(four);
         verify(secondSource).accept(three);
-        verify(secondSource, times(2)).reject(three);
     }
 }

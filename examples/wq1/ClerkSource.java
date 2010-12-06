@@ -33,10 +33,6 @@ public class  ClerkSource implements EventSource {
     }
 
     @Override
-    public void reject(Event event) {
-    }
-
-    @Override
     public void accept(Event event) {
         assert(currentEvent == event);
         currentEvent = null;

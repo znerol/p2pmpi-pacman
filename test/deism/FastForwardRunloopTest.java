@@ -147,9 +147,6 @@ public class FastForwardRunloopTest {
         verify(eventSource).receive(0);
         verify(eventSource).receive(1);
         verify(eventSource).receive(2);
-        // After the first attempt to deliver one, runloop must try to put it 
-        // back into the source.
-        verify(eventSource).reject(one);
         
         verify(eventDispatcher).dispatchEvent(one);
         verify(governor, times(2)).suspendUntil(2);

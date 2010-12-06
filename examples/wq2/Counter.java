@@ -40,10 +40,6 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
     }
 
     @Override
-    public void reject(Event event) {
-    }
-
-    @Override
     public void dispatchEvent(Event event) {
         if (event instanceof CounterServiceEvent) {
             CounterServiceEvent cse = (CounterServiceEvent) event;
