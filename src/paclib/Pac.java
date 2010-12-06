@@ -18,7 +18,7 @@ public class Pac extends MovingObject {
 	private int points=0;
 
 	private int angle = 0;
-	private int steps = 4;
+	private int steps = 16;
 
 	private GamePlay gp;
 

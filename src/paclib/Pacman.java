@@ -14,10 +14,10 @@ public class Pacman {
 	 * @param args nothing
 	 */
 	public static void main(String[] args) {
-		MPI.Init(args);
+		//MPI.Init(args);
 		GamePlay gp = new GamePlay();
 		gp.play();
-		MPI.Finalize();
+		//MPI.Finalize();
 	}
 
 }

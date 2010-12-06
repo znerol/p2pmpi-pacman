@@ -13,8 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import p2pmpi.mpi.MPI;
-
 /**
  * Hier wird der Spielablauf und die Initialisierung organisiert.
  * 
@@ -86,7 +84,7 @@ public class GamePlay extends JFrame {
 	/**
 	 * Halbe Groesse der Wand
 	 */
-	public static final int GUI_SMALL_FREESPACE = 2;
+	public static final int GUI_SMALL_FREESPACE = 5;
 	/**
 	 * Halbe Groesse des Durchganges
 	 */
@@ -99,7 +97,7 @@ public class GamePlay extends JFrame {
 	/**
 	 * Streckfaktor
 	 */
-	public static final int GUI_SIZE_MULTIPLIER = 3;
+	public static final int GUI_SIZE_MULTIPLIER = 1;
 	/**
 	 * Sleep Time
 	 */
@@ -187,17 +185,28 @@ public class GamePlay extends JFrame {
 	 *            Weltdatei
 	 */
 	private void init(String file) {
-		Scanner in = new Scanner("xxxxxxxxxxxxxxxxxxxxx\n"
-				+ "x.........x.........x\nxsxxx.xxx.x.xxx.xxxsx\n"
-				+ "x.xxx.xxx.x.xxx.xxx.x\nx.........g.........x\n"
-				+ "x.xxx.x.xxxxx.x.xxx.x\nx.....x...x...x.....x\n"
-				+ "xxxxx.xxx.x.xxx.xxxxx\nxxxxx.x.g.g.g.x.xxxxx\n"
-				+ "xxxxx.x.xxxxx.x.xxxxx\nx.......xxxxx.......x\n"
-				+ "xxxxx.x.xxxxx.x.xxxxx\nxxxxx.x.......x.xxxxx\n"
-				+ "xxxxx.x.xxxxx.x.xxxxx\nx.........x.........x\n"
-				+ "x.xxx.xxx.x.xxx.xxx.x\nxs..x...........x..sx\n"
-				+ "xxx.x.x.xxxxx.x.x.xxx\nx.....x...x...x.....x\n"
-				+ "x.xxxxxxx.x.xxxxxxx.x\nx.........p.........x\n"
+		Scanner in = new Scanner(
+		          "xxxxxxxxxxxxxxxxxxxxx\n"
+				+ "x.........x.........x\n"
+				+ "xsxxx.xxx.x.xxx.xxxsx\n"
+				+ "x.xxx.xxx.x.xxx.xxx.x\n"
+                + "x.........g.........x\n"
+				+ "x.xxx.x.xxxxx.x.xxx.x\n"
+                + "x.....x...x...x.....x\n"
+				+ "xxxxx.xxx.x.xxx.xxxxx\n"
+                + "xxxxx.x.g.g.g.x.xxxxx\n"
+				+ "xxxxx.x.xxxxx.x.xxxxx\n"
+                + "x.......xxxxx.......x\n"
+				+ "xxxxx.x.xxxxx.x.xxxxx\n"
+                + "xxxxx.x.......x.xxxxx\n"
+				+ "xxxxx.x.xxxxx.x.xxxxx\n"
+                + "x.........x.........x\n"
+				+ "x.xxx.xxx.x.xxx.xxx.x\n"
+                + "xs..x...........x..sx\n"
+				+ "xxx.x.x.xxxxx.x.x.xxx\n"
+                + "x.....x...x...x.....x\n"
+				+ "x.xxxxxxx.x.xxxxxxx.x\n"
+                + "x.........p.........x\n"
 				+ "xxxxxxxxxxxxxxxxxxxxx\n");
 		gt = new ArrayList<Ghost>();
 		ArrayList<String> strArr = new ArrayList<String>();
@@ -248,7 +257,10 @@ public class GamePlay extends JFrame {
 		
 		while (choice == JOptionPane.YES_OPTION) {
 			do {
+			    long l = System.nanoTime();
+			    int j = 0;
 				while (!testCollision() && !win) {
+				    j++;
 					for (int i = 0; i < gt.size(); i++)
 						gt.get(i).move();
 					pac.move();
