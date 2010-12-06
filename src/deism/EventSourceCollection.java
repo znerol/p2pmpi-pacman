@@ -34,14 +34,14 @@ public class EventSourceCollection implements EventSource {
     }
     
     @Override
-    public Event receive(long currentSimtime) {
+    public Event peek(long currentSimtime) {
         Map<EventSource, Event> candidates =
             new LinkedHashMap<EventSource, Event>();
         Event result = null;
 
         // poll all event sources and knock up the candidates map.
         for (EventSource source : eventSources) {
-            Event candidateEvent = source.receive(currentSimtime);
+            Event candidateEvent = source.peek(currentSimtime);
             if (candidateEvent != null) {
                 candidates.put(source, candidateEvent);
             }
@@ -61,8 +61,8 @@ public class EventSourceCollection implements EventSource {
     }
 
     @Override
-    public void accept(Event event) {
+    public void remove(Event event) {
         assert(currentSource != null);
-        currentSource.accept(event);
+        currentSource.remove(event);
     }
 }

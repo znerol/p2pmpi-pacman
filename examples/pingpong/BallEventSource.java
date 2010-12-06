@@ -18,7 +18,7 @@ public class BallEventSource implements EventSource {
     }
     
     @Override
-    public Event receive(long currentSimtime) {
+    public Event peek(long currentSimtime) {
         Event result = null;
         
         long n = Math.max(0, (currentSimtime - t0) / dt + 1);
@@ -29,7 +29,7 @@ public class BallEventSource implements EventSource {
     }
 
     @Override
-    public void accept(Event event) {
+    public void remove(Event event) {
     }
 
     @Override

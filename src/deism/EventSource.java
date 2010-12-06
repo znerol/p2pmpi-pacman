@@ -9,17 +9,20 @@ package deism;
  */
 public interface EventSource {
     /**
-     * Retrieves the next event removing it from the EventSource
+     * Retrieves the next without removing it from the EventSource.
      * 
-     * @param currentSimtime current timestamp in simulation time units
+     * @param currentSimtime
+     *            current timestamp in simulation time units
      * @return The next event or null
      */
-    Event receive(long currentSimtime);
+    Event peek(long currentSimtime);
 
     /**
-     * Accept the last event received from this EventSource
+     * Accept and remove the given event from this EventSource. EventRunloop
+     * guarantees that the event is the last event returned by a preceding call
+     * to peek.
      */
-    void accept(Event event);
+    void remove(Event event);
 
     /**
      * Prepare the EventSource (spawn threads etc.)

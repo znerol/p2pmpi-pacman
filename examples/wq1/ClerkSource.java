@@ -16,7 +16,7 @@ public class  ClerkSource implements EventSource {
     }
 
     @Override
-    public Event receive(long currentSimtime) {
+    public Event peek(long currentSimtime) {
         if (currentEvent == null) {
             ClientArrivedEvent job = jobs.poll();
             if (job != null) {
@@ -33,7 +33,7 @@ public class  ClerkSource implements EventSource {
     }
 
     @Override
-    public void accept(Event event) {
+    public void remove(Event event) {
         assert(currentEvent == event);
         currentEvent = null;
     }

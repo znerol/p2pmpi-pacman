@@ -27,9 +27,9 @@ public class TimewarpEventSourceAdapter
     }
     
     @Override
-    public Event receive(long currentSimtime) {
+    public Event peek(long currentSimtime) {
         if (pending.peek() == null) {
-            lastEventFromSource = source.receive(currentSimtime);
+            lastEventFromSource = source.peek(currentSimtime);
             if (lastEventFromSource != null) {
                 pending.offer(lastEventFromSource);
             }
@@ -39,9 +39,9 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public void accept(Event event) {
+    public void remove(Event event) {
         if (event == lastEventFromSource) {
-            source.accept(event);
+            source.remove(event);
         }
         pending.remove(event);
         pushHistory(event);

@@ -24,7 +24,7 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
             new CounterAvailableEvent(0, this), false);
 
     @Override
-    public Event receive(long currentSimtime) {
+    public Event peek(long currentSimtime) {
         if (currentState.dispatching == false) {
             return currentState.event;
         }
@@ -34,7 +34,7 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
     }
 
     @Override
-    public void accept(Event event) {
+    public void remove(Event event) {
         currentState = new CounterState(currentState.event, true);
         pushHistory(currentState);
     }

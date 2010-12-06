@@ -32,7 +32,7 @@ public class WaitingRoom {
         private CounterServiceEvent currentEvent;
         
         @Override
-        public Event receive(long currentSimtime) {
+        public Event peek(long currentSimtime) {
             if (currentEvent == null) {
                 ClientArrivedEvent client = waitingQueue.peek();
                 CounterAvailableEvent counter = availableCounters.peek();
@@ -46,7 +46,7 @@ public class WaitingRoom {
         }
 
         @Override
-        public void accept(Event event) {
+        public void remove(Event event) {
             assert(event == currentEvent);
             waitingQueue.remove(currentEvent.clientArrivedEvent);
             availableCounters.remove(currentEvent.counterAvailableEvent);

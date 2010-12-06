@@ -38,7 +38,7 @@ public class PestimisticRunnableClientArrivedSource implements EventSource {
     }
 
     @Override
-    public synchronized Event receive(long currentSimtime) {
+    public synchronized Event peek(long currentSimtime) {
         this.currentSimtime = currentSimtime;
         if (currentEvent == null) {
             eventReady = null;
@@ -58,7 +58,7 @@ public class PestimisticRunnableClientArrivedSource implements EventSource {
     }
 
     @Override
-    public synchronized void accept(Event event) {
+    public synchronized void remove(Event event) {
         assert (currentEvent == event);
         currentEvent = null;
     }

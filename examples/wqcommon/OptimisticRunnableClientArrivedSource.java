@@ -43,12 +43,12 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
     }
 
     @Override
-    public Event receive(long currentSimtime) {
+    public Event peek(long currentSimtime) {
         return events.peek();
     }
 
     @Override
-    public void accept(Event event) {
+    public void remove(Event event) {
         events.remove(event);
     }
 

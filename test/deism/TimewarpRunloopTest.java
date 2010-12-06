@@ -37,12 +37,12 @@ public class TimewarpRunloopTest {
         
         simpleEventSource = new EventSource() {
             @Override
-            public Event receive(long currentSimtime) {
+            public Event peek(long currentSimtime) {
                 return eventQueue.poll();
             }
 
             @Override
-            public void accept(Event event) {
+            public void remove(Event event) {
                 eventQueue.remove(event);
             }
 
