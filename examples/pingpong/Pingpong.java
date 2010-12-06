@@ -13,6 +13,8 @@ import deism.EventCondition;
 import deism.EventDispatcher;
 import deism.EventDispatcherCollection;
 import deism.EventRunloopRecoveryStrategy;
+import deism.EventSink;
+import deism.EventSinkCollection;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
@@ -83,8 +85,9 @@ public class Pingpong {
 
         FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, noSnapshots);
-        
+
         runloop.run(new EventSourceCollection(sources),
+                new EventSinkCollection(new ArrayList<EventSink>()),
                 new EventDispatcherCollection(dispatchers));
 
         MPI.Finalize();

@@ -15,6 +15,8 @@ import deism.EventCondition;
 import deism.EventDispatcherCollection;
 import deism.EventRunloop;
 import deism.EventRunloopRecoveryStrategy;
+import deism.EventSink;
+import deism.EventSinkCollection;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
@@ -101,13 +103,15 @@ public class TimewarpJobQueueSimulation {
 
         EventRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
-        
+
         EventSource eventSource = new EventSourceCollection(sources);
         EventDispatcher eventDispatcher =
             new EventDispatcherCollection(dispatchers);
-        
-        runloop.run(eventSource, eventDispatcher);
-        
+
+        runloop.run(eventSource,
+                new EventSinkCollection(new ArrayList<EventSink>()),
+                eventDispatcher);
+
 //        runnableClientSource.stop();
 //        producer.interrupt();
 //        try {

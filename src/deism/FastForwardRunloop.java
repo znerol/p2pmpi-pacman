@@ -43,7 +43,7 @@ public class FastForwardRunloop implements EventRunloop {
      */
 
     @Override
-    public void run(EventSource source, EventDispatcher disp) {
+    public void run(EventSource source, EventSink sink, EventDispatcher disp) {
 
         long lastSimtime = currentSimtime;
         
@@ -64,7 +64,10 @@ public class FastForwardRunloop implements EventRunloop {
              * Suspend execution until its time to handle the event.
              */
             long newSimtime;
+            boolean sinkActive = false;
             if (peekEvent != null) {
+                // Notify sink that we're about to handle peekEvent
+                sinkActive = sink.offer(peekEvent);
                 newSimtime = governor.suspendUntil(peekEvent.getSimtime());
             }
             else {
@@ -81,10 +84,16 @@ public class FastForwardRunloop implements EventRunloop {
                 // Restart and reevaluate loop conditions and current event
                 // when the current simulation time is less than that of the
                 // next event.
+                if (sinkActive) {
+                    sink.remove(peekEvent);
+                }
                 continue;
             }
 
             if (currentSimtime < lastSimtime) {
+                if (sinkActive) {
+                    sink.remove(peekEvent);
+                }
                 System.out.println("Rollback caused by: " + peekEvent);
                 recoveryStrategy.rollback(currentSimtime);
                 lastSimtime = currentSimtime;

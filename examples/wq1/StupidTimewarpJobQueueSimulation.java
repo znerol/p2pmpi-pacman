@@ -14,6 +14,8 @@ import deism.EventDispatcher;
 import deism.EventCondition;
 import deism.EventRunloop;
 import deism.EventRunloopRecoveryStrategy;
+import deism.EventSink;
+import deism.EventSinkCollection;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
@@ -76,6 +78,7 @@ public class StupidTimewarpJobQueueSimulation {
         EventRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
         
-        runloop.run(timewarpSources, disp);
+        runloop.run(timewarpSources,
+                new EventSinkCollection(new ArrayList<EventSink>()), disp);
     }
 }

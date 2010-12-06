@@ -1,5 +1,6 @@
 package wq1;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -12,6 +13,8 @@ import deism.Event;
 import deism.EventDispatcher;
 import deism.EventCondition;
 import deism.EventRunloopRecoveryStrategy;
+import deism.EventSink;
+import deism.EventSinkCollection;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
@@ -77,6 +80,7 @@ public class JobQueueSimulation {
         FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, noSnapshots);
         EventDispatcher disp = new JobAggregator(jobs);
-        runloop.run(aggSource, disp);
+        runloop.run(aggSource,
+                new EventSinkCollection(new ArrayList<EventSink>()), disp);
     }
 }

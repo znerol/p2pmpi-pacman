@@ -13,6 +13,8 @@ public class FastForwardRunloopTest {
     @Mock
     EventSource eventSource;
     @Mock
+    EventSink eventSink;
+    @Mock
     EventDispatcher eventDispatcher;
     @Mock
     ExecutionGovernor governor;
@@ -35,7 +37,7 @@ public class FastForwardRunloopTest {
         when(eventSource.peek(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
 
-        r.run(eventSource, eventDispatcher);
+        r.run(eventSource, eventSink, eventDispatcher);
 
         verify(eventSource).peek(0);
         verifyZeroInteractions(eventDispatcher);
@@ -62,17 +64,21 @@ public class FastForwardRunloopTest {
         when(eventSource.peek(0)).thenReturn(one);
         when(eventSource.peek(1)).thenReturn(two);
         when(eventSource.peek(2)).thenReturn(null);
+        when(eventSink.offer(one)).thenReturn(true);
+        when(eventSink.offer(two)).thenReturn(true);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
 
-        r.run(eventSource, eventDispatcher);
+        r.run(eventSource, eventSink, eventDispatcher);
         
         verify(eventSource).peek(0);
         verify(eventSource).peek(1);
         verify(eventSource).peek(2);
+        verify(eventSink).offer(one);
+        verify(eventSink).offer(two);
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
@@ -98,6 +104,9 @@ public class FastForwardRunloopTest {
         when(eventSource.peek(1)).thenReturn(two);
         when(eventSource.peek(2)).thenReturn(three);
         when(eventSource.peek(3)).thenReturn(null);
+        when(eventSink.offer(one)).thenReturn(true);
+        when(eventSink.offer(two)).thenReturn(true);
+        when(eventSink.offer(three)).thenReturn(true);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
@@ -112,11 +121,13 @@ public class FastForwardRunloopTest {
             }
         }).when(eventDispatcher).dispatchEvent(two);
 
-        r.run(eventSource, eventDispatcher);
+        r.run(eventSource, eventSink, eventDispatcher);
 
         /* We expect receive being called two times (for Events one and two) */
         verify(eventSource).peek(0);
         verify(eventSource).peek(1);
+        verify(eventSink).offer(one);
+        verify(eventSink).offer(two);
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher).dispatchEvent(two);
         verify(governor).suspendUntil(1);
@@ -136,18 +147,21 @@ public class FastForwardRunloopTest {
         when(eventSource.peek(0)).thenReturn(one);
         when(eventSource.peek(1)).thenReturn(one);
         when(eventSource.peek(2)).thenReturn(null);
+        when(eventSink.offer(one)).thenReturn(true);
         when(governor.suspendUntil(2)).thenReturn(1L, 2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
         when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
-        
-        r.run(eventSource, eventDispatcher);
+
+        r.run(eventSource, eventSink, eventDispatcher);
 
         // We expect receive being called three times (one, one, term) */
         verify(eventSource).peek(0);
         verify(eventSource).peek(1);
         verify(eventSource).peek(2);
-        
+
+        verify(eventSink, times(2)).offer(one);
+        verify(eventSink).remove(one);
         verify(eventDispatcher).dispatchEvent(one);
         verify(governor, times(2)).suspendUntil(2);
         verify(terminationCondition, times(2)).match(one);
@@ -171,6 +185,8 @@ public class FastForwardRunloopTest {
         when(eventSource.peek(0)).thenReturn(two);
         when(eventSource.peek(2)).thenReturn(one);
         when(eventSource.peek(3)).thenReturn(null);
+        when(eventSink.offer(one)).thenReturn(true);
+        when(eventSink.offer(two)).thenReturn(true);
         
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
@@ -181,10 +197,13 @@ public class FastForwardRunloopTest {
         doThrow(new StateHistoryException("")).when(
                 recoveryStrategy).rollback(anyLong());
 
-        r.run(eventSource, eventDispatcher);
+        r.run(eventSource, eventSink, eventDispatcher);
 
         verify(eventSource).peek(0);
         verify(eventSource).peek(2);
+        verify(eventSink).offer(two);
+        verify(eventSink).offer(one);
+        verify(eventSink).remove(one);
         
         /* Event two must have been delivered properly */
         verify(eventDispatcher).dispatchEvent(two);

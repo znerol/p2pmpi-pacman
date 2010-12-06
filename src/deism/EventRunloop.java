@@ -11,7 +11,7 @@ public interface EventRunloop {
      * @param eventSource
      * @param eventDispatcher
      */
-    void run(EventSource eventSource, EventDispatcher eventDispatcher);
+    void run(EventSource eventSource, EventSink sink, EventDispatcher eventDispatcher);
 
     /**
      * Signals the EventLoop to continue processing events if the loop was

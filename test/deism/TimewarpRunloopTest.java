@@ -17,6 +17,8 @@ public class TimewarpRunloopTest {
     @Mock
     EventDispatcher eventDispatcher;
     @Mock
+    EventSink eventSink;
+    @Mock
     ExecutionGovernor governor;
     @Mock
     EventCondition terminationCondition;
@@ -80,7 +82,7 @@ public class TimewarpRunloopTest {
         when(terminationCondition.match(null)).thenReturn(true);
         when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
 
-        runloop.run(eventSource, eventDispatcher);
+        runloop.run(eventSource, eventSink, eventDispatcher);
 
         // All events must have been delivered properly. However event four
         // will be emitted twice.
@@ -111,7 +113,7 @@ public class TimewarpRunloopTest {
         when(terminationCondition.match(null)).thenReturn(true);
         when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
 
-        runloop.run(eventSource, eventDispatcher);
+        runloop.run(eventSource, eventSink, eventDispatcher);
 
         // All events must have been delivered properly. However event four
         // will be emitted twice.
