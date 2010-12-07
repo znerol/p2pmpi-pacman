@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 public class EventTest {
     @Test
@@ -42,7 +43,18 @@ public class EventTest {
         ObjectInputStream in = new ObjectInputStream(instream);
 
         Event result = (Event)in.readObject();
-        assertTrue(result.compareTo(event) == 0);
+        assertEquals(result,event);
+    }
+
+    @Test
+    public void testEquality() {
+        Event one = new Event(8L);
+        Event two = new Event(7L);
+        Event three = new Event(7L);
+
+        assertEquals(one,one);
+        assertThat(one,is(not(two)));
+        assertEquals(two,three);
     }
 
     @Test
@@ -53,6 +65,9 @@ public class EventTest {
         assertEquals(event.getSimtime(), inverse.getSimtime());
         assertEquals(true, inverse.isAntimessage());
         assertEquals(false, event.isAntimessage());
+
+        Event doubleinverse = inverse.inverseEvent();
+        assertEquals(event, doubleinverse);
     }
 
     @SuppressWarnings("serial")

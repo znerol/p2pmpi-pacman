@@ -70,4 +70,23 @@ public class Event implements Comparable<Event>, Serializable, Cloneable {
     public String toString() {
         return "Event [simtime = " + simtime + "]";
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || this.getClass() != other.getClass()) {
+            return false;
+        }
+        Event otherEvent = (Event)other;
+        return this.simtime == otherEvent.simtime;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + (int)(simtime ^ (simtime >>> 32));
+        return hash;
+    }
 }

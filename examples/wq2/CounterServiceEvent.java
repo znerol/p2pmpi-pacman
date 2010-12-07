@@ -20,5 +20,17 @@ public class CounterServiceEvent extends Event {
         return "[CounterServiceEvent time=" + this.getSimtime() + " " +
             counterAvailableEvent + " " + clientArrivedEvent + "]";
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!super.equals(other)) {
+            return false;
+        }
+
+        CounterServiceEvent otherEvent = (CounterServiceEvent)other;
+        return
+            this.counterAvailableEvent.equals(otherEvent.counterAvailableEvent)
+            && this.clientArrivedEvent.equals(otherEvent.clientArrivedEvent);
+    }
 }
 
