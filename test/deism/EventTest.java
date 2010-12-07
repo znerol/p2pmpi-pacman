@@ -47,7 +47,7 @@ public class EventTest {
     }
 
     @Test
-    public void testEquality() {
+    public void testEqualityAndHashcode() {
         Event one = new Event(8L);
         Event two = new Event(7L);
         Event three = new Event(7L);
@@ -55,6 +55,8 @@ public class EventTest {
         assertEquals(one,one);
         assertThat(one,is(not(two)));
         assertEquals(two,three);
+
+        assertEquals(two.hashCode(), three.hashCode());
     }
 
     @Test
@@ -68,6 +70,8 @@ public class EventTest {
 
         Event doubleinverse = inverse.inverseEvent();
         assertEquals(event, doubleinverse);
+
+        assertEquals(event.hashCode(), doubleinverse.hashCode());
     }
 
     @SuppressWarnings("serial")
