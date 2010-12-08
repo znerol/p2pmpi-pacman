@@ -11,10 +11,10 @@ import deism.Event;
 import deism.EventArrayDeque;
 import deism.EventCondition;
 import deism.EventQueue;
-import deism.EventSink;
+import deism.TimewarpEventSink;
 
 public class MpiEventSink extends AbstractStateHistory<Long, Event>
-        implements EventSink {
+        implements TimewarpEventSink {
 
     private final int mpireceiver;
     private final int mpitag;
