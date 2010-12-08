@@ -52,6 +52,7 @@ public class FastForwardRunloop implements EventRunloop {
 
         governor.start(currentSimtime);
         source.start(currentSimtime);
+        sink.start(currentSimtime);
 
         while (!stop) {
             Event peekEvent = source.peek(currentSimtime);
@@ -90,10 +91,7 @@ public class FastForwardRunloop implements EventRunloop {
                 continue;
             }
 
-            if (currentSimtime < lastSimtime) {
-                if (sinkActive) {
-                    sink.remove(peekEvent);
-                }
+            if (currentSimtime < lastSimtime || peekEvent.isAntimessage()) {
                 System.out.println("Rollback caused by: " + peekEvent);
                 recoveryStrategy.rollback(currentSimtime);
                 lastSimtime = currentSimtime;
@@ -101,6 +99,9 @@ public class FastForwardRunloop implements EventRunloop {
             }
 
             source.remove(peekEvent);
+
+            // Antimessages aren't allowed here.
+            assert(peekEvent.isAntimessage() == false);
             disp.dispatchEvent(peekEvent);
 
             if (snapshotCondition.match(peekEvent)) {
@@ -111,6 +112,7 @@ public class FastForwardRunloop implements EventRunloop {
         }
 
         source.stop();
+        sink.stop();
         governor.stop();
     }
 

@@ -1,12 +1,11 @@
 package p2pmpi;
 
-import java.util.Queue;
-import java.util.concurrent.PriorityBlockingQueue;
-
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 
 import deism.Event;
+import deism.EventPriorityQueue;
+import deism.EventQueue;
 import deism.EventSource;
 import deism.ExecutionGovernor;
 
@@ -15,7 +14,7 @@ public class MpiEventSource implements EventSource {
     private final int mpisender;
     private final int mpitag;
     private final IntraComm mpicomm;
-    private final Queue<Event> events = new PriorityBlockingQueue<Event>();
+    private final EventQueue<Event> events = new EventPriorityQueue<Event>();
     private final ExecutionGovernor governor;
     private final Worker worker;
 
@@ -37,25 +36,41 @@ public class MpiEventSource implements EventSource {
     @Override
     public void start(long startSimtime) {
         if (worker != null) {
-            worker.start();
+            synchronized (worker) {
+                worker.start();
+            }
         }
     }
 
     @Override
     public void stop() {
         if (worker != null) {
-            worker.terminate();
+            synchronized (worker) {
+                worker.terminate();
+            }
         }
     }
 
     @Override
     public Event peek(long currentSimtime) {
-        return events.peek();
+        Event result = null;
+
+        if (worker != null) {
+            synchronized (worker) {
+                result = events.peek();
+            }
+        }
+
+        return result;
     }
 
     @Override
     public void remove(Event event) {
-        events.remove(event);
+        if (worker != null) {
+            synchronized (worker) {
+                events.remove(event);
+            }
+        }
     }
 
     private class Worker extends Thread {
@@ -66,8 +81,16 @@ public class MpiEventSource implements EventSource {
             while (!done) {
                 Event[] recvBuffer = { null };
                 mpicomm.Recv(recvBuffer, 0, 1, MPI.OBJECT, mpisender, mpitag);
-                events.offer(recvBuffer[0]);
-                governor.resume(events.peek().getSimtime());
+
+                Event peekEvent = null;
+                synchronized (this) {
+                    events.offer(recvBuffer[0]);
+                    peekEvent = events.peek();
+                }
+
+                if (peekEvent != null) {
+                    governor.resume(peekEvent.getSimtime());
+                }
             }
         }
 

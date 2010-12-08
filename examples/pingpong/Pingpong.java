@@ -3,7 +3,7 @@ package pingpong;
 import java.util.ArrayList;
 import java.util.List;
 
-import p2pmpi.MpiEventDispatcher;
+import p2pmpi.MpiEventSink;
 import p2pmpi.MpiEventSource;
 import p2pmpi.mpi.MPI;
 import util.EventLogger;
@@ -13,8 +13,6 @@ import deism.EventCondition;
 import deism.EventDispatcher;
 import deism.EventDispatcherCollection;
 import deism.EventRunloopRecoveryStrategy;
-import deism.EventSink;
-import deism.EventSinkCollection;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
@@ -68,7 +66,6 @@ public class Pingpong {
         };
 
         List<EventDispatcher> dispatchers = new ArrayList<EventDispatcher>();
-        dispatchers.add(new MpiEventDispatcher(MPI.COMM_WORLD, me, other, 0, onlyMine));
         if (me == 0) {
             dispatchers.add(new EventLogger());
         }
@@ -87,7 +84,7 @@ public class Pingpong {
                 recoveryStrategy, noSnapshots);
 
         runloop.run(new EventSourceCollection(sources),
-                new EventSinkCollection(new ArrayList<EventSink>()),
+                new MpiEventSink(MPI.COMM_WORLD, me, other, 0, onlyMine),
                 new EventDispatcherCollection(dispatchers));
 
         MPI.Finalize();
