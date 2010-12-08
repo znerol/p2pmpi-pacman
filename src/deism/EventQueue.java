@@ -9,5 +9,5 @@ import java.util.Queue;
  *
  * Implementations of EventQueue must pass EventQueueTest.
  */
-public interface EventQueue extends Queue<Event> {
+public interface EventQueue<T extends Event> extends Queue<T> {
 }

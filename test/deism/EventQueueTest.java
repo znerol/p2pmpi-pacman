@@ -2,21 +2,27 @@ package deism;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class EventQueueTest {
-    private final EventQueue[] queues = {
-            new EventArrayDeque(),
-            new EventPriorityQueue(),
-    };
+    private List<EventQueue<Event>> queues = new ArrayList<EventQueue<Event>>();
+
+    @Before
+    public void setUp() {
+        queues.add(new EventArrayDeque<Event>());
+        queues.add(new EventPriorityQueue<Event>());
+    }
 
     @Test
     public void testOfferOneEvent() {
         final Event event = new Event(7L);
 
-        for (EventQueue q : queues) {
+        for (EventQueue<Event> q : queues) {
             assertEquals(0, q.size());
             q.offer(event);
             assertEquals(1, q.size());
@@ -30,7 +36,7 @@ public class EventQueueTest {
         final Event event = new Event(7L);
         final Event inverseEvent = event.inverseEvent();
 
-        for (EventQueue q : queues) {
+        for (EventQueue<Event> q : queues) {
             assertEquals(0, q.size());
             q.offer(event);
             assertEquals(1, q.size());
@@ -43,7 +49,7 @@ public class EventQueueTest {
     public void testAddEvent() {
         final Event event = new Event(7L);
 
-        for (EventQueue q : queues) {
+        for (EventQueue<Event> q : queues) {
             assertEquals(0, q.size());
             q.add(event);
             assertEquals(1, q.size());
@@ -57,7 +63,7 @@ public class EventQueueTest {
         final Event event = new Event(7L);
         final Event inverseEvent = event.inverseEvent();
 
-        for (EventQueue q : queues) {
+        for (EventQueue<Event> q : queues) {
             assertEquals(0, q.size());
             q.add(event);
             assertEquals(1, q.size());
@@ -73,7 +79,7 @@ public class EventQueueTest {
                 new Event(8L),
         };
 
-        for (EventQueue q : queues) {
+        for (EventQueue<Event> q : queues) {
             assertEquals(0, q.size());
             q.addAll(Arrays.asList(events));
             assertEquals(2, q.size());
@@ -90,7 +96,7 @@ public class EventQueueTest {
                 new Event(7L, false),
         };
 
-        for (EventQueue q : queues) {
+        for (EventQueue<Event> q : queues) {
             assertEquals(0, q.size());
             q.addAll(Arrays.asList(events));
             assertEquals(1, q.size());

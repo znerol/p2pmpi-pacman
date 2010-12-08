@@ -1,14 +1,12 @@
 package deism;
 
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 public class TimewarpEventSourceAdapter
         extends AbstractStateHistory<Long, Event>
         implements TimewarpEventSource {
 
-    private final Queue<Event> pending = new PriorityQueue<Event>();
+    private final EventQueue<Event> pending = new EventPriorityQueue<Event>();
     private final EventSource source;
     private Event lastEventFromSource;
     
