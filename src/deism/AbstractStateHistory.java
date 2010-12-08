@@ -92,4 +92,11 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
         assert(item != null);
         history.add(item);
     }
+
+    /**
+     * Return true if history contains given item
+     */
+    public boolean containedInHistory(V item) {
+        return history.contains(item);
+    }
 }
