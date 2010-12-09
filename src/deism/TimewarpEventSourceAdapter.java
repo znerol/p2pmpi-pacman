@@ -39,7 +39,15 @@ public class TimewarpEventSourceAdapter
 
             lastEventFromSource = event;
             if (lastEventFromSource != null) {
-                pending.offer(lastEventFromSource);
+                Event inverseEvent = event.inverseEvent();
+                if (pending.contains(inverseEvent)) {
+                    pending.remove(inverseEvent);
+                    source.remove(inverseEvent);
+                    lastEventFromSource = null;
+                }
+                else {
+                    pending.offer(lastEventFromSource);
+                }
             }
         }
 
