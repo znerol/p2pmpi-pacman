@@ -80,7 +80,8 @@ public class Event implements Comparable<Event>, Serializable, Cloneable {
             return false;
         }
         Event otherEvent = (Event)other;
-        return this.simtime == otherEvent.simtime;
+        return this.simtime == otherEvent.simtime
+                && this.antimessage == otherEvent.antimessage;
     }
 
     @Override

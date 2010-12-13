@@ -74,6 +74,14 @@ public class EventTest {
         assertEquals(event.hashCode(), doubleinverse.hashCode());
     }
 
+    @Test
+    public void testInverseEventMustNotBeEqualToOriginalEvent() {
+        Event event = new Event(7L);
+        Event inverse = event.inverseEvent();
+
+        assertThat(event, is(not(inverse)));
+    }
+
     @SuppressWarnings("serial")
     private class Subevent extends Event {
         private final long subvalue;
