@@ -9,7 +9,6 @@ import p2pmpi.mpi.MPI;
 import deism.AbstractStateHistory;
 import deism.Event;
 import deism.EventArrayDeque;
-import deism.EventCondition;
 import deism.EventQueue;
 import deism.TimewarpEventSink;
 
@@ -19,17 +18,15 @@ public class MpiEventSink extends AbstractStateHistory<Long, Event>
     private final int mpireceiver;
     private final int mpitag;
     private final IntraComm mpicomm;
-    private final EventCondition filter;
     private final EventQueue<Event> events = new EventArrayDeque<Event>();
     private final Worker worker;
     private long maxSimtime = 0;
 
     public MpiEventSink(IntraComm comm, int mpisender, int mpireceiver,
-            int mpitag, EventCondition filter) {
+            int mpitag) {
         this.mpicomm = comm;
         this.mpireceiver = mpireceiver;
         this.mpitag = mpitag;
-        this.filter = filter;
 
         if (mpicomm.Rank() == mpisender) {
             worker = new Worker();
@@ -54,7 +51,7 @@ public class MpiEventSink extends AbstractStateHistory<Long, Event>
     public boolean offer(Event event) {
         boolean result = false;
 
-        if (worker != null && filter.match(event)) {
+        if (worker != null) {
             synchronized (worker) {
                 events.offer(event);
 
@@ -75,7 +72,7 @@ public class MpiEventSink extends AbstractStateHistory<Long, Event>
 
     @Override
     public void remove(Event event) {
-        if (worker != null && filter.match(event)) {
+        if (worker != null) {
             Event inverseEvent = event.inverseEvent();
             synchronized (worker) {
                 events.offer(inverseEvent);
