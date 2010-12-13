@@ -68,7 +68,7 @@ public class Event implements Comparable<Event>, Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return "Event [simtime = " + simtime + "]";
+        return (antimessage ? "-" : "+") + "Event [simtime = " + simtime + "]";
     }
 
     @Override

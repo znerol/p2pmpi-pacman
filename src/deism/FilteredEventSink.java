@@ -10,20 +10,9 @@ public class FilteredEventSink implements EventSink {
     }
 
     @Override
-    public boolean offer(Event event) {
-        boolean result = false;
-
+    public void offer(Event event) {
         if (filter.match(event)) {
-            result = sink.offer(event);
-        }
-
-        return result;
-    }
-
-    @Override
-    public void remove(Event event) {
-        if (filter.match(event)) {
-            sink.remove(event);
+            sink.offer(event);
         }
     }
 

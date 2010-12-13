@@ -7,17 +7,12 @@ package deism;
 public interface EventSink {
     /**
      * The next event which will most likely be handled by an EventDispatcher.
+     * An EventSink must also accept antimessages for each event offered before.
      *
      * @param event
      * @return true if EventSink took notice of the event, false otherwise
      */
-    boolean offer(Event event);
-
-    /**
-     * Remove the event offered to this EventSink before, most likely because
-     * an event with a smaller timestamp has arrived during governor.suspend.
-     */
-    void remove(Event event);
+    void offer(Event event);
 
     /**
      * Prepare the EventSource (spawn threads etc.)

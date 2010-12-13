@@ -1,11 +1,12 @@
 package p2pmpi;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 
 import deism.Event;
-import deism.EventPriorityQueue;
-import deism.EventQueue;
 import deism.EventSource;
 import deism.ExecutionGovernor;
 
@@ -14,7 +15,7 @@ public class MpiEventSource implements EventSource {
     private final int mpisender;
     private final int mpitag;
     private final IntraComm mpicomm;
-    private final EventQueue<Event> events = new EventPriorityQueue<Event>();
+    private final Queue<Event> events = new ArrayDeque<Event>();
     private final ExecutionGovernor governor;
     private final Worker worker;
 

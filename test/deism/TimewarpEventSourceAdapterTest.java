@@ -86,42 +86,4 @@ public class TimewarpEventSourceAdapterTest {
         event = source.peek(2);
         assertNull(event);
     }
-
-    @Test
-    public void testAntimessageImmediatelyFollowedByEvent() {
-        final Event antione = new Event(1, true);
-        final Event one = new Event(1);
-        final Event two = new Event(2);
-
-        events.offer(antione);
-        events.offer(one);
-        events.offer(two);
-
-        Event event;
-        event = source.peek(0);
-        assertEquals(two, event);
-        source.remove(event);
-
-        event = source.peek(2);
-        assertNull(event);
-    }
-
-//    @Test
-//    public void testAntimessageFollowedByEvent() {
-//        final Event antione = new Event(1, true);
-//        final Event one = new Event(1);
-//        final Event two = new Event(2);
-//
-//        events.offer(antione);
-//        events.offer(two);
-//        events.offer(one);
-//
-//        Event event;
-//        event = source.peek(0);
-//        assertEquals(two, event);
-//        source.remove(event);
-//
-//        event = source.peek(2);
-//        assertNull(event);
-//    }
 }

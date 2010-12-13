@@ -65,10 +65,9 @@ public class FastForwardRunloop implements EventRunloop {
              * Suspend execution until its time to handle the event.
              */
             long newSimtime;
-            boolean sinkActive = false;
             if (peekEvent != null) {
                 // Notify sink that we're about to handle peekEvent
-                sinkActive = sink.offer(peekEvent);
+                sink.offer(peekEvent);
                 newSimtime = governor.suspendUntil(peekEvent.getSimtime());
             }
             else {
@@ -85,9 +84,7 @@ public class FastForwardRunloop implements EventRunloop {
                 // Restart and reevaluate loop conditions and current event
                 // when the current simulation time is less than that of the
                 // next event.
-                if (sinkActive) {
-                    sink.remove(peekEvent);
-                }
+                sink.offer(peekEvent.inverseEvent());
                 continue;
             }
 

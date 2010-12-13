@@ -48,9 +48,7 @@ public class MpiEventSink extends AbstractStateHistory<Long, Event>
     }
 
     @Override
-    public boolean offer(Event event) {
-        boolean result = false;
-
+    public void offer(Event event) {
         if (worker != null) {
             synchronized (worker) {
                 events.offer(event);
@@ -63,21 +61,7 @@ public class MpiEventSink extends AbstractStateHistory<Long, Event>
                 }
             }
 
-            result = true;
             pushHistory(event);
-        }
-
-        return result;
-    }
-
-    @Override
-    public void remove(Event event) {
-        if (worker != null) {
-            Event inverseEvent = event.inverseEvent();
-            synchronized (worker) {
-                events.offer(inverseEvent);
-            }
-            pushHistory(inverseEvent);
         }
     }
 

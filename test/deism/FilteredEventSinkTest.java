@@ -43,13 +43,14 @@ public class FilteredEventSinkTest {
 
         filteredEventSink.offer(one);
         filteredEventSink.offer(two);
-        filteredEventSink.remove(two);
+        filteredEventSink.offer(two.inverseEvent());
 
         verify(filter).match(one);
-        verify(filter, times(2)).match(two);
+        verify(filter).match(two);
+        verify(filter).match(two.inverseEvent());
         verify(sink).offer(one);
         verify(sink).offer(two);
-        verify(sink).remove(two);
+        verify(sink).offer(two.inverseEvent());
 
         verifyNoMoreInteractions(filter);
         verifyNoMoreInteractions(sink);
@@ -61,17 +62,21 @@ public class FilteredEventSinkTest {
         Event two = new Event(2L);
 
         when(filter.match(one)).thenReturn(true);
+        when(filter.match(one.inverseEvent())).thenReturn(true);
         when(filter.match(two)).thenReturn(false);
+        when(filter.match(two.inverseEvent())).thenReturn(false);
 
         filteredEventSink.offer(one);
-        filteredEventSink.remove(one);
+        filteredEventSink.offer(one.inverseEvent());
         filteredEventSink.offer(two);
-        filteredEventSink.remove(two);
+        filteredEventSink.offer(two.inverseEvent());
 
-        verify(filter, times(2)).match(one);
-        verify(filter, times(2)).match(two);
+        verify(filter).match(one);
+        verify(filter).match(one.inverseEvent());
+        verify(filter).match(two);
+        verify(filter).match(two.inverseEvent());
         verify(sink).offer(one);
-        verify(sink).remove(one);
+        verify(sink).offer(one.inverseEvent());
 
         verifyNoMoreInteractions(filter);
         verifyNoMoreInteractions(sink);
