@@ -14,6 +14,7 @@ import deism.EventCondition;
 import deism.EventDispatcher;
 import deism.EventDispatcherCollection;
 import deism.EventRunloopRecoveryStrategy;
+import deism.EventSink;
 import deism.EventSource;
 import deism.EventSourceCollection;
 import deism.ExecutionGovernor;
@@ -22,7 +23,7 @@ import deism.FilteredEventSink;
 import deism.ImmediateExecutionGovernor;
 import deism.RealtimeExecutionGovernor;
 import deism.StateHistory;
-import deism.TimewarpEventSink;
+import deism.TimewarpEventSinkAdapter;
 import deism.TimewarpEventSourceAdapter;
 import deism.TimewarpRunloopRecoveryStrategy;
 
@@ -70,8 +71,8 @@ public class Pingpong {
             }
         };
 
-        TimewarpEventSink mpiEventSink = new MpiEventSink(MPI.COMM_WORLD, me,
-                other, 0);
+        EventSink mpiEventSink = new FilteredEventSink(onlyMine,
+                new MpiEventSink(MPI.COMM_WORLD, me, other, 0));
 
         List<EventDispatcher> dispatchers = new ArrayList<EventDispatcher>();
         if (me == 0) {
@@ -81,7 +82,7 @@ public class Pingpong {
         ArrayList<StateHistory<Long>> stateObjects =
             new ArrayList<StateHistory<Long>>();
         stateObjects.add(new StateHistoryLogger());
-        stateObjects.add(mpiEventSink);
+        stateObjects.add(new TimewarpEventSinkAdapter(mpiEventSink));
         stateObjects.add(new TimewarpEventSourceAdapter(mpiEventSource));
 
         EventRunloopRecoveryStrategy recoveryStrategy =
@@ -98,7 +99,7 @@ public class Pingpong {
                 recoveryStrategy, noSnapshots);
 
         runloop.run(new EventSourceCollection(sources),
-                new FilteredEventSink(onlyMine, mpiEventSink),
+                mpiEventSink,
                 new EventDispatcherCollection(dispatchers));
 
         MPI.Finalize();

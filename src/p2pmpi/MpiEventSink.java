@@ -1,26 +1,22 @@
 package p2pmpi;
 
 
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 
-import deism.AbstractStateHistory;
 import deism.Event;
-import deism.EventArrayDeque;
-import deism.EventQueue;
-import deism.TimewarpEventSink;
+import deism.EventSink;
 
-public class MpiEventSink extends AbstractStateHistory<Long, Event>
-        implements TimewarpEventSink {
+public class MpiEventSink implements EventSink {
 
     private final int mpireceiver;
     private final int mpitag;
     private final IntraComm mpicomm;
-    private final EventQueue<Event> events = new EventArrayDeque<Event>();
+    private final Queue<Event> events = new ArrayDeque<Event>();
     private final Worker worker;
-    private long maxSimtime = 0;
 
     public MpiEventSink(IntraComm comm, int mpisender, int mpireceiver,
             int mpitag) {
@@ -37,31 +33,12 @@ public class MpiEventSink extends AbstractStateHistory<Long, Event>
     }
 
     @Override
-    public void revertHistory(List<Event> tail) {
-        if (worker != null) {
-            synchronized (worker) {
-                for (Event event : tail) {
-                    events.offer(event.inverseEvent());
-                }
-            }
-        }
-    }
-
-    @Override
     public void offer(Event event) {
         if (worker != null) {
             synchronized (worker) {
                 events.offer(event);
-
-                // We only tell the worker to actually send out the events in
-                // the queue when the simulation is progressing forward in time.
-                if (maxSimtime < event.getSimtime()) {
-                    maxSimtime = event.getSimtime();
-                    worker.notify();
-                }
+                worker.notify();
             }
-
-            pushHistory(event);
         }
     }
 
@@ -98,7 +75,7 @@ public class MpiEventSink extends AbstractStateHistory<Long, Event>
                             this.wait();
                         }
                         catch(InterruptedException e) {
-                            // ignore
+                            // ignore and just retry
                         }
                     }
                 }
