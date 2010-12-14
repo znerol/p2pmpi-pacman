@@ -3,6 +3,8 @@ package deism;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import org.apache.log4j.Logger;
+
 import deism.Event;
 import deism.EventSink;
 
@@ -12,6 +14,7 @@ public class ThreadedEventSinkRunner implements EventSink {
     private final Worker worker = new Worker();
     private final EventSink sink;
     private long startSimtime;
+    private final static Logger logger = Logger.getLogger(ThreadedEventSinkRunner.class);
 
     public ThreadedEventSinkRunner(EventSink sink) {
         this.sink = sink;
@@ -45,6 +48,7 @@ public class ThreadedEventSinkRunner implements EventSink {
 
         @Override
         public void run() {
+            logger.debug("Start worker thread");
             sink.start(startSimtime);
 
             while (!done) {
@@ -62,12 +66,14 @@ public class ThreadedEventSinkRunner implements EventSink {
                 }
 
                 if (event != null) {
+                    logger.debug("Offering event to original source " + event);
                     sink.offer(event);
                 }
             }
 
             sink.stop();
-        }
+            logger.debug("Terminated worker thread");
+       }
 
         public void terminate() {
             done = true;
