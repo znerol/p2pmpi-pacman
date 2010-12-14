@@ -2,15 +2,22 @@ package wqcommon;
 
 import java.util.Random;
 
+import org.apache.log4j.Logger;
+
 
 import deism.Event;
 import deism.EventSource;
 
 public class ClientArrivedSource implements EventSource {
-    private long mtbca;
-    private long mstpc;
+    /** Last customer arrival time */
+    private long lcat;
+    /** Mean time between customer arrival */
+    private final long mtbca;
+    /** Mean service time per customer */
+    private final long mstpc;
     private Event currentEvent = null;
     private final Random rng;
+    private static final Logger logger = Logger.getLogger(ClientArrivedSource.class);
 
     public ClientArrivedSource(Random rng,
             long mean_time_between_customer_arrival,
@@ -27,11 +34,13 @@ public class ClientArrivedSource implements EventSource {
             long arrivalTime;
             long serviceTime;
             synchronized(rng) {
-                arrivalTime = currentSimtime
+                arrivalTime = lcat
                         + (long) (mtbca * -Math.log(rng.nextDouble()));
                 serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
             }
             currentEvent = new ClientArrivedEvent(arrivalTime, serviceTime);
+            logger.debug("New Event: " + currentEvent);
+            lcat = arrivalTime;
         }
         
         return currentEvent;
@@ -45,6 +54,7 @@ public class ClientArrivedSource implements EventSource {
 
     @Override
     public void start(long startSimtime) {
+        lcat = startSimtime;
     }
 
     @Override

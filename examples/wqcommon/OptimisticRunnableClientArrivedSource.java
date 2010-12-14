@@ -4,6 +4,8 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.apache.log4j.Logger;
+
 import deism.Event;
 import deism.EventSource;
 import deism.ExecutionGovernor;
@@ -17,6 +19,7 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
     private final Random rng;
     private final Queue<Event> events;
     private final Worker worker = new Worker();
+    private static final Logger logger = Logger.getLogger(OptimisticRunnableClientArrivedSource.class);
 
     public OptimisticRunnableClientArrivedSource(Random rng,
             ExecutionGovernor governor,
@@ -69,6 +72,7 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
                     serviceTime = (long) (mstpc * -Math.log(rng.nextDouble()));
                 }
                 Event e = new ClientArrivedEvent(arrivalTime, serviceTime);
+                logger.debug("New event: " + e);
                 events.offer(e);
                 mainGovernor.resume(e.getSimtime());
 
