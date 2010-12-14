@@ -37,8 +37,7 @@ public class WaitingRoom {
                 ClientArrivedEvent client = waitingQueue.peek();
                 CounterAvailableEvent counter = availableCounters.peek();
                 if (client != null && counter != null) {
-                    currentEvent = new CounterServiceEvent(
-                            availableCounters.poll(), waitingQueue.poll());
+                    currentEvent = new CounterServiceEvent(counter, client);
                 }
             }
 
@@ -48,8 +47,11 @@ public class WaitingRoom {
         @Override
         public void remove(Event event) {
             assert(event == currentEvent);
-            waitingQueue.remove(currentEvent.clientArrivedEvent);
-            availableCounters.remove(currentEvent.counterAvailableEvent);
+            boolean result;
+            result = waitingQueue.remove(currentEvent.clientArrivedEvent);
+            assert(result);
+            result = availableCounters.remove(currentEvent.counterAvailableEvent);
+            assert(result);
             pushHistory(currentEvent);
             currentEvent = null;
         }
@@ -91,11 +93,15 @@ public class WaitingRoom {
         @Override
         public void revertHistory(List<Event> tail) {
             for (Event event : tail) {
+                boolean result;
                 if (event instanceof ClientArrivedEvent) {
-                    waitingQueue.remove((ClientArrivedEvent) event);
+                    result = waitingQueue.remove((ClientArrivedEvent) event);
+                    assert(result);
                 }
                 else if (event instanceof CounterAvailableEvent) {
-                    availableCounters.remove((CounterAvailableEvent) event);
+                    result = 
+                        availableCounters.remove((CounterAvailableEvent) event);
+                    assert(result);
                 }
             }
         }

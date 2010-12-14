@@ -95,8 +95,8 @@ public class TimewarpJobQueueSimulation {
             new ArrayList<StateHistory<Long>>();
         stateObjects.add(new StateHistoryLogger());
         stateObjects.add(timewarpClientSource);
-        stateObjects.add(waitingRoom.dispatcher);
         stateObjects.add(waitingRoom.source);
+        stateObjects.add(waitingRoom.dispatcher);
         stateObjects.add(counterOne);
         stateObjects.add(counterTwo);
         stateObjects.add(jitterSource);
