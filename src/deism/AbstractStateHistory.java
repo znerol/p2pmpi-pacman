@@ -15,9 +15,9 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
     
     @Override
     public void save(K key) throws StateHistoryException {
-//        if (snapshots.containsKey(key)) {
-//            throw new StateHistoryException("Key exists");
-//        }
+        if (snapshots.containsKey(key)) {
+            throw new StateHistoryException("Key exists");
+        }
         
         Integer nextIndex = history.size();
         snapshots.put(key, nextIndex);

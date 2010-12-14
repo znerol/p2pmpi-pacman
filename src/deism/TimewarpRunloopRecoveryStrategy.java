@@ -7,6 +7,7 @@ public class TimewarpRunloopRecoveryStrategy
         implements EventRunloopRecoveryStrategy {
 
     private SortedSet<Long> snapshots;
+    private SortedSet<Long> unusableSnapshots = new TreeSet<Long>();
     private Iterable<StateHistory<Long>> stateObjects;
     public TimewarpRunloopRecoveryStrategy(
             Iterable<StateHistory<Long>> stateObjects) {
@@ -16,6 +17,15 @@ public class TimewarpRunloopRecoveryStrategy
         
     @Override
     public void save(Long timestamp) {
+        if (unusableSnapshots.contains(timestamp)) {
+            return;
+        }
+        else if (snapshots.contains(timestamp)) {
+            unusableSnapshots.add(timestamp);
+            snapshots.remove(timestamp);
+            return;
+        }
+        
         for (StateHistory<Long> s : stateObjects) {
             s.save(timestamp);
         }
