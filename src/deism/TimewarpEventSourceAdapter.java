@@ -1,15 +1,17 @@
 package deism;
 
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class TimewarpEventSourceAdapter
         extends AbstractStateHistory<Long, Event>
         implements TimewarpEventSource {
 
-    private final EventQueue<Event> pending = new EventPriorityQueue<Event>();
+    private final Queue<Event> pending = new PriorityQueue<Event>();
+    private final Queue<Event> pendingAnti = new PriorityQueue<Event>();
     private final EventSource source;
-    private Event lastEventFromSource;
-    
+
     public TimewarpEventSourceAdapter(EventSource orig) {
         source = orig;
     }
@@ -23,40 +25,61 @@ public class TimewarpEventSourceAdapter
     public void stop() {
         source.stop();
     }
-    
+
     @Override
     public Event peek(long currentSimtime) {
-        while (pending.peek() == null && source.peek(currentSimtime) != null) {
-            Event event = null;
+        Event event;
 
-            // poll antimessages until we get a normal event or null
-            for (event = source.peek(currentSimtime);
-                    event != null && event.isAntimessage();
-                    event = source.peek(currentSimtime)) {
+        while ((event = source.peek(currentSimtime)) != null) {
+            Event inverseEvent = event.inverseEvent();
+            if (event.isAntimessage()) {
+                // This event is an antimessage. If it matches a message in the
+                // pending queue the two annihilate. Otherwise the antimessage
+                // is added to the antimessage pending queue for later
+                // processing.
+                if (!pending.remove(inverseEvent)) {
+                    pendingAnti.offer(event);
+                }
                 source.remove(event);
-                pending.offer(event);
             }
-
-            lastEventFromSource = event;
-            if (lastEventFromSource != null) {
-                Event inverseEvent = event.inverseEvent();
-                if (pending.contains(inverseEvent)) {
-                    pending.remove(inverseEvent);
-                    source.remove(inverseEvent);
-                    lastEventFromSource = null;
-                }
-                else {
-                    pending.offer(lastEventFromSource);
-                }
+            else if(pendingAnti.remove(inverseEvent)) {
+                // Just silently absorb the event if we have a matching
+                // antimessage pending.
+                source.remove(event);
+            }
+            else if (pending.peek() == null) {
+                // If the pending queue is empty we just put the event into
+                // the queue.
+                pending.offer(event);
+                source.remove(event);
+            }
+            else if (event.compareTo(pending.peek()) < 0) {
+                // If the pending queue already contains events, we only
+                // want to add this event to the queue if it makes it is newer
+                // than peek.
+                pending.offer(event);
+                source.remove(event);
+            }
+            else {
+                break;
             }
         }
 
-        Event result = pending.peek();
-        // An EventSource may not emit antimessages when no corresponding Event
-        // was emitted before.
-        if (result != null && result.isAntimessage()
-                && !containedInHistory(result.inverseEvent())) {
-            result = null;
+        Event pendingPeek = pending.peek();
+        assert(pendingPeek == null || pendingPeek.isAntimessage() == false);
+        Event pendingAntiPeek = pendingAnti.peek();
+        assert(pendingAntiPeek == null || pendingAntiPeek.isAntimessage() == true);
+        Event result = null;
+
+        if (pendingPeek != null && pendingAntiPeek != null) {
+            result = pendingPeek.compareTo(pendingAntiPeek) >= 0 ?
+                    pendingAntiPeek : pendingPeek;
+        }
+        else if (pendingPeek != null) {
+            result = pendingPeek;
+        }
+        else if (pendingAntiPeek != null) {
+            result = pendingAntiPeek;
         }
 
         return result;
@@ -64,18 +87,32 @@ public class TimewarpEventSourceAdapter
 
     @Override
     public void remove(Event event) {
-        if (event == lastEventFromSource) {
-            source.remove(event);
-            lastEventFromSource = null;
+        boolean result;
+        if (event.isAntimessage()) {
+            result = pendingAnti.remove(event);
+            assert(result);
         }
-        assert(lastEventFromSource == null);
-
-        pending.remove(event);
+        else {
+            result = pending.remove(event);
+            assert(result);
+        }
         pushHistory(event);
     }
 
     @Override
     public void revertHistory(List<Event> tail) {
-        this.pending.addAll(tail);
+        for (Event event : tail) {
+            Event inverseEvent = event.inverseEvent();
+            if (event.isAntimessage()) {
+                if (!pending.remove(inverseEvent)) {
+                    pendingAnti.add(event);
+                }
+            }
+            else {
+                if (!pendingAnti.remove(inverseEvent)) {
+                    pending.add(event);
+                }
+            }
+        }
     }
 }
