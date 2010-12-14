@@ -3,6 +3,8 @@ package wq2;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.apache.log4j.BasicConfigurator;
+
 import util.EventLogger;
 import util.JitterEventSource;
 import util.StateHistoryLogger;
@@ -34,6 +36,7 @@ public class TimewarpJobQueueSimulation {
      * @param args
      */
     public static void main(String[] args) {
+        BasicConfigurator.configure();
         Random rng = new Random(1234);
         
         /* exit simulation after n units of simulation time */

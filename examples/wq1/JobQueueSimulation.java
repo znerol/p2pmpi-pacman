@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import org.apache.log4j.BasicConfigurator;
+
 import util.TerminateAfterDuration;
 import wqcommon.ClientArrivedEvent;
 import wqcommon.ClientArrivedSource;
@@ -28,6 +30,7 @@ public class JobQueueSimulation {
      * @param args
      */
     public static void main(String[] args) {
+        BasicConfigurator.configure();
         Random rng = new Random(1234);
         
         /* exit simulation after n units of simulation time */

@@ -3,6 +3,8 @@ package pingpong;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.BasicConfigurator;
+
 import p2pmpi.MpiEventSink;
 import p2pmpi.MpiEventSource;
 import p2pmpi.mpi.MPI;
@@ -36,6 +38,10 @@ public class Pingpong {
     public static void main(String[] args) {
         MPI.Init(args);
         assert (MPI.COMM_WORLD.Size() == 2);
+
+        if (MPI.COMM_WORLD.Rank() == 0) {
+            BasicConfigurator.configure();
+        }
 
         /* exit simulation after n units of simulation time */
         EventCondition termCond = new TerminateAfterDuration(10000);
