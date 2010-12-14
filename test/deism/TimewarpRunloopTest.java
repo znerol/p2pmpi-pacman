@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +35,8 @@ public class TimewarpRunloopTest {
     TimewarpEventSource eventSource;
     
     @Before
-    public void setup() {
+    public void setUp() {
+        BasicConfigurator.configure();
         eventQueue = new ArrayDeque<Event>();
         
         simpleEventSource = new EventSource() {
@@ -69,8 +71,10 @@ public class TimewarpRunloopTest {
     public void runSourceWithWrongEventOrderRollbackToLoopStart() {
         final Event one = new Event(1);
         final Event two = new Event(2);
+        final Event three = new Event(3);
 
         eventQueue.add(two);
+        eventQueue.add(three);
         eventQueue.add(one);
         
         /*
@@ -78,6 +82,7 @@ public class TimewarpRunloopTest {
          */
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
+        when(governor.suspendUntil(3)).thenReturn(3L);
         when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
         when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
@@ -88,6 +93,7 @@ public class TimewarpRunloopTest {
         // will be emitted twice.
         verify(eventDispatcher).dispatchEvent(one);
         verify(eventDispatcher, times(2)).dispatchEvent(two);
+        verify(eventDispatcher).dispatchEvent(three);
     }    
 
     @Test
@@ -96,10 +102,12 @@ public class TimewarpRunloopTest {
         final Event two = new Event(2);
         final Event three = new Event(3);
         final Event four = new Event(4);
+        final Event five = new Event(5);
 
         eventQueue.add(one);
         eventQueue.add(two);
         eventQueue.add(four);
+        eventQueue.add(five);
         eventQueue.add(three);
         
         /*
@@ -109,6 +117,7 @@ public class TimewarpRunloopTest {
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
         when(governor.suspendUntil(4)).thenReturn(4L);
+        when(governor.suspendUntil(5)).thenReturn(5L);
         when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
         when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
@@ -121,5 +130,6 @@ public class TimewarpRunloopTest {
         verify(eventDispatcher).dispatchEvent(two);
         verify(eventDispatcher).dispatchEvent(three);
         verify(eventDispatcher, times(2)).dispatchEvent(four);
+        verify(eventDispatcher).dispatchEvent(five);
     }    
 }
