@@ -96,15 +96,15 @@ public class Pingpong {
         EventRunloopRecoveryStrategy recoveryStrategy = new TimewarpRunloopRecoveryStrategy(
                 stateObjects);
 
-        EventCondition noSnapshots = new EventCondition() {
+        EventCondition snapshotAll = new EventCondition() {
             @Override
             public boolean match(Event e) {
-                return false;
+                return true;
             }
         };
 
         FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
-                recoveryStrategy, noSnapshots);
+                recoveryStrategy, snapshotAll);
 
         runloop.run(new EventSourceCollection(sources), mpiEventSink,
                 new EventDispatcherCollection(dispatchers));
