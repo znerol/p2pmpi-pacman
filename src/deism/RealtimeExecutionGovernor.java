@@ -1,5 +1,7 @@
 package deism;
 
+import org.apache.log4j.Logger;
+
 /**
  * ExecutionGovernor implementation using the RealtimeClock
  * 
@@ -11,6 +13,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     private Timebase systemTimebase;
     private SystemTimeProxy systemTime;
     private long wakeupTime;
+    private final static Logger logger = Logger.getLogger(RealtimeExecutionGovernor.class);
 
     public RealtimeExecutionGovernor(double scale) {
         simulationTimebase = new Timebase(scale);
@@ -21,11 +24,15 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     @Override
     public synchronized void start(long simtime) {
         simulationTimebase.setTimebase(simtime);
-        systemTimebase.setTimebase(systemTime.get());
+        long systime = systemTime.get();
+        systemTimebase.setTimebase(systime);
+        logger.debug("Governor start at simtime " + simtime + " systime "
+                + systime);
     }
 
     @Override
     public synchronized void stop() {
+        logger.debug("Governor stop");
     }
 
     /**
@@ -36,9 +43,11 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
         wakeupTime = Long.MAX_VALUE;
         
         try {
+            logger.debug("Wait indefinitely");
             this.wait();
         }
         catch (InterruptedException ex) {
+            logger.debug(ex);
             // ignored intentionally
         }
         
@@ -62,11 +71,12 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
                 systemTime.get();
         try {
             if (delay > 0) {
-                System.out.println("** Wait delay=" + delay);
+                logger.debug("Wait for " + delay + " milliseconds");
                 this.wait(delay);
             }
         }
         catch (InterruptedException ex) {
+            logger.debug(ex);
             // ignored intentionally
         }
 
@@ -77,6 +87,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     public synchronized void resume() {
         this.wakeupTime = Math.min(this.wakeupTime,
                 systemTimebase.convert(systemTime.get(), simulationTimebase));
+        logger.debug("Resume at " + this.wakeupTime);
         this.notify();
     }
     
@@ -85,6 +96,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
         this.wakeupTime = Math.min(this.wakeupTime, wakeupTime);
         this.wakeupTime = Math.min(this.wakeupTime,
                 systemTimebase.convert(systemTime.get(), simulationTimebase));
+        logger.debug("Resume at " + this.wakeupTime + " with given maximum wakeup time " + wakeupTime);
         this.notify();
     }
 }

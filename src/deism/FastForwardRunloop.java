@@ -1,5 +1,7 @@
 package deism;
 
+import org.apache.log4j.Logger;
+
 /**
  * Simple realtime implementation of EventLoop
  * 
@@ -18,6 +20,7 @@ public class FastForwardRunloop implements EventRunloop {
     private long currentSimtime = 0;
     private EventRunloopRecoveryStrategy recoveryStrategy;
     private EventCondition snapshotCondition;
+    private final static Logger logger = Logger.getLogger(FastForwardRunloop.class);
 
     public FastForwardRunloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
@@ -44,20 +47,25 @@ public class FastForwardRunloop implements EventRunloop {
 
     @Override
     public void run(EventSource source, EventSink sink, EventDispatcher disp) {
+        logger.debug("Start runloop at simulation time: " + currentSimtime);
 
         long lastSimtime = currentSimtime;
         
         // support rollback to before very first event
         recoveryStrategy.save(currentSimtime - 1);
 
+        logger.debug("Start governor, source, sink");
         governor.start(currentSimtime);
         source.start(currentSimtime);
         sink.start(currentSimtime);
 
         while (!stop) {
+            logger.debug("Begin runloop cycle");
             Event peekEvent = source.peek(currentSimtime);
+            logger.info("Optained peekEvent from event source " + peekEvent);
 
             if (terminationCondition.match(peekEvent)) {
+                logger.info("Event matches termination condition, exit runloop");
                 break;
             }
 
@@ -67,12 +75,16 @@ public class FastForwardRunloop implements EventRunloop {
             long newSimtime;
             if (peekEvent != null) {
                 // Notify sink that we're about to handle peekEvent
+                logger.info("Announce peekEvent to event sink " + peekEvent);
                 sink.offer(peekEvent);
+                logger.debug("Suspend runloop until " + peekEvent.getSimtime());
                 newSimtime = governor.suspendUntil(peekEvent.getSimtime());
             }
             else {
+                logger.debug("Suspend runloop indefinitely");
                 newSimtime = governor.suspend();
             }
+            logger.debug("Resumed runloop at " + newSimtime);
 
             currentSimtime = newSimtime;
 
@@ -84,6 +96,7 @@ public class FastForwardRunloop implements EventRunloop {
                 // Restart and reevaluate loop conditions and current event
                 // when the current simulation time is less than that of the
                 // next event.
+                logger.debug("Resumed runloop before the expected time, restart runloop cycle");
                 sink.offer(peekEvent.inverseEvent());
                 continue;
             }
@@ -92,25 +105,32 @@ public class FastForwardRunloop implements EventRunloop {
                 System.out.println("Rollback caused by: " + peekEvent);
                 recoveryStrategy.rollback(currentSimtime);
                 lastSimtime = currentSimtime;
+                logger.debug("Restart runloop cycle at " + currentSimtime);
                 continue;
             }
 
+            logger.debug("Accept peekEvent " + peekEvent);
             source.remove(peekEvent);
 
             // Antimessages aren't allowed here.
             assert(peekEvent.isAntimessage() == false);
+            logger.info("Dispatch peekEvent " + peekEvent);
             disp.dispatchEvent(peekEvent);
 
             if (snapshotCondition.match(peekEvent)) {
+                logger.info("Take snapshot at " + currentSimtime);
                 recoveryStrategy.save(currentSimtime);
             }
 
             lastSimtime = currentSimtime;
         }
 
+        logger.debug("Stop source, sink, governor");
         source.stop();
         sink.stop();
         governor.stop();
+
+        logger.info("End runloop");
     }
 
     @Override
