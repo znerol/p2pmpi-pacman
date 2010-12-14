@@ -18,8 +18,8 @@ public class BallEvent extends Event {
     }
 
     public String toString() {
-        return "[BallEvent timestamp=" + getSimtime() + " from=" + sender +
-            " to=" + receiver;
+        return (isAntimessage() ? "-" : "+") + "[BallEvent timestamp="
+                + getSimtime() + " from=" + sender + " to=" + receiver;
     }
     
     public int getSender() {
