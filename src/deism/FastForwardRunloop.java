@@ -102,7 +102,11 @@ public class FastForwardRunloop implements EventRunloop {
             }
 
             if (currentSimtime < lastSimtime || peekEvent.isAntimessage()) {
-                System.out.println("Rollback caused by: " + peekEvent);
+                if (peekEvent.isAntimessage()) {
+                    source.remove(peekEvent);
+                }
+
+                logger.debug("Initiate rollback caused by peekEvent " + peekEvent);
                 recoveryStrategy.rollback(currentSimtime);
                 lastSimtime = currentSimtime;
                 logger.debug("Restart runloop cycle at " + currentSimtime);
