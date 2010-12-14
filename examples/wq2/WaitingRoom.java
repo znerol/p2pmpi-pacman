@@ -1,19 +1,19 @@
 package wq2;
 
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import wqcommon.ClientArrivedEvent;
 
 import deism.AbstractStateHistory;
 import deism.Event;
 import deism.EventDispatcher;
-import deism.EventPriorityQueue;
-import deism.EventQueue;
 import deism.TimewarpEventSource;
 
 public class WaitingRoom {
-    private EventQueue<ClientArrivedEvent> waitingQueue;
-    private EventQueue<CounterAvailableEvent> availableCounters;
+    private Queue<ClientArrivedEvent> waitingQueue;
+    private Queue<CounterAvailableEvent> availableCounters;
     public final WaitingRoom.Source source = new WaitingRoom.Source();
     public final WaitingRoom.Dispatcher dispatcher =
         new WaitingRoom.Dispatcher();
@@ -21,8 +21,8 @@ public class WaitingRoom {
         new WaitingRoom.StatisticsLogger();
 
     public WaitingRoom() {
-        waitingQueue = new EventPriorityQueue<ClientArrivedEvent>();
-        availableCounters = new EventPriorityQueue<CounterAvailableEvent>();
+        waitingQueue = new PriorityQueue<ClientArrivedEvent>();
+        availableCounters = new PriorityQueue<CounterAvailableEvent>();
     }
     
     public class Source
