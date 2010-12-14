@@ -23,6 +23,7 @@ import deism.FilteredEventSink;
 import deism.ImmediateExecutionGovernor;
 import deism.RealtimeExecutionGovernor;
 import deism.StateHistory;
+import deism.ThreadedEventSourceRunner;
 import deism.TimewarpEventSinkAdapter;
 import deism.TimewarpEventSourceAdapter;
 import deism.TimewarpRunloopRecoveryStrategy;
@@ -55,10 +56,12 @@ public class Pingpong {
         final int me = MPI.COMM_WORLD.Rank();
         final int other = 1 - me;
 
-        EventSource mpiEventSource = new MpiEventSource(MPI.COMM_WORLD, other,
-                me, 0, governor);
-        EventSource[] sources = {
-                new BallEventSource(me * 50, 100, me, other), mpiEventSource, };
+        EventSource mpiEventSource = new ThreadedEventSourceRunner(governor,
+                new MpiEventSource(MPI.COMM_WORLD, other, 0));
+//        EventSource mpiEventSource = 
+//                new MpiEventSource(MPI.COMM_WORLD, other, 0);
+        EventSource[] sources = { new BallEventSource(me * 50, 100, me, other),
+                mpiEventSource, };
 
         EventCondition onlyMine = new EventCondition() {
             @Override
@@ -72,21 +75,20 @@ public class Pingpong {
         };
 
         EventSink mpiEventSink = new FilteredEventSink(onlyMine,
-                new MpiEventSink(MPI.COMM_WORLD, me, other, 0));
+                new MpiEventSink(MPI.COMM_WORLD, other, 0));
 
         List<EventDispatcher> dispatchers = new ArrayList<EventDispatcher>();
         if (me == 0) {
             dispatchers.add(new EventLogger());
         }
 
-        ArrayList<StateHistory<Long>> stateObjects =
-            new ArrayList<StateHistory<Long>>();
+        ArrayList<StateHistory<Long>> stateObjects = new ArrayList<StateHistory<Long>>();
         stateObjects.add(new StateHistoryLogger());
         stateObjects.add(new TimewarpEventSinkAdapter(mpiEventSink));
         stateObjects.add(new TimewarpEventSourceAdapter(mpiEventSource));
 
-        EventRunloopRecoveryStrategy recoveryStrategy =
-            new TimewarpRunloopRecoveryStrategy(stateObjects);
+        EventRunloopRecoveryStrategy recoveryStrategy = new TimewarpRunloopRecoveryStrategy(
+                stateObjects);
 
         EventCondition noSnapshots = new EventCondition() {
             @Override
@@ -98,8 +100,7 @@ public class Pingpong {
         FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, noSnapshots);
 
-        runloop.run(new EventSourceCollection(sources),
-                mpiEventSink,
+        runloop.run(new EventSourceCollection(sources), mpiEventSink,
                 new EventDispatcherCollection(dispatchers));
 
         MPI.Finalize();
