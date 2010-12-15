@@ -6,8 +6,9 @@ import p2pmpi.mpi.MPI;
 
 import deism.core.Event;
 import deism.core.EventSink;
+import deism.run.Blocking;
 
-public class MpiEventSink implements EventSink {
+public class MpiEventSink implements EventSink, Blocking {
 
     private final int mpireceiver;
     private final int mpitag;

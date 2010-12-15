@@ -4,9 +4,12 @@ import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 
 import deism.core.Event;
+import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
+import deism.run.Blocking;
 
-public class MpiEventGenerator implements StatefulEventGenerator {
+public class MpiEventGenerator implements StatefulEventGenerator, Stateful,
+        Blocking {
 
     private final int mpisender;
     private final int mpitag;
