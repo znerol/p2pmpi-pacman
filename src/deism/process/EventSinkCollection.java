@@ -1,6 +1,9 @@
-package deism.core;
+package deism.process;
 
 import java.util.Arrays;
+
+import deism.core.Event;
+import deism.core.EventSink;
 
 public class EventSinkCollection implements EventSink {
     private Iterable<EventSink> eventSinks;

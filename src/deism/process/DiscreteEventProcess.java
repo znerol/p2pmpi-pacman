@@ -1,4 +1,4 @@
-package deism.run;
+package deism.process;
 
 import deism.core.EventDispatcher;
 import deism.core.EventSink;

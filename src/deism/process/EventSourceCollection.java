@@ -1,14 +1,15 @@
-package deism.core;
+package deism.process;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import deism.core.Event;
+import deism.core.EventSource;
 
 /**
  * Special EventSource aggregating the events from multiple EventSources
  */
 public class EventSourceCollection implements EventSource {
-    protected Iterable<EventSource> eventSources;
+    protected final Iterable<EventSource> eventSources;
     private EventSource currentSource;
 
     public EventSourceCollection(Iterable<EventSource> eventSources) {
@@ -21,23 +22,16 @@ public class EventSourceCollection implements EventSource {
 
     @Override
     public Event peek(long currentSimtime) {
-        Map<EventSource, Event> candidates =
-            new LinkedHashMap<EventSource, Event>();
         Event result = null;
 
-        // poll all event sources and knock up the candidates map.
+        // find the event and source with the smallest timestamp
+        currentSource = null;
         for (EventSource source : eventSources) {
             Event candidateEvent = source.peek(currentSimtime);
-            if (candidateEvent != null) {
-                candidates.put(source, candidateEvent);
+            if (candidateEvent == null) {
+                continue;
             }
-        }
-
-        // find the event with the least timestamp
-        currentSource = null;
-        for (EventSource source : candidates.keySet()) {
-            Event candidateEvent = candidates.get(source);
-            if (result == null || candidateEvent.compareTo(result) < 0) {
+            else if (result == null || candidateEvent.compareTo(result) < 0) {
                 result = candidateEvent;
                 currentSource = source;
             }

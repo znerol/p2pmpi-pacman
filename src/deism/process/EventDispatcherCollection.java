@@ -1,6 +1,9 @@
-package deism.core;
+package deism.process;
 
 import java.util.Arrays;
+
+import deism.core.Event;
+import deism.core.EventDispatcher;
 
 public class EventDispatcherCollection implements EventDispatcher {
     private final Iterable<EventDispatcher> dispatchers;

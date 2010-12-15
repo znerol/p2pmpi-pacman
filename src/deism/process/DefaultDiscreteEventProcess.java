@@ -1,15 +1,13 @@
-package deism.run;
+package deism.process;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import deism.core.Event;
 import deism.core.EventDispatcher;
-import deism.core.EventDispatcherCollection;
 import deism.core.EventSink;
-import deism.core.EventSinkCollection;
 import deism.core.EventSource;
-import deism.core.EventSourceCollection;
+import deism.run.Startable;
 
 public class DefaultDiscreteEventProcess implements DiscreteEventProcess, Startable {
     private final List<EventSource> sourceList = new ArrayList<EventSource>();
@@ -26,52 +24,18 @@ public class DefaultDiscreteEventProcess implements DiscreteEventProcess, Starta
 
     public void addEventSource(EventSource source) {
         sourceList.add(source);
-        if (source instanceof Startable) {
-            addStartable((Startable)source);
-        }
-    }
-
-    public void removeEventSource(EventSource source) {
-        sourceList.remove(source);
-        if (source instanceof Startable) {
-            removeStartable((Startable)source);
-        }
     }
 
     public void addEventSink(EventSink sink) {
         sinkList.add(sink);
-        if (sink instanceof Startable) {
-            addStartable((Startable)sink);
-        }
-    }
-
-    public void removeEventSink(EventSink sink) {
-        sinkList.remove(sink);
-        if (sink instanceof Startable) {
-            removeStartable((Startable)sink);
-        }
     }
 
     public void addEventDispatcher(EventDispatcher dispatcher) {
         dispatcherList.add(dispatcher);
-        if (dispatcher instanceof Startable) {
-            addStartable((Startable)dispatcher);
-        }
-    }
-
-    public void removeEventDispatcher(EventDispatcher dispatcher) {
-        dispatcherList.remove(dispatcher);
-        if (dispatcher instanceof Startable) {
-            removeStartable((Startable)dispatcher);
-        }
     }
 
     public void addStartable(Startable startable) {
         startableList.add(startable);
-    }
-
-    public void removeStartable(Startable startable) {
-        startableList.remove(startable);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package deism.run;
 
+import deism.process.DiscreteEventProcess;
+
 
 /**
  * EventRunloop implementations iterate thru events from an eventSource
