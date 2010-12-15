@@ -9,7 +9,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import deism.core.Event;
 import deism.core.EventSource;
-import deism.core.EventSourceCollection;
+import deism.process.EventSourceCollection;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

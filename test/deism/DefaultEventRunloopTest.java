@@ -9,8 +9,8 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.core.EventCondition;
+import deism.process.DiscreteEventProcess;
 import deism.run.DefaultEventRunloop;
-import deism.run.DiscreteEventProcess;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.stateful.StateHistoryException;

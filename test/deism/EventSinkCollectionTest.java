@@ -7,7 +7,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import deism.core.Event;
 import deism.core.EventSink;
-import deism.core.EventSinkCollection;
+import deism.process.EventSinkCollection;
 
 import static org.mockito.Mockito.*;
 
