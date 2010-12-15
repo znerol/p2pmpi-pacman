@@ -15,7 +15,7 @@ import deism.core.EventCondition;
 import deism.run.EventRunloop;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
-import deism.run.FastForwardRunloop;
+import deism.run.DefaultEventRunloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.TimewarpRunloopRecoveryStrategy;
@@ -83,7 +83,7 @@ public class TimewarpJobQueueSimulation {
         EventRunloopRecoveryStrategy recoveryStrategy =
             new TimewarpRunloopRecoveryStrategy(process);
 
-        EventRunloop runloop = new FastForwardRunloop(governor, termCond,
+        EventRunloop runloop = new DefaultEventRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
 
         runloop.run(process);

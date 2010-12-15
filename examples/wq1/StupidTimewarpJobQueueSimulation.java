@@ -14,7 +14,7 @@ import deism.core.EventCondition;
 import deism.run.EventRunloop;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
-import deism.run.FastForwardRunloop;
+import deism.run.DefaultEventRunloop;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.TimewarpRunloopRecoveryStrategy;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
@@ -66,7 +66,7 @@ public class StupidTimewarpJobQueueSimulation {
         EventRunloopRecoveryStrategy recoveryStrategy =
             new TimewarpRunloopRecoveryStrategy(process);
 
-        EventRunloop runloop = new FastForwardRunloop(governor, termCond,
+        EventRunloop runloop = new DefaultEventRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
 
         runloop.run(process);

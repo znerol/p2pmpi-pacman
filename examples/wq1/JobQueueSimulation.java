@@ -17,7 +17,7 @@ import deism.run.DefaultDiscreteEventProcess;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.run.FailFastRunloopRecoveryStrategy;
-import deism.run.FastForwardRunloop;
+import deism.run.DefaultEventRunloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 
@@ -74,7 +74,7 @@ public class JobQueueSimulation {
             }
         };
         
-        FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
+        DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
                 recoveryStrategy, noSnapshots);
         runloop.run(process);
     }

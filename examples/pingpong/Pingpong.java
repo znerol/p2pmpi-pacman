@@ -19,7 +19,7 @@ import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
-import deism.run.FastForwardRunloop;
+import deism.run.DefaultEventRunloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.ThreadedEventSourceRunner;
@@ -107,7 +107,7 @@ public class Pingpong {
             }
         };
 
-        FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
+        DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
 
         runloop.run(process);

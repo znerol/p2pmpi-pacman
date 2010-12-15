@@ -17,7 +17,7 @@ import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
-import deism.run.FastForwardRunloop;
+import deism.run.DefaultEventRunloop;
 import deism.run.TimewarpRunloopRecoveryStrategy;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.StateHistory;
@@ -41,7 +41,7 @@ public class TimewarpRunloopTest {
 
     List<StateHistory<Long>> stateObjects;
     EventRunloopRecoveryStrategy recoveryStrategy;
-    FastForwardRunloop runloop;
+    DefaultEventRunloop runloop;
     
     ArrayDeque<Event> eventQueue;
     EventSource simpleEventSource;
@@ -72,7 +72,7 @@ public class TimewarpRunloopTest {
         process.addEventSink(eventSink);
 
         recoveryStrategy = new TimewarpRunloopRecoveryStrategy(process);
-        runloop = new FastForwardRunloop(governor, terminationCondition,
+        runloop = new DefaultEventRunloop(governor, terminationCondition,
                 recoveryStrategy, snapshotCondition);
     }
 

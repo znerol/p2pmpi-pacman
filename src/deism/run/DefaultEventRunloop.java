@@ -11,21 +11,17 @@ import deism.core.EventCondition;
  * This EventRunloop implementation respects the simtime property of the events
  * supplied by the event source such that if an event for a future point in time
  * is received, execution is delayed adequately.
- * 
- * FastForwardRunloop verifies that events delivered by the event source arrive
- * in the proper order i.e. with increasing timestamps. Otherwise an
- * EventSourceOrderException is thrown.
  */
-public class FastForwardRunloop implements EventRunloop {
+public class DefaultEventRunloop implements EventRunloop {
     private boolean stop = false;
     private EventCondition terminationCondition = null;
     private ExecutionGovernor governor;
     private long currentSimtime = 0;
     private EventRunloopRecoveryStrategy recoveryStrategy;
     private EventCondition snapshotCondition;
-    private final static Logger logger = Logger.getLogger(FastForwardRunloop.class);
+    private final static Logger logger = Logger.getLogger(DefaultEventRunloop.class);
 
-    public FastForwardRunloop(ExecutionGovernor governor,
+    public DefaultEventRunloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             EventRunloopRecoveryStrategy recoveryStrategy,
             EventCondition snapshotCondition) {

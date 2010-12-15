@@ -9,15 +9,15 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.core.EventCondition;
+import deism.run.DefaultEventRunloop;
 import deism.run.DiscreteEventProcess;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
-import deism.run.FastForwardRunloop;
 import deism.stateful.StateHistoryException;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FastForwardRunloopTest {
+public class DefaultEventRunloopTest {
     @Mock
     DiscreteEventProcess process;
     @Mock
@@ -35,7 +35,7 @@ public class FastForwardRunloopTest {
      */
     @Test
     public void runNoEvent() {
-        final FastForwardRunloop r = new FastForwardRunloop(governor,
+        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
         when(process.peek(0)).thenReturn(null);
@@ -58,7 +58,7 @@ public class FastForwardRunloopTest {
     public void runSomeEvents() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final FastForwardRunloop r = new FastForwardRunloop(governor,
+        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
         /*
@@ -99,7 +99,7 @@ public class FastForwardRunloopTest {
         final Event two = new Event(2);
         final Event three = new Event(3);
 
-        final FastForwardRunloop r = new FastForwardRunloop(governor,
+        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
         when(process.peek(0)).thenReturn(one);
@@ -140,7 +140,7 @@ public class FastForwardRunloopTest {
     {
         final Event one = new Event(2);
 
-        final FastForwardRunloop r = new FastForwardRunloop(governor,
+        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
         when(process.peek(0)).thenReturn(one);
@@ -174,7 +174,7 @@ public class FastForwardRunloopTest {
     public void runSourceWithWrongEventOrder() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final FastForwardRunloop r = new FastForwardRunloop(governor,
+        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
         /*
