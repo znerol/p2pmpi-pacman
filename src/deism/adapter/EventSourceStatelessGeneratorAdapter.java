@@ -10,7 +10,8 @@ import deism.core.StatelessEventGenerator;
 public class EventSourceStatelessGeneratorAdapter implements EventSource {
     private final StatelessEventGenerator generator;
 
-    public EventSourceStatelessGeneratorAdapter(StatelessEventGenerator generator) {
+    public EventSourceStatelessGeneratorAdapter(
+            StatelessEventGenerator generator) {
         this.generator = generator;
     }
 

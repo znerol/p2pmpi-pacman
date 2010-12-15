@@ -2,12 +2,14 @@ package deism.adapter;
 
 import deism.core.Event;
 import deism.core.EventSource;
+import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 
 /**
  * Adapter class which turns a StatefulEventGenerator into an EventSource
  */
-public class EventSourceStatefulGeneratorAdapter implements EventSource {
+public class EventSourceStatefulGeneratorAdapter implements EventSource,
+        Stateful {
     private final StatefulEventGenerator generator;
     private Event currentEvent;
 

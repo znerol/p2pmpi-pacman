@@ -8,7 +8,7 @@ package deism.core;
  * realtime communication channels between logical simulation processes or as
  * playback device for prerecorded event sequences stored on disk.
  */
-public interface StatefulEventGenerator {
+public interface StatefulEventGenerator extends Stateful {
     /**
      * Receive an event from the generator.
      * 

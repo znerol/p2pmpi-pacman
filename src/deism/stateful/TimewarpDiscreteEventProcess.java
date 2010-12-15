@@ -1,6 +1,6 @@
 package deism.stateful;
 
-import deism.run.DiscreteEventProcess;
+import deism.process.DiscreteEventProcess;
 
 public interface TimewarpDiscreteEventProcess extends DiscreteEventProcess,
         StateHistory<Long> {
