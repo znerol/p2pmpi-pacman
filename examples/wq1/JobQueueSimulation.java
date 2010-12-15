@@ -13,7 +13,8 @@ import wqcommon.PestimisticRunnableClientArrivedSource;
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.run.DefaultDiscreteEventProcess;
+import deism.process.DefaultDiscreteEventProcess;
+import deism.process.DefaultProcessBuilder;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.run.FailFastRunloopRecoveryStrategy;
@@ -46,23 +47,24 @@ public class JobQueueSimulation {
         }
 
         DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
+        DefaultProcessBuilder builder = new DefaultProcessBuilder(process, governor);
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         if (multithread) {
-            process.addEventSource(new PestimisticRunnableClientArrivedSource(
+            builder.add(new PestimisticRunnableClientArrivedSource(
                     rng, governor, 1000, 1600));
         }
         else {
-            process.addEventSource(new EventSourceStatefulGeneratorAdapter(
+            builder.add(new EventSourceStatefulGeneratorAdapter(
                 new ClientArrivedGenerator(rng, 1000, 1600)));
         }
-        
+
         PriorityBlockingQueue<ClientArrivedEvent> jobs =
             new PriorityBlockingQueue<ClientArrivedEvent>();
-        process.addEventSource(new ClerkSource(jobs));
-        process.addEventSource(new ClerkSource(jobs));
+        builder.add(new ClerkSource(jobs));
+        builder.add(new ClerkSource(jobs));
 
-        process.addEventDispatcher(new JobAggregator(jobs));
+        builder.add(new JobAggregator(jobs));
         
         EventRunloopRecoveryStrategy recoveryStrategy =
             new FailFastRunloopRecoveryStrategy();
