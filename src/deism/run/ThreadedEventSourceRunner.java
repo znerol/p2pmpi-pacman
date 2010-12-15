@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import deism.core.Event;
 import deism.core.EventSource;
 
-public class ThreadedEventSourceRunner implements EventSource {
+public class ThreadedEventSourceRunner implements EventSource, Startable {
     private final Queue<Event> events = new ArrayDeque<Event>();
     private final EventSource source;
     private final ExecutionGovernor governor;
@@ -31,7 +31,7 @@ public class ThreadedEventSourceRunner implements EventSource {
     }
 
     @Override
-    public void stop() {
+    public void stop(long simtime) {
         synchronized (worker) {
             worker.terminate();
         }
@@ -62,7 +62,9 @@ public class ThreadedEventSourceRunner implements EventSource {
         @Override
         public void run() {
             logger.debug("Start worker thread");
-            source.start(startSimtime);
+            if (source instanceof Startable) {
+                ((Startable)source).start(startSimtime);
+            }
             long mySimtime = startSimtime;
 
             while (!done) {
@@ -81,8 +83,9 @@ public class ThreadedEventSourceRunner implements EventSource {
                     governor.resume(event.getSimtime());
                 }
             }
-
-            source.stop();
+            if (source instanceof Startable) {
+                ((Startable)source).stop(mySimtime);
+            }
             logger.debug("Terminated worker thread");
         }
 

@@ -6,10 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import deism.adapter.FilteredEventSink;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventSink;
-import deism.core.FilteredEventSink;
 
 import static org.mockito.Mockito.*;
 
@@ -25,18 +25,6 @@ public class FilteredEventSinkTest {
     @Before
     public void setUp() {
         filteredEventSink = new FilteredEventSink(filter, sink);
-    }
-
-    @Test
-    public void testStartStop() {
-        filteredEventSink.start(7L);
-        filteredEventSink.stop();
-
-        verify(sink).start(7L);
-        verify(sink).stop();
-
-        verifyNoMoreInteractions(filter);
-        verifyNoMoreInteractions(sink);
     }
 
     @Test

@@ -1,31 +1,23 @@
 package wq1;
 
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.BasicConfigurator;
 
-import util.StateHistoryLogger;
 import util.TerminateAfterDuration;
 import wqcommon.ClientArrivedEvent;
 import wqcommon.OptimisticRunnableClientArrivedSource;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.core.EventDispatcher;
-import deism.core.EventSink;
-import deism.core.EventSinkCollection;
-import deism.core.EventSource;
-import deism.core.EventSourceCollection;
 import deism.run.EventRunloop;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.run.FastForwardRunloop;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.TimewarpRunloopRecoveryStrategy;
-import deism.stateful.StateHistory;
-import deism.stateful.TimewarpEventSource;
+import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.TimewarpEventSourceAdapter;
 
 public class StupidTimewarpJobQueueSimulation {
@@ -45,22 +37,25 @@ public class StupidTimewarpJobQueueSimulation {
         ExecutionGovernor governor;
         governor = new RealtimeExecutionGovernor(speed);
 
-        EventSource clientSource = new OptimisticRunnableClientArrivedSource(
-                rng, governor, speed, 1000, 1600);
+        DefaultTimewarpDiscreteEventProcess process = 
+            new DefaultTimewarpDiscreteEventProcess();
+
+        OptimisticRunnableClientArrivedSource clientArrivedSource =
+            new OptimisticRunnableClientArrivedSource(rng, governor, speed,
+                    1000, 1600);
+        process.addStartable(clientArrivedSource);
+        process.addEventSource(
+                new TimewarpEventSourceAdapter(clientArrivedSource));
         
         PriorityBlockingQueue<ClientArrivedEvent> jobs =
             new PriorityBlockingQueue<ClientArrivedEvent>();
-        
-        /* Define as many customer/clerk sources as you wish */
-        EventSource[] sources = {
-                clientSource,
-                new ClerkSource(jobs),
-                new ClerkSource(jobs)
-        };
-        
-        TimewarpEventSource timewarpSources = 
-            new TimewarpEventSourceAdapter(new EventSourceCollection(sources));
+        process.addEventSource(
+                new TimewarpEventSourceAdapter(new ClerkSource(jobs)));
+        process.addEventSource(
+                new TimewarpEventSourceAdapter(new ClerkSource(jobs)));
 
+        process.addEventDispatcher(new JobAggregator(jobs));
+        
         EventCondition snapshotAll = new EventCondition() {
             @Override
             public boolean match(Event e) {
@@ -68,20 +63,12 @@ public class StupidTimewarpJobQueueSimulation {
             }
         };
 
-        EventDispatcher disp = new JobAggregator(jobs);
-
-        ArrayList<StateHistory<Long>> stateObjects =
-            new ArrayList<StateHistory<Long>>();
-        stateObjects.add(new StateHistoryLogger());
-        stateObjects.add(timewarpSources);
-
         EventRunloopRecoveryStrategy recoveryStrategy =
-            new TimewarpRunloopRecoveryStrategy(stateObjects);
+            new TimewarpRunloopRecoveryStrategy(process);
 
         EventRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, snapshotAll);
-        
-        runloop.run(timewarpSources,
-                new EventSinkCollection(new ArrayList<EventSink>()), disp);
+
+        runloop.run(process);
     }
 }

@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import deism.core.Event;
 import deism.core.EventSink;
 
-public class ThreadedEventSinkRunner implements EventSink {
+public class ThreadedEventSinkRunner implements EventSink, Startable {
 
     private final Queue<Event> events = new ArrayDeque<Event>();
     private final Worker worker = new Worker();
@@ -37,7 +37,7 @@ public class ThreadedEventSinkRunner implements EventSink {
     }
 
     @Override
-    public void stop() {
+    public void stop(long simtime) {
         synchronized (worker) {
             worker.terminate();
         }
@@ -49,7 +49,9 @@ public class ThreadedEventSinkRunner implements EventSink {
         @Override
         public void run() {
             logger.debug("Start worker thread");
-            sink.start(startSimtime);
+            if (sink instanceof Startable) {
+                ((Startable)sink).start(startSimtime);
+            }
 
             while (!done) {
                 Event event = null;
@@ -71,7 +73,9 @@ public class ThreadedEventSinkRunner implements EventSink {
                 }
             }
 
-            sink.stop();
+            if (sink instanceof Startable) {
+                ((Startable)sink).stop(startSimtime);
+            }
             logger.debug("Terminated worker thread");
        }
 

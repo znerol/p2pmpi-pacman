@@ -5,8 +5,9 @@ import java.util.Random;
 import deism.core.Event;
 import deism.core.EventSource;
 import deism.run.ExecutionGovernor;
+import deism.run.Startable;
 
-public class PestimisticRunnableClientArrivedSource implements EventSource {
+public class PestimisticRunnableClientArrivedSource implements EventSource, Startable {
     private long mtbca;
     private long mstpc;
     private final ExecutionGovernor governor;
@@ -33,7 +34,7 @@ public class PestimisticRunnableClientArrivedSource implements EventSource {
     }
 
     @Override
-    public void stop() {
+    public void stop(long simtime) {
         worker.terminate();
     }
 

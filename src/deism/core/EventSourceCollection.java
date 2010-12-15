@@ -20,20 +20,6 @@ public class EventSourceCollection implements EventSource {
     }
 
     @Override
-    public void start(long startSimtime) {
-        for (EventSource source : eventSources) {
-            source.start(startSimtime);
-        }
-    }
-
-    @Override
-    public void stop() {
-        for (EventSource source : eventSources) {
-            source.stop();
-        }
-    }
-    
-    @Override
     public Event peek(long currentSimtime) {
         Map<EventSource, Event> candidates =
             new LinkedHashMap<EventSource, Event>();

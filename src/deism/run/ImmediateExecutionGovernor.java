@@ -13,7 +13,7 @@ public class ImmediateExecutionGovernor implements ExecutionGovernor {
     }
 
     @Override
-    public void stop() {
+    public void stop(long timestamp) {
     }
 
     @Override

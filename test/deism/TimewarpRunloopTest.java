@@ -1,7 +1,6 @@
 package deism;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
@@ -20,6 +19,7 @@ import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.run.FastForwardRunloop;
 import deism.run.TimewarpRunloopRecoveryStrategy;
+import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.StateHistory;
 import deism.stateful.TimewarpEventSource;
 import deism.stateful.TimewarpEventSourceAdapter;
@@ -46,6 +46,7 @@ public class TimewarpRunloopTest {
     ArrayDeque<Event> eventQueue;
     EventSource simpleEventSource;
     TimewarpEventSource eventSource;
+    DefaultTimewarpDiscreteEventProcess process;
     
     @Before
     public void setUp() {
@@ -62,20 +63,15 @@ public class TimewarpRunloopTest {
             public void remove(Event event) {
                 eventQueue.remove(event);
             }
-
-            @Override
-            public void start(long startSimtime) {
-            }
-
-            @Override
-            public void stop() {
-            }
         };
         eventSource = new TimewarpEventSourceAdapter(simpleEventSource);
-        
-        stateObjects = new ArrayList<StateHistory<Long>>();
-        stateObjects.add(eventSource);
-        recoveryStrategy = new TimewarpRunloopRecoveryStrategy(stateObjects);
+
+        process = new DefaultTimewarpDiscreteEventProcess();
+        process.addEventSource(eventSource);
+        process.addEventDispatcher(eventDispatcher);
+        process.addEventSink(eventSink);
+
+        recoveryStrategy = new TimewarpRunloopRecoveryStrategy(process);
         runloop = new FastForwardRunloop(governor, terminationCondition,
                 recoveryStrategy, snapshotCondition);
     }
@@ -100,7 +96,7 @@ public class TimewarpRunloopTest {
         when(terminationCondition.match(null)).thenReturn(true);
         when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
 
-        runloop.run(eventSource, eventSink, eventDispatcher);
+        runloop.run(process);
 
         // All events must have been delivered properly. However event four
         // will be emitted twice.
@@ -135,7 +131,7 @@ public class TimewarpRunloopTest {
         when(terminationCondition.match(null)).thenReturn(true);
         when(snapshotCondition.match((Event)isNotNull())).thenReturn(true);
 
-        runloop.run(eventSource, eventSink, eventDispatcher);
+        runloop.run(process);
 
         // All events must have been delivered properly. However event four
         // will be emitted twice.

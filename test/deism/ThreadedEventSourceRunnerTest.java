@@ -11,6 +11,7 @@ import org.mockito.stubbing.Answer;
 import deism.core.Event;
 import deism.core.EventSource;
 import deism.run.ExecutionGovernor;
+import deism.run.Startable;
 import deism.run.ThreadedEventSourceRunner;
 
 import static org.junit.Assert.*;
@@ -18,8 +19,11 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ThreadedEventSourceRunnerTest {
+    private interface StartableEventSource extends EventSource, Startable {
+    }
+
     @Mock
-    private EventSource source;
+    private StartableEventSource source;
     @Mock
     private ExecutionGovernor governor;
 
@@ -36,7 +40,7 @@ public class ThreadedEventSourceRunnerTest {
         // original event source
         when(source.peek(0L)).thenAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {
-                threadedSource.stop();
+                threadedSource.stop(0L);
                 return null;
             }
         });
@@ -44,7 +48,7 @@ public class ThreadedEventSourceRunnerTest {
         threadedSource.start(0L);
 
         verify(source, timeout(100)).start(0L);
-        verify(source, timeout(100)).stop();
+        verify(source, timeout(100)).stop(0L);
     }
 
     @Test
@@ -57,7 +61,7 @@ public class ThreadedEventSourceRunnerTest {
         // arrived event
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {
-                threadedSource.stop();
+                threadedSource.stop(1L);
                 return null;
             }
         }).when(governor).resume(1L);

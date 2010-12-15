@@ -1,4 +1,8 @@
-package deism.core;
+package deism.adapter;
+
+import deism.core.Event;
+import deism.core.EventSource;
+import deism.core.StatelessEventGenerator;
 
 /**
  * Adapter class which turns a StatelessEventGenerator into an EventSource.
@@ -6,8 +10,7 @@ package deism.core;
 public class EventSourceStatelessGeneratorAdapter implements EventSource {
     private final StatelessEventGenerator generator;
 
-    public EventSourceStatelessGeneratorAdapter(
-            StatelessEventGenerator generator) {
+    public EventSourceStatelessGeneratorAdapter(StatelessEventGenerator generator) {
         this.generator = generator;
     }
 
@@ -18,13 +21,6 @@ public class EventSourceStatelessGeneratorAdapter implements EventSource {
 
     @Override
     public void remove(Event event) {
-    }
-
-    @Override
-    public void start(long startSimtime) {
-    }
-
-    @Override
-    public void stop() {
+        // Left blank intentionally
     }
 }

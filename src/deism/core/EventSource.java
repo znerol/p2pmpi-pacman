@@ -23,14 +23,4 @@ public interface EventSource {
      * to peek.
      */
     void remove(Event event);
-
-    /**
-     * Prepare the EventSource (spawn threads etc.)
-     */
-    void start(long startSimtime);
-
-    /**
-     * Cleanup EventSource (terminate threads etc.)
-     */
-    void stop();
 }

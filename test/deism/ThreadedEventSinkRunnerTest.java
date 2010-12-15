@@ -10,14 +10,18 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.core.EventSink;
+import deism.run.Startable;
 import deism.run.ThreadedEventSinkRunner;
 
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ThreadedEventSinkRunnerTest {
+    private interface StartableEventSink extends EventSink, Startable {
+    }
+
     @Mock
-    private EventSink sink;
+    private StartableEventSink sink;
     private ThreadedEventSinkRunner threadedSink;
 
     @Before
@@ -32,7 +36,7 @@ public class ThreadedEventSinkRunnerTest {
         // stop the thread when it tries to offer the first event to the sink
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {
-                threadedSink.stop();
+                threadedSink.stop(0L);
                 return null;
             }
         }).when(sink).offer(event);
@@ -47,7 +51,7 @@ public class ThreadedEventSinkRunnerTest {
         threadedSink.offer(event);
 
         verify(sink, timeout(100)).start(0L);
-        verify(sink, timeout(100)).stop();
+        verify(sink, timeout(100)).stop(0L);
         verify(sink, timeout(100)).offer(event);
         verifyNoMoreInteractions(sink);
     }

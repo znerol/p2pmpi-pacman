@@ -24,12 +24,4 @@ public class MpiEventSink implements EventSink {
         Event[] buffer = {event};
         mpicomm.Send(buffer, 0, 1, MPI.OBJECT, mpireceiver, mpitag);
     }
-
-    @Override
-    public void start(long startSimtime) {
-    }
-
-    @Override
-    public void stop() {
-    }
 }

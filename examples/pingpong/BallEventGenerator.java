@@ -1,16 +1,15 @@
 package pingpong;
 
 import deism.core.Event;
-import deism.core.EventSource;
+import deism.core.StatelessEventGenerator;
 
-public class BallEventSource implements EventSource {
-
+public class BallEventGenerator implements StatelessEventGenerator {
     private final long t0;
     private final long dt;
     private final int sender;
     private final int receiver;
     
-    public BallEventSource(long start, long interval, int sender, int receiver) {
+    public BallEventGenerator(long start, long interval, int sender, int receiver) {
         this.t0 = start;
         this.dt = interval;
         this.sender = sender;
@@ -26,17 +25,5 @@ public class BallEventSource implements EventSource {
         result = new BallEvent(next, sender, receiver);
         
         return result;
-    }
-
-    @Override
-    public void remove(Event event) {
-    }
-
-    @Override
-    public void start(long startSimtime) {
-    }
-
-    @Override
-    public void stop() {
     }
 }

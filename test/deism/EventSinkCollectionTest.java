@@ -18,23 +18,6 @@ public class EventSinkCollectionTest {
     @Mock
     EventSink secondSink;
 
-    @Test
-    public void collectionStartStop() {
-        /* construct Sinks list */
-        final EventSink[] sinks = { firstSink, secondSink, };
-
-        /* test EventSinkController */
-        EventSinkCollection c = new EventSinkCollection(sinks);
-
-        c.start(0);
-        verify(firstSink).start(0);
-        verify(secondSink).start(0);
-
-        c.stop();
-        verify(firstSink).stop();
-        verify(secondSink).stop();
-    }
-
     /**
      * EventSinkCollection.offer must deliver an event to all sinks
      */

@@ -1,6 +1,5 @@
 package wq1;
 
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -8,16 +7,13 @@ import org.apache.log4j.BasicConfigurator;
 
 import util.TerminateAfterDuration;
 import wqcommon.ClientArrivedEvent;
-import wqcommon.ClientArrivedSource;
+import wqcommon.ClientArrivedGenerator;
 import wqcommon.PestimisticRunnableClientArrivedSource;
 
+import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.core.EventDispatcher;
-import deism.core.EventSink;
-import deism.core.EventSinkCollection;
-import deism.core.EventSource;
-import deism.core.EventSourceCollection;
+import deism.run.DefaultDiscreteEventProcess;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.run.FailFastRunloopRecoveryStrategy;
@@ -49,26 +45,24 @@ public class JobQueueSimulation {
             governor = new ImmediateExecutionGovernor();
         }
 
+        DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
+
         boolean multithread = Boolean.getBoolean("simulationMultithread");
-        EventSource clientSource;
         if (multithread) {
-            clientSource = new PestimisticRunnableClientArrivedSource(rng,
-                    governor, 1000, 1600);
+            process.addEventSource(new PestimisticRunnableClientArrivedSource(
+                    rng, governor, 1000, 1600));
         }
         else {
-            clientSource = new ClientArrivedSource(rng, 1000, 1600);
+            process.addEventSource(new EventSourceStatefulGeneratorAdapter(
+                new ClientArrivedGenerator(rng, 1000, 1600)));
         }
         
         PriorityBlockingQueue<ClientArrivedEvent> jobs =
             new PriorityBlockingQueue<ClientArrivedEvent>();
-        /* Define as many customer/clerk sources as you wish */
-        EventSource[] sources = {
-                clientSource,
-                new ClerkSource(jobs),
-                new ClerkSource(jobs)
-        };
-        
-        EventSource aggSource = new EventSourceCollection(sources);
+        process.addEventSource(new ClerkSource(jobs));
+        process.addEventSource(new ClerkSource(jobs));
+
+        process.addEventDispatcher(new JobAggregator(jobs));
         
         EventRunloopRecoveryStrategy recoveryStrategy =
             new FailFastRunloopRecoveryStrategy();
@@ -82,8 +76,6 @@ public class JobQueueSimulation {
         
         FastForwardRunloop runloop = new FastForwardRunloop(governor, termCond,
                 recoveryStrategy, noSnapshots);
-        EventDispatcher disp = new JobAggregator(jobs);
-        runloop.run(aggSource,
-                new EventSinkCollection(new ArrayList<EventSink>()), disp);
+        runloop.run(process);
     }
 }

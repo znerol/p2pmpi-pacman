@@ -18,12 +18,4 @@ public class EventLogger implements EventDispatcher, EventSink {
     public void offer(Event event) {
         logger.info("Offer: " + event);
     }
-
-    @Override
-    public void start(long startSimtime) {
-    }
-
-    @Override
-    public void stop() {
-    }
 }

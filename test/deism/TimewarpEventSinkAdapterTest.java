@@ -25,17 +25,6 @@ public class TimewarpEventSinkAdapterTest {
     }
 
     @Test
-    public void testStartStop() {
-        sinkAdapter.start(7L);
-        sinkAdapter.stop();
-
-        verify(sink).start(7L);
-        verify(sink).stop();
-
-        verifyNoMoreInteractions(sink);
-    }
-
-    @Test
     public void testSimpleOffer() {
         Event one = new Event(1L);
 

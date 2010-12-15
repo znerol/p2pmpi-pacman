@@ -6,9 +6,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import deism.adapter.EventSourceStatelessGeneratorAdapter;
 import deism.core.Event;
 import deism.core.StatelessEventGenerator;
-import deism.core.EventSourceStatelessGeneratorAdapter;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

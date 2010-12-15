@@ -10,8 +10,9 @@ import deism.core.Event;
 import deism.core.EventSource;
 import deism.run.ExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
+import deism.run.Startable;
 
-public class OptimisticRunnableClientArrivedSource implements EventSource {
+public class OptimisticRunnableClientArrivedSource implements EventSource, Startable {
     private long mtbca;
     private long mstpc;
     private ExecutionGovernor mainGovernor;
@@ -41,7 +42,7 @@ public class OptimisticRunnableClientArrivedSource implements EventSource {
     }
 
     @Override
-    public void stop() {
+    public void stop(long simtime) {
         worker.terminate();
     }
 

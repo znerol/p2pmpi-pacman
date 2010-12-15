@@ -24,14 +24,6 @@ public class TimewarpEventSourceAdapterTest {
         public void remove(Event event) {
             events.remove(event);
         }
-
-        @Override
-        public void start(long startSimtime) {
-        }
-
-        @Override
-        public void stop() {
-        }
     };
     private final TimewarpEventSource source =
         new TimewarpEventSourceAdapter(simpleSource);

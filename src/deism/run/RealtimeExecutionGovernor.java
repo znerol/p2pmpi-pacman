@@ -32,7 +32,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     }
 
     @Override
-    public synchronized void stop() {
+    public synchronized void stop(long simtime) {
         logger.debug("Governor stop");
     }
 

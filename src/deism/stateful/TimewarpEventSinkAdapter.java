@@ -60,17 +60,6 @@ public class TimewarpEventSinkAdapter extends AbstractStateHistory<Long, Event>
     }
 
     @Override
-    public void start(long startSimtime) {
-        sink.start(startSimtime);
-    }
-
-    @Override
-    public void stop() {
-        flush(Long.MAX_VALUE);
-        sink.stop();
-    }
-
-    @Override
     public void revertHistory(List<Event> tail) {
         for (Event event : tail) {
             if (event.isAntimessage()) {

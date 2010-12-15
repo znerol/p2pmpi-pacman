@@ -20,16 +20,6 @@ public class TimewarpEventSourceAdapter
     }
 
     @Override
-    public void start(long startSimtime) {
-        source.start(startSimtime);
-    }
-
-    @Override
-    public void stop() {
-        source.stop();
-    }
-
-    @Override
     public Event peek(long currentSimtime) {
         Event event;
 

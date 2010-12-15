@@ -4,19 +4,7 @@ package deism.run;
  * Implementations of execution governors must provide a way to suspend the
  * current thread until the given timestamp is reached.
  */
-public interface ExecutionGovernor{
-    /**
-     * Start the governor with the given simulation time.
-     *
-     * @param simtime initial timestamp in simulation time units
-     */
-    public void start(long simtime);
-
-    /**
-     * Stop the governor
-     */
-    public void stop();
-
+public interface ExecutionGovernor extends Startable {
     /**
      * Suspend execution until something called resume.
      * 

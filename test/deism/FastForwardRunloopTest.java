@@ -9,9 +9,7 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.core.EventDispatcher;
-import deism.core.EventSink;
-import deism.core.EventSource;
+import deism.run.DiscreteEventProcess;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.run.FastForwardRunloop;
@@ -21,11 +19,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class FastForwardRunloopTest {
     @Mock
-    EventSource eventSource;
-    @Mock
-    EventSink eventSink;
-    @Mock
-    EventDispatcher eventDispatcher;
+    DiscreteEventProcess process;
     @Mock
     ExecutionGovernor governor;
     @Mock
@@ -44,15 +38,15 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.peek(0)).thenReturn(null);
+        when(process.peek(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
 
-        r.run(eventSource, eventSink, eventDispatcher);
+        r.run(process);
 
-        verify(eventSource).peek(0);
-        verifyZeroInteractions(eventDispatcher);
+        verify(process).peek(0);
+        verifyZeroInteractions(process);
         verify(governor).start(0);
-        verify(governor).stop();
+        verify(governor).stop(0);
         verify(terminationCondition).match(null);
     }
     
@@ -68,27 +62,27 @@ public class FastForwardRunloopTest {
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
         /*
-         * On each call to receive() eventSource will return event one, then
+         * On each call to receive() process will return event one, then
          * two and finally null.
          */
-        when(eventSource.peek(0)).thenReturn(one);
-        when(eventSource.peek(1)).thenReturn(two);
-        when(eventSource.peek(2)).thenReturn(null);
+        when(process.peek(0)).thenReturn(one);
+        when(process.peek(1)).thenReturn(two);
+        when(process.peek(2)).thenReturn(null);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(one)).thenReturn(false);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
 
-        r.run(eventSource, eventSink, eventDispatcher);
+        r.run(process);
         
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(1);
-        verify(eventSource).peek(2);
-        verify(eventSink).offer(one);
-        verify(eventSink).offer(two);
-        verify(eventDispatcher).dispatchEvent(one);
-        verify(eventDispatcher).dispatchEvent(two);
+        verify(process).peek(0);
+        verify(process).peek(1);
+        verify(process).peek(2);
+        verify(process).offer(one);
+        verify(process).offer(two);
+        verify(process).dispatchEvent(one);
+        verify(process).dispatchEvent(two);
         verify(governor).suspendUntil(1);
         verify(governor).suspendUntil(2);
         when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
@@ -108,33 +102,33 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.peek(0)).thenReturn(one);
-        when(eventSource.peek(1)).thenReturn(two);
-        when(eventSource.peek(2)).thenReturn(three);
-        when(eventSource.peek(3)).thenReturn(null);
+        when(process.peek(0)).thenReturn(one);
+        when(process.peek(1)).thenReturn(two);
+        when(process.peek(2)).thenReturn(three);
+        when(process.peek(3)).thenReturn(null);
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
         when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
 
-        /* call r.stop() when eventDispatcher.dispatchEvent(two) is called */
+        /* call r.stop() when process.dispatchEvent(two) is called */
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {
                 r.stop();
                 return null;
             }
-        }).when(eventDispatcher).dispatchEvent(two);
+        }).when(process).dispatchEvent(two);
 
-        r.run(eventSource, eventSink, eventDispatcher);
+        r.run(process);
 
         /* We expect receive being called two times (for Events one and two) */
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(1);
-        verify(eventSink).offer(one);
-        verify(eventSink).offer(two);
-        verify(eventDispatcher).dispatchEvent(one);
-        verify(eventDispatcher).dispatchEvent(two);
+        verify(process).peek(0);
+        verify(process).peek(1);
+        verify(process).offer(one);
+        verify(process).offer(two);
+        verify(process).dispatchEvent(one);
+        verify(process).dispatchEvent(two);
         verify(governor).suspendUntil(1);
         verify(governor).suspendUntil(2);
         verify(terminationCondition).match(one);
@@ -149,24 +143,24 @@ public class FastForwardRunloopTest {
         final FastForwardRunloop r = new FastForwardRunloop(governor,
                 terminationCondition, recoveryStrategy, snapshotCondition);
 
-        when(eventSource.peek(0)).thenReturn(one);
-        when(eventSource.peek(1)).thenReturn(one);
-        when(eventSource.peek(2)).thenReturn(null);
+        when(process.peek(0)).thenReturn(one);
+        when(process.peek(1)).thenReturn(one);
+        when(process.peek(2)).thenReturn(null);
         when(governor.suspendUntil(2)).thenReturn(1L, 2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
         when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
 
-        r.run(eventSource, eventSink, eventDispatcher);
+        r.run(process);
 
         // We expect receive being called three times (one, one, term) */
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(1);
-        verify(eventSource).peek(2);
+        verify(process).peek(0);
+        verify(process).peek(1);
+        verify(process).peek(2);
 
-        verify(eventSink, times(2)).offer(one);
-        verify(eventSink).offer(one.inverseEvent());
-        verify(eventDispatcher).dispatchEvent(one);
+        verify(process, times(2)).offer(one);
+        verify(process).offer(one.inverseEvent());
+        verify(process).dispatchEvent(one);
         verify(governor, times(2)).suspendUntil(2);
         verify(terminationCondition, times(2)).match(one);
         verify(terminationCondition).match(null);
@@ -186,9 +180,9 @@ public class FastForwardRunloopTest {
         /*
          * Simulate event source which returns events in the wrong order.
          */
-        when(eventSource.peek(0)).thenReturn(two);
-        when(eventSource.peek(2)).thenReturn(one);
-        when(eventSource.peek(3)).thenReturn(null);
+        when(process.peek(0)).thenReturn(two);
+        when(process.peek(2)).thenReturn(one);
+        when(process.peek(3)).thenReturn(null);
         
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
@@ -199,16 +193,16 @@ public class FastForwardRunloopTest {
         doThrow(new StateHistoryException("")).when(
                 recoveryStrategy).rollback(anyLong());
 
-        r.run(eventSource, eventSink, eventDispatcher);
+        r.run(process);
 
-        verify(eventSource).peek(0);
-        verify(eventSource).peek(2);
-        verify(eventSink).offer(two);
-        verify(eventSink).offer(one);
-        verify(eventSink).offer(one.inverseEvent());
+        verify(process).peek(0);
+        verify(process).peek(2);
+        verify(process).offer(two);
+        verify(process).offer(one);
+        verify(process).offer(one.inverseEvent());
         
         /* Event two must have been delivered properly */
-        verify(eventDispatcher).dispatchEvent(two);
+        verify(process).dispatchEvent(two);
         verify(governor).suspendUntil(1);
         verify(governor).suspendUntil(2);
         verify(terminationCondition).match(two);

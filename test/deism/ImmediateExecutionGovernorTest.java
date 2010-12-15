@@ -12,7 +12,7 @@ public class ImmediateExecutionGovernorTest {
     public void testStartStop() {
         // no-op
         governor.start(42L);
-        governor.stop();
+        governor.stop(50L);
     }
 
     @Test

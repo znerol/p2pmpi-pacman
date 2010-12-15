@@ -1,6 +1,5 @@
 package deism;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
@@ -24,10 +23,7 @@ public class TimewarpRunloopRecoveryStrategyTest {
 
     @Before
     public void setUp() {
-        List<StateHistory<Long>> stateObjects =
-            new ArrayList<StateHistory<Long>>();
-        stateObjects.add(eventSource);        
-        strategy = new TimewarpRunloopRecoveryStrategy(stateObjects);
+        strategy = new TimewarpRunloopRecoveryStrategy(eventSource);
     }
 
     @Test

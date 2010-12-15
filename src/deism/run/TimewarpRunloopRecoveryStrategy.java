@@ -11,10 +11,9 @@ public class TimewarpRunloopRecoveryStrategy
 
     private SortedSet<Long> snapshots;
     private SortedSet<Long> unusableSnapshots = new TreeSet<Long>();
-    private Iterable<StateHistory<Long>> stateObjects;
-    public TimewarpRunloopRecoveryStrategy(
-            Iterable<StateHistory<Long>> stateObjects) {
-        this.stateObjects = stateObjects;
+    private StateHistory<Long> stateObject;
+    public TimewarpRunloopRecoveryStrategy(StateHistory<Long> stateObject) {
+        this.stateObject = stateObject;
         this.snapshots = new TreeSet<Long>();
     }
         
@@ -29,9 +28,7 @@ public class TimewarpRunloopRecoveryStrategy
             return;
         }
         
-        for (StateHistory<Long> s : stateObjects) {
-            s.save(timestamp);
-        }
+        stateObject.save(timestamp);
         snapshots.add(timestamp);
     }
 
@@ -44,9 +41,7 @@ public class TimewarpRunloopRecoveryStrategy
         }
 
         Long snapshotKey = snapshots.last();
-        for (StateHistory<Long> s : stateObjects) {
-            s.rollback(snapshotKey);
-        }
+        stateObject.rollback(snapshotKey);
     }
 
     @Override
@@ -58,8 +53,6 @@ public class TimewarpRunloopRecoveryStrategy
         }
         
         Long snapshotKey = snapshots.first();
-        for (StateHistory<Long> s : stateObjects) {
-            s.commit(snapshotKey);
-        }
+        stateObject.commit(snapshotKey);
     }
 }

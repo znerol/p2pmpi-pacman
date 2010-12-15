@@ -41,26 +41,6 @@ public class EventSourceCollectionTest {
         assertNull(event);
     }
     
-    @Test
-    public void collectionStartStop() {
-        /* construct sources list */
-        final EventSource[] sources = {
-            firstSource,
-            secondSource,
-        };
-
-        /* test EventSourceController */
-        EventSourceCollection c = new EventSourceCollection(sources);
-
-        c.start(0);
-        verify(firstSource).start(0);
-        verify(secondSource).start(0);
-
-        c.stop();
-        verify(firstSource).stop();
-        verify(secondSource).stop();
-    }
-    
     /**
      * EventSourceCollection.peek and EventSourceCollection.receive must return
      * events in ascending timestamp-order from any source.

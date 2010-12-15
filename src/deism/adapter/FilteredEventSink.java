@@ -1,6 +1,10 @@
-package deism.core;
+package deism.adapter;
 
-public class FilteredEventSink implements EventSink {
+import deism.core.Event;
+import deism.core.EventCondition;
+import deism.core.EventSink;
+
+public class FilteredEventSink implements EventSink{
     private final EventCondition filter;
     private final EventSink sink;
 
@@ -14,15 +18,5 @@ public class FilteredEventSink implements EventSink {
         if (filter.match(event)) {
             sink.offer(event);
         }
-    }
-
-    @Override
-    public void start(long startSimtime) {
-        sink.start(startSimtime);
-    }
-
-    @Override
-    public void stop() {
-        sink.stop();
     }
 }

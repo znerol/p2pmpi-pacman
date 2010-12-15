@@ -77,7 +77,7 @@ public class RealtimeExecutionGovernorTest {
     @Test
     public void testStop() {
         // This is actually a no-op...
-        governor.stop();
+        governor.stop(0L);
 
         verifyNoMoreInteractions(simulationTimebase);
         verifyNoMoreInteractions(systemTimebase);

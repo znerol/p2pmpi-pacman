@@ -37,12 +37,4 @@ public class  ClerkSource implements EventSource {
         assert(currentEvent == event);
         currentEvent = null;
     }
-
-    @Override
-    public void start(long startSimtime) {
-    }
-
-    @Override
-    public void stop() {
-    }
 }

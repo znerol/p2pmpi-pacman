@@ -13,14 +13,4 @@ public interface EventSink {
      * @return true if EventSink took notice of the event, false otherwise
      */
     void offer(Event event);
-
-    /**
-     * Prepare the EventSource (spawn threads etc.)
-     */
-    void start(long startSimtime);
-
-    /**
-     * Cleanup EventSource (terminate threads etc.)
-     */
-    void stop();
 }

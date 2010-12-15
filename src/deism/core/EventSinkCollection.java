@@ -21,18 +21,4 @@ public class EventSinkCollection implements EventSink {
             sink.offer(event);
         }
     }
-
-    @Override
-    public void start(long startSimtime) {
-        for (EventSink sink : eventSinks) {
-            sink.start(startSimtime);
-        }
-    }
-
-    @Override
-    public void stop() {
-        for (EventSink sink : eventSinks) {
-            sink.stop();
-        }
-    }
 }
