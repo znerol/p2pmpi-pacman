@@ -1,21 +1,25 @@
 package util;
 
+import org.apache.log4j.Logger;
+
 import deism.StateHistory;
 import deism.StateHistoryException;
 
 public class StateHistoryLogger implements StateHistory<Long> {
+    private final static Logger logger = Logger.getLogger(StateHistoryLogger.class);
 
     @Override
     public void save(Long timestamp) throws StateHistoryException {
+        logger.info("Save time=" + timestamp);
     }
     
     @Override
     public void rollback(Long timestamp) {
-        System.out.println("** Rollback time=" + timestamp);
+        logger.info("Rollback time=" + timestamp);
     }
 
     @Override
     public void commit(Long timestamp) {
-        System.out.println("** Commit time=" + timestamp);
+        logger.info("Commit time=" + timestamp);
     }
 }

@@ -3,7 +3,11 @@ package pingpong;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Layout;
+import org.apache.log4j.PatternLayout;
 
 import p2pmpi.MpiEventSink;
 import p2pmpi.MpiEventSource;
@@ -39,9 +43,9 @@ public class Pingpong {
         MPI.Init(args);
         assert (MPI.COMM_WORLD.Size() == 2);
 
-        if (MPI.COMM_WORLD.Rank() == 0) {
-            BasicConfigurator.configure();
-        }
+        Layout layout = new PatternLayout(MPI.COMM_WORLD.Rank() + " " + PatternLayout.TTCC_CONVERSION_PATTERN);
+        Appender appender = new ConsoleAppender(layout);
+        BasicConfigurator.configure(appender);
 
         /* exit simulation after n units of simulation time */
         EventCondition termCond = new TerminateAfterDuration(1000);
@@ -64,8 +68,6 @@ public class Pingpong {
 
         EventSource mpiEventSource = new ThreadedEventSourceRunner(governor,
                 new MpiEventSource(MPI.COMM_WORLD, other, 0));
-//        EventSource mpiEventSource = 
-//                new MpiEventSource(MPI.COMM_WORLD, other, 0);
         EventSource[] sources = { new BallEventSource(me * 50, 100, me, other),
                 mpiEventSource, };
 
