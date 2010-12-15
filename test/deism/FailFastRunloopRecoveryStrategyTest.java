@@ -2,6 +2,9 @@ package deism;
 
 import org.junit.Test;
 
+import deism.run.FailFastRunloopRecoveryStrategy;
+import deism.stateful.StateHistoryException;
+
 public class FailFastRunloopRecoveryStrategyTest {
     FailFastRunloopRecoveryStrategy strategy =
         new FailFastRunloopRecoveryStrategy();

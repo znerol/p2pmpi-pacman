@@ -9,6 +9,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import deism.run.TimewarpRunloopRecoveryStrategy;
+import deism.stateful.StateHistory;
+import deism.stateful.StateHistoryException;
+import deism.stateful.TimewarpEventSource;
+
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

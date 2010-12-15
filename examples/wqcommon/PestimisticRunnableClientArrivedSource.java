@@ -2,9 +2,9 @@ package wqcommon;
 
 import java.util.Random;
 
-import deism.Event;
-import deism.EventSource;
-import deism.ExecutionGovernor;
+import deism.core.Event;
+import deism.core.EventSource;
+import deism.run.ExecutionGovernor;
 
 public class PestimisticRunnableClientArrivedSource implements EventSource {
     private long mtbca;

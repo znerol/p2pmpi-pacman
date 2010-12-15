@@ -11,19 +11,19 @@ import wqcommon.ClientArrivedEvent;
 import wqcommon.ClientArrivedSource;
 import wqcommon.PestimisticRunnableClientArrivedSource;
 
-import deism.Event;
-import deism.EventDispatcher;
-import deism.EventCondition;
-import deism.EventRunloopRecoveryStrategy;
-import deism.EventSink;
-import deism.EventSinkCollection;
-import deism.EventSource;
-import deism.EventSourceCollection;
-import deism.ExecutionGovernor;
-import deism.FailFastRunloopRecoveryStrategy;
-import deism.FastForwardRunloop;
-import deism.ImmediateExecutionGovernor;
-import deism.RealtimeExecutionGovernor;
+import deism.core.Event;
+import deism.core.EventCondition;
+import deism.core.EventDispatcher;
+import deism.core.EventSink;
+import deism.core.EventSinkCollection;
+import deism.core.EventSource;
+import deism.core.EventSourceCollection;
+import deism.run.EventRunloopRecoveryStrategy;
+import deism.run.ExecutionGovernor;
+import deism.run.FailFastRunloopRecoveryStrategy;
+import deism.run.FastForwardRunloop;
+import deism.run.ImmediateExecutionGovernor;
+import deism.run.RealtimeExecutionGovernor;
 
 public class JobQueueSimulation {
     /**

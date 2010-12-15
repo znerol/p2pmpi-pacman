@@ -6,6 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import deism.core.Event;
+import deism.core.EventSink;
+import deism.stateful.TimewarpEventSinkAdapter;
+
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

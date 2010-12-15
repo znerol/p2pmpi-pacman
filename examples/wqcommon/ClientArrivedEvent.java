@@ -1,6 +1,6 @@
 package wqcommon;
 
-import deism.Event;
+import deism.core.Event;
 
 @SuppressWarnings("serial")
 public class ClientArrivedEvent extends Event {

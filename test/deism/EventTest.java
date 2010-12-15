@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.junit.Test;
+
+import deism.core.Event;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 

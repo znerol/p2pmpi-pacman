@@ -5,6 +5,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import deism.core.Event;
+import deism.core.EventDispatcher;
+import deism.core.EventDispatcherCollection;
+
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

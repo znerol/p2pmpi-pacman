@@ -2,9 +2,9 @@ package util;
 
 import org.apache.log4j.Logger;
 
-import deism.Event;
-import deism.EventDispatcher;
-import deism.EventSink;
+import deism.core.Event;
+import deism.core.EventDispatcher;
+import deism.core.EventSink;
 
 public class EventLogger implements EventDispatcher, EventSink {
     private final static Logger logger = Logger.getLogger(EventLogger.class);

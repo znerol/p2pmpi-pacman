@@ -1,7 +1,7 @@
 package pingpong;
 
-import deism.Event;
-import deism.EventSource;
+import deism.core.Event;
+import deism.core.EventSource;
 
 public class BallEventSource implements EventSource {
 

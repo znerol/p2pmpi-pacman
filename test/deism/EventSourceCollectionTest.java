@@ -7,6 +7,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import deism.core.Event;
+import deism.core.EventSource;
+import deism.core.EventSourceCollection;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 

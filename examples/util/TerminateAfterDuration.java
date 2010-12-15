@@ -1,7 +1,7 @@
 package util;
 
-import deism.Event;
-import deism.EventCondition;
+import deism.core.Event;
+import deism.core.EventCondition;
 
 /**
  * TerminateAfterDuration.match will return true after given amount of

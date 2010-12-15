@@ -6,10 +6,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.log4j.Logger;
 
-import deism.Event;
-import deism.EventSource;
-import deism.ExecutionGovernor;
-import deism.RealtimeExecutionGovernor;
+import deism.core.Event;
+import deism.core.EventSource;
+import deism.run.ExecutionGovernor;
+import deism.run.RealtimeExecutionGovernor;
 
 public class OptimisticRunnableClientArrivedSource implements EventSource {
     private long mtbca;

@@ -7,6 +7,11 @@ import java.util.Queue;
 
 import org.junit.Test;
 
+import deism.core.Event;
+import deism.core.EventSource;
+import deism.stateful.TimewarpEventSource;
+import deism.stateful.TimewarpEventSourceAdapter;
+
 public class TimewarpEventSourceAdapterTest {
     private final Queue<Event> events = new ArrayDeque<Event>();
     private final EventSource simpleSource = new EventSource() {

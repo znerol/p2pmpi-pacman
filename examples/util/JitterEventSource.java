@@ -2,8 +2,8 @@ package util;
 
 import java.util.Random;
 
-import deism.Event;
-import deism.EventSource;
+import deism.core.Event;
+import deism.core.EventSource;
 
 public class JitterEventSource implements EventSource {
     private Event currentEvent;

@@ -2,8 +2,8 @@ package util;
 
 import org.apache.log4j.Logger;
 
-import deism.StateHistory;
-import deism.StateHistoryException;
+import deism.stateful.StateHistory;
+import deism.stateful.StateHistoryException;
 
 public class StateHistoryLogger implements StateHistory<Long> {
     private final static Logger logger = Logger.getLogger(StateHistoryLogger.class);

@@ -2,10 +2,10 @@ package wq2;
 
 import java.util.List;
 
-import deism.AbstractStateHistory;
-import deism.Event;
-import deism.EventDispatcher;
-import deism.EventSource;
+import deism.core.Event;
+import deism.core.EventDispatcher;
+import deism.core.EventSource;
+import deism.stateful.AbstractStateHistory;
 
 public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
         implements EventDispatcher, EventSource {

@@ -1,6 +1,6 @@
 package pingpong;
 
-import deism.Event;
+import deism.core.Event;
 
 public class BallEvent extends Event {
     private int sender;

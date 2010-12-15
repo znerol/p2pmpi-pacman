@@ -1,6 +1,6 @@
 package wq1;
 
-import deism.Event;
+import deism.core.Event;
 
 @SuppressWarnings("serial")
 public class ClerkFreeEvent extends Event {

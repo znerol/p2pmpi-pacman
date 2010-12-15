@@ -4,8 +4,8 @@ import java.util.Queue;
 
 import wqcommon.ClientArrivedEvent;
 
-import deism.Event;
-import deism.EventDispatcher;
+import deism.core.Event;
+import deism.core.EventDispatcher;
 
 public class JobAggregator implements EventDispatcher {
     Queue<ClientArrivedEvent> waitingQueue;

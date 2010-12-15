@@ -8,6 +8,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import deism.core.Event;
+import deism.core.EventSink;
+import deism.run.ThreadedEventSinkRunner;
+
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)

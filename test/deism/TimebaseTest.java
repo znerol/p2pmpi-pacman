@@ -1,6 +1,8 @@
 package deism;
 
 import org.junit.Test;
+
+import deism.run.Timebase;
 import static org.junit.Assert.*;
 
 public class TimebaseTest {

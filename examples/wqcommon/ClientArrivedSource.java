@@ -5,8 +5,8 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 
 
-import deism.Event;
-import deism.EventSource;
+import deism.core.Event;
+import deism.core.EventSource;
 
 public class ClientArrivedSource implements EventSource {
     /** Last customer arrival time */

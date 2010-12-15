@@ -1,7 +1,7 @@
 package wq2;
 
 import wqcommon.ClientArrivedEvent;
-import deism.Event;
+import deism.core.Event;
 
 @SuppressWarnings("serial")
 public class CounterServiceEvent extends Event {

@@ -4,8 +4,8 @@ import java.util.Queue;
 
 import wqcommon.ClientArrivedEvent;
 
-import deism.Event;
-import deism.EventSource;
+import deism.core.Event;
+import deism.core.EventSource;
 
 public class  ClerkSource implements EventSource {
     Queue<ClientArrivedEvent> jobs;

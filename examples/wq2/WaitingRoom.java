@@ -6,10 +6,10 @@ import java.util.Queue;
 
 import wqcommon.ClientArrivedEvent;
 
-import deism.AbstractStateHistory;
-import deism.Event;
-import deism.EventDispatcher;
-import deism.TimewarpEventSource;
+import deism.core.Event;
+import deism.core.EventDispatcher;
+import deism.stateful.AbstractStateHistory;
+import deism.stateful.TimewarpEventSource;
 
 public class WaitingRoom {
     private Queue<ClientArrivedEvent> waitingQueue;

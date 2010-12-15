@@ -11,6 +11,19 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import deism.core.Event;
+import deism.core.EventCondition;
+import deism.core.EventDispatcher;
+import deism.core.EventSink;
+import deism.core.EventSource;
+import deism.run.EventRunloopRecoveryStrategy;
+import deism.run.ExecutionGovernor;
+import deism.run.FastForwardRunloop;
+import deism.run.TimewarpRunloopRecoveryStrategy;
+import deism.stateful.StateHistory;
+import deism.stateful.TimewarpEventSource;
+import deism.stateful.TimewarpEventSourceAdapter;
+
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
