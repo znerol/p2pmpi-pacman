@@ -4,8 +4,9 @@ import java.util.Random;
 
 import deism.core.Event;
 import deism.core.EventSource;
+import deism.core.Stateful;
 
-public class JitterEventSource implements EventSource {
+public class JitterEventSource implements EventSource, Stateful {
     private Event currentEvent;
     private final Random rng = new Random(0);
     
