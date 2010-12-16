@@ -2,6 +2,8 @@ package deism.process;
 
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.adapter.EventSourceStatelessGeneratorAdapter;
+import deism.adapter.FilteredEventSink;
+import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
@@ -46,17 +48,14 @@ public class DefaultProcessBuilder {
      * @return
      */
     protected EventSource decorate(EventSource source, Object adaptee) {
-        final EventSource result;
+        register(source);
 
+        EventSource result = source;
         if (adaptee instanceof Blocking) {
-            register(source);
             result = new ThreadedEventSourceRunner(governor, source);
-        }
-        else {
-            result = source;
+            register(result);
         }
 
-        register(result);
         return result;
     }
 
@@ -123,17 +122,14 @@ public class DefaultProcessBuilder {
      * @return
      */
     protected EventSink decorate(EventSink sink, Object adaptee) {
-        final EventSink result;
+        register(sink);
 
+        EventSink result = sink;
         if (adaptee instanceof Blocking) {
-            register(sink);
             result = new ThreadedEventSinkRunner(sink);
-        }
-        else {
-            result = sink;
+            register(result);
         }
 
-        register(result);
         return sink;
     }
 
@@ -145,6 +141,18 @@ public class DefaultProcessBuilder {
      */
     public void add(EventSink sink) {
         EventSink result = decorate(sink, sink);
+        process.addEventSink(result);
+    }
+
+    /**
+     * Add an EventSink to the process with the given filter.
+     * 
+     * @param sink
+     */
+    public void add(EventSink sink, EventCondition filter) {
+        EventSink result = decorate(sink, sink);
+        result = new FilteredEventSink(filter, result);
+        register(result);
         process.addEventSink(result);
     }
 
