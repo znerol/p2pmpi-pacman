@@ -13,7 +13,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
-import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
@@ -30,8 +29,6 @@ import static org.mockito.Mockito.*;
 public class TimewarpRunloopTest {
     @Mock
     EventDispatcher eventDispatcher;
-    @Mock
-    EventSink eventSink;
     @Mock
     ExecutionGovernor governor;
     @Mock
@@ -68,8 +65,8 @@ public class TimewarpRunloopTest {
 
         process = new DefaultTimewarpDiscreteEventProcess();
         process.addEventSource(eventSource);
+        process.addStatefulObject(eventSource);
         process.addEventDispatcher(eventDispatcher);
-        process.addEventSink(eventSink);
 
         recoveryStrategy = new TimewarpRunloopRecoveryStrategy(process);
         runloop = new DefaultEventRunloop(governor, terminationCondition,
