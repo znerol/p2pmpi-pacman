@@ -4,12 +4,10 @@ import java.util.Random;
 
 import org.apache.log4j.BasicConfigurator;
 
-import util.EventLogger;
 import util.JitterEventSource;
 import util.TerminateAfterDuration;
 import wqcommon.ClientArrivedGenerator;
 
-import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.run.EventRunloop;
@@ -20,7 +18,7 @@ import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.TimewarpRunloopRecoveryStrategy;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
-import deism.stateful.TimewarpEventSourceAdapter;
+import deism.stateful.DefaultTimewarpProcessBuilder;
 
 public class TimewarpJobQueueSimulation {
     /**
@@ -48,30 +46,30 @@ public class TimewarpJobQueueSimulation {
 
         DefaultTimewarpDiscreteEventProcess process = 
             new DefaultTimewarpDiscreteEventProcess();
+        DefaultTimewarpProcessBuilder builder = 
+            new DefaultTimewarpProcessBuilder(process, governor);
 
-        process.addEventSource(
-                new TimewarpEventSourceAdapter(
-                new EventSourceStatefulGeneratorAdapter(
-                new ClientArrivedGenerator(rng, 1000, 1600))));
+        builder.add(new ClientArrivedGenerator(rng, 1000, 1600));
         
         WaitingRoom waitingRoom = new WaitingRoom();
-        Counter counterOne = new Counter();
-        Counter counterTwo = new Counter();
+        builder.add(waitingRoom.source);
+        builder.add(waitingRoom.dispatcher);
 
-        process.addEventSource(waitingRoom.source);
-        process.addEventSource(counterOne);
-        process.addEventSource(counterTwo);
+        Counter counterOne = new Counter();
+        builder.add(counterOne.source);
+        builder.add(counterOne.dispatecher);
+        process.addStatefulObject(counterOne);
+
+        Counter counterTwo = new Counter();
+        builder.add(counterTwo.source);
+        builder.add(counterTwo.dispatecher);
+        process.addStatefulObject(counterTwo);
 
         // add jitter
-        process.addEventSource(
-                new TimewarpEventSourceAdapter(
-                new JitterEventSource()));
+        builder.add(new JitterEventSource());
 
-        process.addEventDispatcher(waitingRoom.dispatcher);
-        process.addEventDispatcher(counterOne);
-        process.addEventDispatcher(counterTwo);
-        process.addEventDispatcher(new EventLogger());
-        process.addEventDispatcher(waitingRoom.statisticsLogger);
+        // queue logger
+        builder.add(waitingRoom.statisticsLogger);
         
         EventCondition snapshotAll = new EventCondition() {
             @Override

@@ -8,6 +8,7 @@ import wqcommon.ClientArrivedEvent;
 
 import deism.core.Event;
 import deism.core.EventDispatcher;
+import deism.core.Stateful;
 import deism.stateful.AbstractStateHistory;
 import deism.stateful.TimewarpEventSource;
 
@@ -27,7 +28,7 @@ public class WaitingRoom {
     
     public class Source
             extends AbstractStateHistory<Long, CounterServiceEvent>
-            implements TimewarpEventSource {
+            implements TimewarpEventSource, Stateful {
         
         private CounterServiceEvent currentEvent;
         
@@ -68,7 +69,7 @@ public class WaitingRoom {
     }
     
     public class Dispatcher extends AbstractStateHistory<Long, Event>
-            implements EventDispatcher {
+            implements EventDispatcher, Stateful {
         
         @Override
         public void dispatchEvent(Event event) {
