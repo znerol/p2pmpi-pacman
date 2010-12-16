@@ -10,9 +10,6 @@ import p2pmpi.mpi.MPI;
 import util.EventLogger;
 import util.StateHistoryLogger;
 import util.TerminateAfterDuration;
-import deism.adapter.EventSourceStatefulGeneratorAdapter;
-import deism.adapter.EventSourceStatelessGeneratorAdapter;
-import deism.adapter.FilteredEventSink;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.p2pmpi.MpiEventSink;
@@ -22,12 +19,9 @@ import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
-import deism.run.ThreadedEventSourceRunner;
 import deism.run.TimewarpRunloopRecoveryStrategy;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
-import deism.stateful.TimewarpEventSinkAdapter;
-import deism.stateful.TimewarpEventSource;
-import deism.stateful.TimewarpEventSourceAdapter;
+import deism.stateful.DefaultTimewarpProcessBuilder;
 
 public class Pingpong {
 
@@ -63,20 +57,11 @@ public class Pingpong {
 
         DefaultTimewarpDiscreteEventProcess process =
             new DefaultTimewarpDiscreteEventProcess();
+        DefaultTimewarpProcessBuilder builder = 
+            new DefaultTimewarpProcessBuilder(process, governor);
 
-        process.addEventSource(
-                new EventSourceStatelessGeneratorAdapter(
-                new BallEventGenerator(me * 50, 100, me, other)));
-
-        ThreadedEventSourceRunner startableMpiEventSource =
-            new ThreadedEventSourceRunner(governor,
-            new EventSourceStatefulGeneratorAdapter(
-            new MpiEventGenerator(MPI.COMM_WORLD, other, 0)));
-        process.addStartable(startableMpiEventSource);
-
-        TimewarpEventSource timewarpMpiEventSource = 
-            new TimewarpEventSourceAdapter(startableMpiEventSource);
-        process.addEventSource(timewarpMpiEventSource);
+        builder.add(new BallEventGenerator(me * 50, 100, me, other));
+        builder.add(new MpiEventGenerator(MPI.COMM_WORLD, other, 0));
 
         EventCondition onlyMine = new EventCondition() {
             @Override
@@ -89,11 +74,9 @@ public class Pingpong {
             }
         };
 
-        process.addEventSink(
-                new TimewarpEventSinkAdapter(
-                new FilteredEventSink(onlyMine,
-                new MpiEventSink(MPI.COMM_WORLD, other, 0))));
+        builder.add(new MpiEventSink(MPI.COMM_WORLD, other, 0), onlyMine);
 
+        process.addEventSink(new EventLogger());
         process.addEventDispatcher(new EventLogger());
         process.addStatefulObject(new StateHistoryLogger());
 
