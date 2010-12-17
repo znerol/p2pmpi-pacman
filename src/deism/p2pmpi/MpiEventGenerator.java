@@ -3,10 +3,10 @@ package deism.p2pmpi;
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 
+import deism.core.Blocking;
 import deism.core.Event;
 import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
-import deism.run.Blocking;
 
 @Stateful
 @Blocking

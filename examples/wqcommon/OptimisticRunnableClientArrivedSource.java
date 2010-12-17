@@ -8,9 +8,9 @@ import org.apache.log4j.Logger;
 
 import deism.core.Event;
 import deism.core.EventSource;
+import deism.core.Startable;
 import deism.run.ExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
-import deism.run.Startable;
 
 public class OptimisticRunnableClientArrivedSource implements EventSource, Startable {
     private long mtbca;

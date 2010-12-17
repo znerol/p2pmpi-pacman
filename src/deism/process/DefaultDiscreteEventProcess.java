@@ -7,7 +7,7 @@ import deism.core.Event;
 import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
-import deism.run.Startable;
+import deism.core.Startable;
 
 public class DefaultDiscreteEventProcess implements DiscreteEventProcess, Startable {
     private final List<EventSource> sourceList = new ArrayList<EventSource>();

@@ -1,4 +1,4 @@
-package deism.run;
+package deism.core;
 
 /**
  * Startable objects get notified before a runloop starts and after it

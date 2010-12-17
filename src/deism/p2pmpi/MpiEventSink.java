@@ -4,9 +4,9 @@ package deism.p2pmpi;
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 
+import deism.core.Blocking;
 import deism.core.Event;
 import deism.core.EventSink;
-import deism.run.Blocking;
 
 @Blocking
 public class MpiEventSink implements EventSink {

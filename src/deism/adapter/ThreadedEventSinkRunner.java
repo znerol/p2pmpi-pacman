@@ -1,4 +1,4 @@
-package deism.run;
+package deism.adapter;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import deism.core.Event;
 import deism.core.EventSink;
+import deism.core.Startable;
 
 public class ThreadedEventSinkRunner implements EventSink, Startable {
 

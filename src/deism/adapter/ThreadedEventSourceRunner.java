@@ -1,4 +1,4 @@
-package deism.run;
+package deism.adapter;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 
 import deism.core.Event;
 import deism.core.EventSource;
+import deism.core.Startable;
+import deism.run.ExecutionGovernor;
 
 public class ThreadedEventSourceRunner implements EventSource, Startable {
     private final Queue<Event> events = new ArrayDeque<Event>();

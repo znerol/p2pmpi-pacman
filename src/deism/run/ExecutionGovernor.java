@@ -1,5 +1,7 @@
 package deism.run;
 
+import deism.core.Startable;
+
 /**
  * Implementations of execution governors must provide a way to suspend the
  * current thread until the given timestamp is reached.

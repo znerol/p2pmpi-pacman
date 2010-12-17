@@ -3,17 +3,17 @@ package deism.process;
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.adapter.EventSourceStatelessGeneratorAdapter;
 import deism.adapter.FilteredEventSink;
+import deism.adapter.ThreadedEventSinkRunner;
+import deism.adapter.ThreadedEventSourceRunner;
+import deism.core.Blocking;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
+import deism.core.Startable;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
-import deism.run.Blocking;
 import deism.run.ExecutionGovernor;
-import deism.run.Startable;
-import deism.run.ThreadedEventSinkRunner;
-import deism.run.ThreadedEventSourceRunner;
 
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;
