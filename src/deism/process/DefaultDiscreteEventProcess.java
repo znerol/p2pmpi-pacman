@@ -7,20 +7,22 @@ import deism.core.Event;
 import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
+import deism.core.Flushable;
 import deism.core.Startable;
 
-public class DefaultDiscreteEventProcess implements DiscreteEventProcess, Startable {
+public class DefaultDiscreteEventProcess implements DiscreteEventProcess,
+        Startable, Flushable {
     private final List<EventSource> sourceList = new ArrayList<EventSource>();
     private final List<EventSink> sinkList = new ArrayList<EventSink>();
-    private final List<EventDispatcher> dispatcherList =
-        new ArrayList<EventDispatcher>();
+    private final List<EventDispatcher> dispatcherList = new ArrayList<EventDispatcher>();
     private final List<Startable> startableList = new ArrayList<Startable>();
+    private final List<Flushable> flushableList = new ArrayList<Flushable>();
 
-    private final EventSourceCollection source =
-        new EventSourceCollection(sourceList);
+    private final EventSourceCollection source = new EventSourceCollection(
+            sourceList);
     private final EventSinkCollection sink = new EventSinkCollection(sinkList);
-    private final EventDispatcherCollection dispatcher = 
-        new EventDispatcherCollection(dispatcherList);
+    private final EventDispatcherCollection dispatcher = new EventDispatcherCollection(
+            dispatcherList);
 
     public void addEventSource(EventSource source) {
         sourceList.add(source);
@@ -36,6 +38,10 @@ public class DefaultDiscreteEventProcess implements DiscreteEventProcess, Starta
 
     public void addStartable(Startable startable) {
         startableList.add(startable);
+    }
+
+    public void addFlushable(Flushable flushable) {
+        flushableList.add(flushable);
     }
 
     @Override
@@ -69,6 +75,13 @@ public class DefaultDiscreteEventProcess implements DiscreteEventProcess, Starta
     public void stop(long simtime) {
         for (Startable startable : startableList) {
             startable.stop(simtime);
+        }
+    }
+
+    @Override
+    public void flush(long simtime) {
+        for (Flushable flushable : flushableList) {
+            flushable.flush(simtime);
         }
     }
 }

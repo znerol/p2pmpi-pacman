@@ -12,6 +12,7 @@ import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
+import deism.core.Flushable;
 import deism.core.Startable;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
@@ -35,7 +36,12 @@ public class DefaultProcessBuilder {
      */
     protected void register(Object object) {
         if (object instanceof Startable) {
+            logger.debug("Register startable " + object);
             process.addStartable((Startable) object);
+        }
+        if (object instanceof Flushable) {
+            logger.debug("Register flushable " + object);
+            process.addFlushable((Flushable) object);
         }
     }
 

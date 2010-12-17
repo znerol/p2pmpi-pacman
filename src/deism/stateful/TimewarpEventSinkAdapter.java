@@ -7,9 +7,10 @@ import java.util.Queue;
 
 import deism.core.Event;
 import deism.core.EventSink;
+import deism.core.Flushable;
 
 public class TimewarpEventSinkAdapter extends AbstractStateHistory<Long, Event>
-        implements EventSink {
+        implements EventSink, Flushable {
     private final EventSink sink;
     private final Queue<Event> pending = new ArrayDeque<Event>();
     private final Queue<Event> pendingAnti = new ArrayDeque<Event>();
@@ -27,11 +28,9 @@ public class TimewarpEventSinkAdapter extends AbstractStateHistory<Long, Event>
         else {
             pending.add(event);
         }
-
-        flush(event.getSimtime());
     }
 
-    private void flush(long simtime) {
+    public void flush(long simtime) {
         for (Iterator<Event> i = pending.iterator(); i.hasNext(); ) {
             Event event = i.next();
             if (pendingAnti.remove(event.inverseEvent())) {

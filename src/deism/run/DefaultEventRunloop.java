@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import deism.core.Event;
 import deism.core.EventCondition;
+import deism.core.Flushable;
 import deism.core.Startable;
 import deism.process.DiscreteEventProcess;
 
@@ -52,14 +53,15 @@ public class DefaultEventRunloop implements EventRunloop {
         logger.debug("Start runloop at simulation time: " + currentSimtime);
 
         long lastSimtime = currentSimtime;
-        
+        long maxSimtime = currentSimtime;
+
         // support rollback to before very first event
         recoveryStrategy.save(currentSimtime - 1);
 
         logger.debug("Start governor, source, sink");
         governor.start(currentSimtime);
         if (process instanceof Startable) {
-            ((Startable)process).start(currentSimtime);
+            ((Startable) process).start(currentSimtime);
         }
 
         while (!stop) {
@@ -80,10 +82,22 @@ public class DefaultEventRunloop implements EventRunloop {
                 // Notify sink that we're about to handle peekEvent
                 logger.info("Announce peekEvent to event sink " + peekEvent);
                 process.offer(peekEvent);
+
+                if (process instanceof Flushable
+                        && peekEvent.getSimtime() > maxSimtime) {
+                    logger.debug("Flush");
+                    ((Flushable)process).flush(peekEvent.getSimtime());
+                }
+
                 logger.debug("Suspend runloop until " + peekEvent.getSimtime());
                 newSimtime = governor.suspendUntil(peekEvent.getSimtime());
             }
             else {
+                if (process instanceof Flushable) {
+                    logger.debug("Flush");
+                    ((Flushable)process).flush(Long.MAX_VALUE);
+                }
+
                 logger.debug("Suspend runloop indefinitely");
                 newSimtime = governor.suspend();
             }
@@ -121,7 +135,7 @@ public class DefaultEventRunloop implements EventRunloop {
             process.remove(peekEvent);
 
             // Antimessages aren't allowed here.
-            assert(peekEvent.isAntimessage() == false);
+            assert (peekEvent.isAntimessage() == false);
             logger.info("Dispatch peekEvent " + peekEvent);
             process.dispatchEvent(peekEvent);
 
@@ -131,11 +145,12 @@ public class DefaultEventRunloop implements EventRunloop {
             }
 
             lastSimtime = currentSimtime;
+            maxSimtime = Math.max(maxSimtime, currentSimtime);
         }
 
         logger.debug("Stop source, sink, governor");
         if (process instanceof Startable) {
-            ((Startable)process).stop(currentSimtime);
+            ((Startable) process).stop(currentSimtime);
         }
         governor.stop(currentSimtime);
 
