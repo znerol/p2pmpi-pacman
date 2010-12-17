@@ -70,6 +70,6 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
             register(result);
         }
 
-        return sink;
+        return result;
     }
 }

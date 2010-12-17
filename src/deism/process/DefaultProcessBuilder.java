@@ -126,12 +126,12 @@ public class DefaultProcessBuilder {
      */
     protected EventSink decorate(EventSink sink, Object adaptee) {
         EventSink result = sink;
-        if (adaptee instanceof Blocking) {
+        if (adaptee.getClass().isAnnotationPresent(Blocking.class)) {
             result = new ThreadedEventSinkRunner(sink);
             register(result);
         }
 
-        return sink;
+        return result;
     }
 
     /**
