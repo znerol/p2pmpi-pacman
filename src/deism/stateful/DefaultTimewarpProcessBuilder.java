@@ -1,5 +1,7 @@
 package deism.stateful;
 
+import org.apache.log4j.Logger;
+
 import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.Stateful;
@@ -7,7 +9,8 @@ import deism.process.DefaultProcessBuilder;
 import deism.run.ExecutionGovernor;
 
 public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
-    DefaultTimewarpDiscreteEventProcess timewarpProcess;
+    private DefaultTimewarpDiscreteEventProcess timewarpProcess;
+    private final static Logger logger = Logger.getLogger(DefaultTimewarpProcessBuilder.class);
 
     public DefaultTimewarpProcessBuilder(
             DefaultTimewarpDiscreteEventProcess process,
@@ -22,6 +25,7 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
         super.register(object);
 
         if (object instanceof StateHistory<?>) {
+            logger.debug("Register state aware " + object);
             timewarpProcess.addStatefulObject((StateHistory<Long>) object);
         }
     }
@@ -43,6 +47,7 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
 
         if (!(adaptee instanceof StateHistory<?>)
                 && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
+            logger.debug("Decorate stateful " + adaptee + " with timewarp source adapter");
             result = new TimewarpEventSourceAdapter(result);
             register(result);
         }
@@ -66,6 +71,7 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
 
         if (!(adaptee instanceof StateHistory<?>)
                 && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
+            logger.debug("Decorate stateful " + adaptee + " with timewarp sink adapter");
             result = new TimewarpEventSinkAdapter(result);
             register(result);
         }

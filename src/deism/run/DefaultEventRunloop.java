@@ -21,7 +21,8 @@ public class DefaultEventRunloop implements EventRunloop {
     private long currentSimtime = 0;
     private EventRunloopRecoveryStrategy recoveryStrategy;
     private EventCondition snapshotCondition;
-    private final static Logger logger = Logger.getLogger(DefaultEventRunloop.class);
+    private final static Logger logger = Logger
+            .getLogger(DefaultEventRunloop.class);
 
     public DefaultEventRunloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
@@ -108,7 +109,8 @@ public class DefaultEventRunloop implements EventRunloop {
                     process.remove(peekEvent);
                 }
 
-                logger.debug("Initiate rollback caused by peekEvent " + peekEvent);
+                logger.debug("Initiate rollback caused by peekEvent "
+                        + peekEvent);
                 recoveryStrategy.rollback(currentSimtime);
                 lastSimtime = currentSimtime;
                 logger.debug("Restart runloop cycle at " + currentSimtime);

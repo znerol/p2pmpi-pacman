@@ -1,5 +1,7 @@
 package deism.process;
 
+import org.apache.log4j.Logger;
+
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.adapter.EventSourceStatelessGeneratorAdapter;
 import deism.adapter.FilteredEventSink;
@@ -18,6 +20,7 @@ import deism.run.ExecutionGovernor;
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;
     private final ExecutionGovernor governor;
+    private final static Logger logger = Logger.getLogger(DefaultProcessBuilder.class);
 
     public DefaultProcessBuilder(DefaultDiscreteEventProcess process,
             ExecutionGovernor governor) {
@@ -50,6 +53,7 @@ public class DefaultProcessBuilder {
     protected EventSource decorate(EventSource source, Object adaptee) {
         EventSource result = source;
         if (adaptee.getClass().isAnnotationPresent(Blocking.class)) {
+            logger.debug("Decorate blocking " + adaptee + " with worker thread");
             result = new ThreadedEventSourceRunner(governor, source);
             register(result);
         }
@@ -61,6 +65,7 @@ public class DefaultProcessBuilder {
      * Return an EventSource wrapping the given generator
      */
     protected EventSource adapt(StatefulEventGenerator generator) {
+        logger.debug("Adapt " + generator + " to EventSource");
         EventSource result = new EventSourceStatefulGeneratorAdapter(generator);
         register(result);
         return result;
@@ -70,6 +75,7 @@ public class DefaultProcessBuilder {
      * Return an EventSource wrapping the given generator
      */
     protected EventSource adapt(StatelessEventGenerator generator) {
+        logger.debug("Adapt " + generator + " to EventSource");
         EventSource result = new EventSourceStatelessGeneratorAdapter(generator);
         register(result);
         return result;
@@ -84,6 +90,7 @@ public class DefaultProcessBuilder {
     public void add(EventSource source) {
         register(source);
         EventSource result = decorate(source, source);
+        logger.debug("Add EventSource " + result);
         process.addEventSource(result);
     }
 
@@ -97,6 +104,7 @@ public class DefaultProcessBuilder {
         register(generator);
         EventSource source = adapt(generator);
         EventSource result = decorate(source, generator);
+        logger.debug("Add EventSource " + result);
         process.addEventSource(result);
     }
 
@@ -110,6 +118,7 @@ public class DefaultProcessBuilder {
         register(generator);
         EventSource source = adapt(generator);
         EventSource result = decorate(source, generator);
+        logger.debug("Add EventSource " + result);
         process.addEventSource(result);
     }
 
@@ -127,6 +136,7 @@ public class DefaultProcessBuilder {
     protected EventSink decorate(EventSink sink, Object adaptee) {
         EventSink result = sink;
         if (adaptee.getClass().isAnnotationPresent(Blocking.class)) {
+            logger.debug("Decorate blocking " + adaptee + " with worker thread");
             result = new ThreadedEventSinkRunner(sink);
             register(result);
         }
@@ -143,6 +153,7 @@ public class DefaultProcessBuilder {
     public void add(EventSink sink) {
         register(sink);
         EventSink result = decorate(sink, sink);
+        logger.debug("Add EventSink " + result);
         process.addEventSink(result);
     }
 
@@ -156,6 +167,7 @@ public class DefaultProcessBuilder {
         EventSink result = decorate(sink, sink);
         result = new FilteredEventSink(filter, result);
         register(result);
+        logger.debug("Add EventSink " + result + " with filter " + filter);
         process.addEventSink(result);
     }
 
@@ -183,6 +195,7 @@ public class DefaultProcessBuilder {
     public void add(EventDispatcher dispatcher) {
         register(dispatcher);
         EventDispatcher result = decorate(dispatcher, dispatcher);
+        logger.debug("Add EventDispatcher " + result);
         process.addEventDispatcher(result);
     }
 
@@ -198,15 +211,18 @@ public class DefaultProcessBuilder {
         // same as add(EventSource source) without register
         EventSource source = decorate((EventSource) process,
                 (EventSource) process);
+        logger.debug("Add EventSource " + source);
         this.process.addEventSource(source);
 
         // same as add(EventSink sink) without register
         EventSink sink = decorate((EventSink) process, (EventSink) process);
+        logger.debug("Add EventSink " + sink);
         this.process.addEventSink(sink);
 
         // same as add(EventDispatcher dispatcher) without register
         EventDispatcher dispatcher = decorate((EventDispatcher) process,
                 (EventDispatcher) process);
+        logger.debug("Add EventDispatcher " + sink);
         this.process.addEventDispatcher(dispatcher);
     }
 }
