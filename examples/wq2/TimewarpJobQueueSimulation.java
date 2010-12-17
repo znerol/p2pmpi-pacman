@@ -56,14 +56,10 @@ public class TimewarpJobQueueSimulation {
         builder.add(waitingRoom.dispatcher);
 
         Counter counterOne = new Counter();
-        builder.add(counterOne.source);
-        builder.add(counterOne.dispatecher);
-        process.addStatefulObject(counterOne);
+        builder.add(counterOne);
 
         Counter counterTwo = new Counter();
-        builder.add(counterTwo.source);
-        builder.add(counterTwo.dispatecher);
-        process.addStatefulObject(counterTwo);
+        builder.add(counterTwo);
 
         // add jitter
         builder.add(new JitterEventSource());

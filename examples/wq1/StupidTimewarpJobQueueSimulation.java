@@ -18,7 +18,7 @@ import deism.run.DefaultEventRunloop;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.TimewarpRunloopRecoveryStrategy;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
-import deism.stateful.TimewarpEventSourceAdapter;
+import deism.stateful.DefaultTimewarpProcessBuilder;
 
 public class StupidTimewarpJobQueueSimulation {
     /**
@@ -39,23 +39,21 @@ public class StupidTimewarpJobQueueSimulation {
 
         DefaultTimewarpDiscreteEventProcess process = 
             new DefaultTimewarpDiscreteEventProcess();
+        DefaultTimewarpProcessBuilder builder =
+            new DefaultTimewarpProcessBuilder(process, governor);
 
         OptimisticRunnableClientArrivedSource clientArrivedSource =
             new OptimisticRunnableClientArrivedSource(rng, governor, speed,
                     1000, 1600);
-        process.addStartable(clientArrivedSource);
-        process.addEventSource(
-                new TimewarpEventSourceAdapter(clientArrivedSource));
-        
+
+        builder.add(clientArrivedSource);
+
         PriorityBlockingQueue<ClientArrivedEvent> jobs =
             new PriorityBlockingQueue<ClientArrivedEvent>();
-        process.addEventSource(
-                new TimewarpEventSourceAdapter(new ClerkSource(jobs)));
-        process.addEventSource(
-                new TimewarpEventSourceAdapter(new ClerkSource(jobs)));
+        builder.add(new ClerkSource(jobs));
+        builder.add(new ClerkSource(jobs));
+        builder.add(new JobAggregator(jobs));
 
-        process.addEventDispatcher(new JobAggregator(jobs));
-        
         EventCondition snapshotAll = new EventCondition() {
             @Override
             public boolean match(Event e) {

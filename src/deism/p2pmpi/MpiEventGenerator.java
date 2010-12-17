@@ -8,8 +8,9 @@ import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 import deism.run.Blocking;
 
-public class MpiEventGenerator implements StatefulEventGenerator, Stateful,
-        Blocking {
+@Stateful
+@Blocking
+public class MpiEventGenerator implements StatefulEventGenerator {
 
     private final int mpisender;
     private final int mpitag;

@@ -6,7 +6,8 @@ import deism.core.Event;
 import deism.core.EventSource;
 import deism.core.Stateful;
 
-public class JitterEventSource implements EventSource, Stateful {
+@Stateful
+public class JitterEventSource implements EventSource {
     private Event currentEvent;
     private final Random rng = new Random(0);
     

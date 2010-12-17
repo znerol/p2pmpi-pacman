@@ -42,7 +42,7 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
         EventSource result = super.decorate(source, adaptee);
 
         if (!(adaptee instanceof StateHistory<?>)
-                && (adaptee instanceof Stateful)) {
+                && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
             result = new TimewarpEventSourceAdapter(result);
             register(result);
         }
@@ -65,7 +65,7 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
         EventSink result = super.decorate(sink, sink);
 
         if (!(adaptee instanceof StateHistory<?>)
-                && (adaptee instanceof Stateful)) {
+                && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
             result = new TimewarpEventSinkAdapter(result);
             register(result);
         }

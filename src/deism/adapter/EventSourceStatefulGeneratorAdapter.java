@@ -8,8 +8,8 @@ import deism.core.StatefulEventGenerator;
 /**
  * Adapter class which turns a StatefulEventGenerator into an EventSource
  */
-public class EventSourceStatefulGeneratorAdapter implements EventSource,
-        Stateful {
+@Stateful
+public class EventSourceStatefulGeneratorAdapter implements EventSource {
     private final StatefulEventGenerator generator;
     private Event currentEvent;
 

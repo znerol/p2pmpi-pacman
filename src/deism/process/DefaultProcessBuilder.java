@@ -48,10 +48,8 @@ public class DefaultProcessBuilder {
      * @return
      */
     protected EventSource decorate(EventSource source, Object adaptee) {
-        register(source);
-
         EventSource result = source;
-        if (adaptee instanceof Blocking) {
+        if (adaptee.getClass().isAnnotationPresent(Blocking.class)) {
             result = new ThreadedEventSourceRunner(governor, source);
             register(result);
         }
@@ -63,16 +61,18 @@ public class DefaultProcessBuilder {
      * Return an EventSource wrapping the given generator
      */
     protected EventSource adapt(StatefulEventGenerator generator) {
-        register(generator);
-        return new EventSourceStatefulGeneratorAdapter(generator);
+        EventSource result = new EventSourceStatefulGeneratorAdapter(generator);
+        register(result);
+        return result;
     }
 
     /**
      * Return an EventSource wrapping the given generator
      */
     protected EventSource adapt(StatelessEventGenerator generator) {
-        register(generator);
-        return new EventSourceStatelessGeneratorAdapter(generator);
+        EventSource result = new EventSourceStatelessGeneratorAdapter(generator);
+        register(result);
+        return result;
     }
 
     /**
@@ -82,6 +82,7 @@ public class DefaultProcessBuilder {
      * @param source
      */
     public void add(EventSource source) {
+        register(source);
         EventSource result = decorate(source, source);
         process.addEventSource(result);
     }
@@ -93,6 +94,7 @@ public class DefaultProcessBuilder {
      * @param source
      */
     public void add(StatefulEventGenerator generator) {
+        register(generator);
         EventSource source = adapt(generator);
         EventSource result = decorate(source, generator);
         process.addEventSource(result);
@@ -105,6 +107,7 @@ public class DefaultProcessBuilder {
      * @param source
      */
     public void add(StatelessEventGenerator generator) {
+        register(generator);
         EventSource source = adapt(generator);
         EventSource result = decorate(source, generator);
         process.addEventSource(result);
@@ -122,8 +125,6 @@ public class DefaultProcessBuilder {
      * @return
      */
     protected EventSink decorate(EventSink sink, Object adaptee) {
-        register(sink);
-
         EventSink result = sink;
         if (adaptee instanceof Blocking) {
             result = new ThreadedEventSinkRunner(sink);
@@ -140,6 +141,7 @@ public class DefaultProcessBuilder {
      * @param sink
      */
     public void add(EventSink sink) {
+        register(sink);
         EventSink result = decorate(sink, sink);
         process.addEventSink(result);
     }
@@ -150,6 +152,7 @@ public class DefaultProcessBuilder {
      * @param sink
      */
     public void add(EventSink sink, EventCondition filter) {
+        register(sink);
         EventSink result = decorate(sink, sink);
         result = new FilteredEventSink(filter, result);
         register(result);
@@ -168,7 +171,6 @@ public class DefaultProcessBuilder {
      */
     protected EventDispatcher decorate(EventDispatcher dispatcher,
             Object adaptee) {
-        register(dispatcher);
         return dispatcher;
     }
 
@@ -179,7 +181,32 @@ public class DefaultProcessBuilder {
      * @param sink
      */
     public void add(EventDispatcher dispatcher) {
+        register(dispatcher);
         EventDispatcher result = decorate(dispatcher, dispatcher);
         process.addEventDispatcher(result);
+    }
+
+    /**
+     * Add a child process, registering supplementary interfaces and decorating
+     * it if necessary.
+     *
+     * @param process child process
+     */
+    public void add(DiscreteEventProcess process) {
+        register(process);
+
+        // same as add(EventSource source) without register
+        EventSource source = decorate((EventSource) process,
+                (EventSource) process);
+        this.process.addEventSource(source);
+
+        // same as add(EventSink sink) without register
+        EventSink sink = decorate((EventSink) process, (EventSink) process);
+        this.process.addEventSink(sink);
+
+        // same as add(EventDispatcher dispatcher) without register
+        EventDispatcher dispatcher = decorate((EventDispatcher) process,
+                (EventDispatcher) process);
+        this.process.addEventDispatcher(dispatcher);
     }
 }

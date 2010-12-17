@@ -25,10 +25,11 @@ public class WaitingRoom {
         waitingQueue = new PriorityQueue<ClientArrivedEvent>();
         availableCounters = new PriorityQueue<CounterAvailableEvent>();
     }
-    
+
+    @Stateful
     public class Source
             extends AbstractStateHistory<Long, CounterServiceEvent>
-            implements TimewarpEventSource, Stateful {
+            implements TimewarpEventSource {
         
         private CounterServiceEvent currentEvent;
         
@@ -67,9 +68,10 @@ public class WaitingRoom {
             }
         }
     }
-    
+
+    @Stateful
     public class Dispatcher extends AbstractStateHistory<Long, Event>
-            implements EventDispatcher, Stateful {
+            implements EventDispatcher {
         
         @Override
         public void dispatchEvent(Event event) {

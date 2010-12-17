@@ -3,13 +3,11 @@ package wq2;
 import java.util.List;
 
 import deism.core.Event;
-import deism.core.EventDispatcher;
-import deism.core.EventSource;
 import deism.stateful.AbstractStateHistory;
+import deism.stateful.TimewarpDiscreteEventProcess;
 
-public class Counter extends AbstractStateHistory<Long, Counter.CounterState> {
-    public final Source source = new Source();
-    public final Dispatcher dispatecher = new Dispatcher();
+public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
+        implements TimewarpDiscreteEventProcess {
 
     public class CounterState {
         public final CounterAvailableEvent event;
@@ -31,7 +29,6 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState> {
         }
     }
 
-    private class Source implements EventSource {
         @Override
         public Event peek(long currentSimtime) {
             if (currentState.dispatching == false) {
@@ -47,9 +44,7 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState> {
             currentState = new CounterState(currentState.event, true);
             pushHistory(currentState);
         }
-    }
 
-    private class Dispatcher implements EventDispatcher {
         @Override
         public void dispatchEvent(Event event) {
             if (event instanceof CounterServiceEvent) {
@@ -75,5 +70,9 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState> {
                 return new CounterAvailableEvent(endTime, Counter.this);
             }
         }
-    }
+
+        @Override
+        public void offer(Event event) {
+            // not used
+        }
 }

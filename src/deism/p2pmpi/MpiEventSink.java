@@ -8,7 +8,8 @@ import deism.core.Event;
 import deism.core.EventSink;
 import deism.run.Blocking;
 
-public class MpiEventSink implements EventSink, Blocking {
+@Blocking
+public class MpiEventSink implements EventSink {
 
     private final int mpireceiver;
     private final int mpitag;
