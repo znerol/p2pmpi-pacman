@@ -39,7 +39,7 @@ public class Pingpong {
         /* exit simulation after n units of simulation time */
         EventCondition termCond = new TerminateAfterDuration(1000);
 
-        String speedString = System.getProperty("simulationSpeed", "0.1");
+        String speedString = System.getProperty("simulationSpeed", "1.0");
         double speed = Double.valueOf(speedString).doubleValue();
 
         ExecutionGovernor governor;
