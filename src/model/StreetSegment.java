@@ -1,30 +1,64 @@
 package model;
 
-import java.util.List;
-
 public class StreetSegment extends Field {
-    protected Street vertical;
-    protected Street horizontal;
+    private StreetSegment north;
+    private StreetSegment east;
+    private StreetSegment south;
+    private StreetSegment west;
 
     protected StreetSegment(int x, int y, Board board) {
         super(x, y, board);
-        vertical = new Street(this);
-        horizontal = new Street(this);
+    }
+
+    public StreetSegment getNorthStreetSegment() {
+        return north;
     }
 
     @Override
-    public Street getVerticalStreet() {
-        return vertical;
+    protected void setNorth(Field field) {
+        super.setNorth(field);
+        if (field instanceof StreetSegment)
+            this.north = (StreetSegment) field;
+        else
+            this.north = null;
+    }
+
+    public StreetSegment getEastStreetSegment() {
+        return east;
     }
 
     @Override
-    public Street getHorizontalStreet() {
-        return horizontal;
+    protected void setEast(Field field) {
+        super.setEast(field);
+        if (field instanceof StreetSegment)
+            this.east = (StreetSegment) field;
+        else
+            this.east = null;
+    }
+
+    public StreetSegment getSouthStreetSegment() {
+        return south;
     }
 
     @Override
-    public List<Sprite> getSprites() {
-        // TODO Auto-generated method stub
-        return null;
+    protected void setSouth(Field field) {
+        super.setSouth(field);
+        if (field instanceof StreetSegment)
+            this.south = (StreetSegment) field;
+        else
+            this.south = null;
+    }
+
+    public StreetSegment getWestStreetSegment() {
+        return west;
+    }
+
+    @Override
+    protected void setWest(Field field) {
+        super.setWest(field);
+        if (field instanceof StreetSegment)
+            this.west = (StreetSegment) field;
+        else
+            this.west = null;
     }
 }
