@@ -1,6 +1,11 @@
 package model;
 
 public class Sprite {
+
+    public void getState(int t) {
+        // TODO
+    }
+
     private Direction direction = null;
 
     private Direction nextDirection = null;

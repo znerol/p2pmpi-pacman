@@ -83,7 +83,7 @@ public class GamePlay extends JFrame {
     /**
      * Feld Groesse
      */
-    public static final int GUI_FIELD_SIZE = 9;
+    public static final int GUI_FIELD_SIZE = 8;
     /**
      * Streckfaktor
      */
@@ -111,16 +111,16 @@ public class GamePlay extends JFrame {
      */
     public static final int SPECIAL_HAPPYPILL_TIME = 500;
 
-    private String file = "world1";
+    private final String file = "world1";
 
     private Board b;
     private List<Ghost> gt;
     private Pac pac;
-    private GameComponent gc;
-    private KeyListener kl;
-    private JLabel lblPoints;
-    private JLabel lblLives;
-    private ArrayList<Special> spez = new ArrayList<Special>();
+    private final GameComponent gc;
+    private final KeyListener kl;
+    private final JLabel lblPoints;
+    private final JLabel lblLives;
+    private final ArrayList<Special> spez = new ArrayList<Special>();
 
     /**
      * Standart Konstruktor

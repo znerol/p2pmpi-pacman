@@ -7,7 +7,6 @@ public abstract class Field {
     private int y;
     protected static final int FIELD_SIZE = GamePlay.GUI_FIELD_SIZE;
     private Board board;
-    private Sprite sprite;
     private Field north;
     private Field east;
     private Field south;
@@ -30,14 +29,6 @@ public abstract class Field {
         getSouth().setNorth(this);
         setWest(this.board.getField(x - 1, y));
         getWest().setEast(this);
-    }
-
-    public void setSprite(Sprite sprite) {
-        this.sprite = sprite;
-    }
-
-    public Sprite getSprite() {
-        return sprite;
     }
 
     public Board getBoard() {
