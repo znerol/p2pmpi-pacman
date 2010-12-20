@@ -12,6 +12,8 @@ import util.StateHistoryLogger;
 import util.TerminateAfterDuration;
 import deism.core.Event;
 import deism.core.EventCondition;
+import deism.core.EventExporter;
+import deism.core.EventImporter;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
 import deism.run.EventRunloopRecoveryStrategy;
@@ -55,10 +57,24 @@ public class Pingpong {
         final int me = MPI.COMM_WORLD.Rank();
         final int other = 1 - me;
 
+        EventImporter fakeImporter = new EventImporter() {
+            @Override
+            public Event unpack(Event event) {
+                return event;
+            }
+        };
+
+        EventExporter fakeExporter = new EventExporter() {
+            @Override
+            public Event pack(Event event) {
+                return event;
+            }
+        };
+
         DefaultTimewarpDiscreteEventProcess process =
             new DefaultTimewarpDiscreteEventProcess();
-        DefaultTimewarpProcessBuilder builder = 
-            new DefaultTimewarpProcessBuilder(process, governor);
+        DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
+                process, governor, fakeImporter, fakeExporter);
 
         builder.add(new BallEventGenerator(me * 50, 100, me, other));
         builder.add(new MpiEventGenerator(MPI.COMM_WORLD, other, 0));

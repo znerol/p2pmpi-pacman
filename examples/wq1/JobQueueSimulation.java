@@ -13,6 +13,8 @@ import wqcommon.PestimisticRunnableClientArrivedSource;
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.core.Event;
 import deism.core.EventCondition;
+import deism.core.EventExporter;
+import deism.core.EventImporter;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.run.EventRunloopRecoveryStrategy;
@@ -46,8 +48,23 @@ public class JobQueueSimulation {
             governor = new ImmediateExecutionGovernor();
         }
 
+        EventImporter fakeImporter = new EventImporter() {
+            @Override
+            public Event unpack(Event event) {
+                return event;
+            }
+        };
+
+        EventExporter fakeExporter = new EventExporter() {
+            @Override
+            public Event pack(Event event) {
+                return event;
+            }
+        };
+
         DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
-        DefaultProcessBuilder builder = new DefaultProcessBuilder(process, governor);
+        DefaultProcessBuilder builder = new DefaultProcessBuilder(process,
+                governor, fakeImporter, fakeExporter);
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         if (multithread) {

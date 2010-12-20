@@ -9,10 +9,12 @@ import p2pmpi.mpi.MPI;
 import deism.core.Blocking;
 import deism.core.Event;
 import deism.core.EventSink;
+import deism.core.External;
 import deism.core.Stateful;
 
 @Stateful
 @Blocking
+@External
 public class MpiEventSink implements EventSink {
 
     private final int mpireceiver;

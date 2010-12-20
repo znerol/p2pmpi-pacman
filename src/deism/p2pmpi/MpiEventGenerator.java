@@ -7,11 +7,13 @@ import p2pmpi.mpi.MPI;
 
 import deism.core.Blocking;
 import deism.core.Event;
+import deism.core.External;
 import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 
 @Stateful
 @Blocking
+@External
 public class MpiEventGenerator implements StatefulEventGenerator {
 
     private final int mpisender;

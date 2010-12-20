@@ -16,6 +16,8 @@ import deism.core.Blocking;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
+import deism.core.EventExporter;
+import deism.core.EventImporter;
 import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.Startable;
@@ -33,12 +35,16 @@ public class DefaultProcessBuilderTest {
 
     @Mock
     private DefaultDiscreteEventProcess process;
+    @Mock
+    private EventImporter importer;
+    @Mock
+    private EventExporter exporter;
 
     private DefaultProcessBuilder builder;
 
     @Before
     public void setUp() {
-        builder = new DefaultProcessBuilder(process, null);
+        builder = new DefaultProcessBuilder(process, null, importer, exporter);
     }
 
     @Mock

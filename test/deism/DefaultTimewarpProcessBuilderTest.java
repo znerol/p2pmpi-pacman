@@ -9,6 +9,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import deism.adapter.EventSourceStatelessGeneratorAdapter;
 import deism.adapter.FilteredEventSink;
+import deism.core.EventExporter;
+import deism.core.EventImporter;
 import deism.core.Stateful;
 import deism.core.Event;
 import deism.core.EventCondition;
@@ -34,12 +36,17 @@ public class DefaultTimewarpProcessBuilderTest {
 
     @Mock
     private DefaultTimewarpDiscreteEventProcess process;
+    @Mock
+    private EventImporter importer;
+    @Mock
+    private EventExporter exporter;
 
     private DefaultTimewarpProcessBuilder builder;
 
     @Before
     public void setUp() {
-        builder = new DefaultTimewarpProcessBuilder(process, null);
+        builder = new DefaultTimewarpProcessBuilder(process, null, importer,
+                exporter);
     }
 
     // event sources

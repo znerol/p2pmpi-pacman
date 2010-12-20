@@ -10,6 +10,8 @@ import wqcommon.ClientArrivedGenerator;
 
 import deism.core.Event;
 import deism.core.EventCondition;
+import deism.core.EventExporter;
+import deism.core.EventImporter;
 import deism.run.EventRunloop;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
@@ -44,10 +46,24 @@ public class TimewarpJobQueueSimulation {
             governor = new ImmediateExecutionGovernor();
         }
 
+        EventImporter fakeImporter = new EventImporter() {
+            @Override
+            public Event unpack(Event event) {
+                return event;
+            }
+        };
+
+        EventExporter fakeExporter = new EventExporter() {
+            @Override
+            public Event pack(Event event) {
+                return event;
+            }
+        };
+
         DefaultTimewarpDiscreteEventProcess process = 
             new DefaultTimewarpDiscreteEventProcess();
-        DefaultTimewarpProcessBuilder builder = 
-            new DefaultTimewarpProcessBuilder(process, governor);
+        DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
+                process, governor, fakeImporter, fakeExporter);
 
         builder.add(new ClientArrivedGenerator(rng, 1000, 1600));
         

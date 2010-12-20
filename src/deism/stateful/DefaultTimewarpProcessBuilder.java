@@ -2,6 +2,8 @@ package deism.stateful;
 
 import org.apache.log4j.Logger;
 
+import deism.core.EventExporter;
+import deism.core.EventImporter;
 import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.Stateful;
@@ -14,8 +16,9 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
 
     public DefaultTimewarpProcessBuilder(
             DefaultTimewarpDiscreteEventProcess process,
-            ExecutionGovernor governor) {
-        super(process, governor);
+            ExecutionGovernor governor, EventImporter importer,
+            EventExporter exporter) {
+        super(process, governor, importer, exporter);
         timewarpProcess = process;
     }
 

@@ -4,14 +4,19 @@ import org.apache.log4j.Logger;
 
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.adapter.EventSourceStatelessGeneratorAdapter;
+import deism.adapter.ExternalEventGeneratorAdapter;
+import deism.adapter.ExternalEventSinkAdapter;
 import deism.adapter.FilteredEventSink;
 import deism.adapter.ThreadedEventSinkRunner;
 import deism.adapter.ThreadedEventSourceRunner;
 import deism.core.Blocking;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
+import deism.core.EventExporter;
+import deism.core.EventImporter;
 import deism.core.EventSink;
 import deism.core.EventSource;
+import deism.core.External;
 import deism.core.Flushable;
 import deism.core.Startable;
 import deism.core.StatefulEventGenerator;
@@ -21,12 +26,16 @@ import deism.run.ExecutionGovernor;
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;
     private final ExecutionGovernor governor;
+    private final EventImporter importer;
+    private final EventExporter exporter;
     private final static Logger logger = Logger.getLogger(DefaultProcessBuilder.class);
 
     public DefaultProcessBuilder(DefaultDiscreteEventProcess process,
-            ExecutionGovernor governor) {
+            ExecutionGovernor governor, EventImporter importer, EventExporter exporter) {
         this.process = process;
         this.governor = governor;
+        this.importer = importer;
+        this.exporter = exporter;
     }
 
     /**
@@ -78,6 +87,21 @@ public class DefaultProcessBuilder {
     }
 
     /**
+     * Wrap the given generator into an ExternalEventGeneratorAdapter registered
+     * with the builders importer if @External annotation is present on adaptee.
+     */
+    protected StatefulEventGenerator decorate(StatefulEventGenerator generator, Object adaptee) {
+        StatefulEventGenerator result = generator;
+        if (adaptee.getClass().isAnnotationPresent(External.class)) {
+            logger.debug("Decorate external " + adaptee + " with importer");
+            result = new ExternalEventGeneratorAdapter(generator, importer);
+            register(result);
+        }
+
+        return result;
+    }
+
+    /**
      * Return an EventSource wrapping the given generator
      */
     protected EventSource adapt(StatelessEventGenerator generator) {
@@ -108,7 +132,7 @@ public class DefaultProcessBuilder {
      */
     public void add(StatefulEventGenerator generator) {
         register(generator);
-        EventSource source = adapt(generator);
+        EventSource source = adapt(decorate(generator, generator));
         EventSource result = decorate(source, generator);
         logger.debug("Add EventSource " + result);
         process.addEventSource(result);
@@ -141,9 +165,16 @@ public class DefaultProcessBuilder {
      */
     protected EventSink decorate(EventSink sink, Object adaptee) {
         EventSink result = sink;
+
+        if (adaptee.getClass().isAnnotationPresent(External.class)) {
+            logger.debug("Decorate external " + adaptee + " with exporter");
+            result = new ExternalEventSinkAdapter(result, exporter);
+            register(result);
+        }
+
         if (adaptee.getClass().isAnnotationPresent(Blocking.class)) {
             logger.debug("Decorate blocking " + adaptee + " with worker thread");
-            result = new ThreadedEventSinkRunner(sink);
+            result = new ThreadedEventSinkRunner(result);
             register(result);
         }
 
