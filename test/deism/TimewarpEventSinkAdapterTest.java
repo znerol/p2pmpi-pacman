@@ -29,6 +29,7 @@ public class TimewarpEventSinkAdapterTest {
         Event one = new Event(1L);
 
         sinkAdapter.offer(one);
+        sinkAdapter.flush(1L);
 
         verify(sink).offer(one);
 
@@ -42,10 +43,15 @@ public class TimewarpEventSinkAdapterTest {
         Event three = new Event(3L);
 
         sinkAdapter.offer(one);
+        sinkAdapter.flush(1L);
         sinkAdapter.offer(one.inverseEvent());
+        sinkAdapter.flush(1L);
         sinkAdapter.offer(two);
+        sinkAdapter.flush(2L);
         sinkAdapter.offer(three);
+        sinkAdapter.flush(3L);
         sinkAdapter.offer(three.inverseEvent());
+        sinkAdapter.flush(3L);
 
         verify(sink).offer(one);
         verify(sink).offer(one.inverseEvent());
@@ -64,10 +70,13 @@ public class TimewarpEventSinkAdapterTest {
 
         sinkAdapter.save(0L);
         sinkAdapter.offer(one);
+        sinkAdapter.flush(1L);
         sinkAdapter.save(1L);
         sinkAdapter.offer(three);
+        sinkAdapter.flush(3L);
         sinkAdapter.save(3L);
         sinkAdapter.offer(two);
+        sinkAdapter.offer(two.inverseEvent());
 
         sinkAdapter.rollback(0L);
 
@@ -77,6 +86,7 @@ public class TimewarpEventSinkAdapterTest {
         sinkAdapter.save(2L);
         sinkAdapter.offer(three);
         sinkAdapter.save(3L);
+        sinkAdapter.flush(3L);
 
         verify(sink).offer(one);
         verify(sink).offer(three);
@@ -93,10 +103,13 @@ public class TimewarpEventSinkAdapterTest {
 
         sinkAdapter.save(0L);
         sinkAdapter.offer(one);
+        sinkAdapter.flush(1L);
         sinkAdapter.offer(one.inverseEvent());
         sinkAdapter.offer(three);
+        sinkAdapter.flush(3L);
         sinkAdapter.save(3L);
         sinkAdapter.offer(two);
+        sinkAdapter.offer(two.inverseEvent());
 
         sinkAdapter.rollback(0L);
 
@@ -104,6 +117,7 @@ public class TimewarpEventSinkAdapterTest {
         sinkAdapter.save(2L);
         sinkAdapter.offer(three);
         sinkAdapter.save(3L);
+        sinkAdapter.flush(3L);
 
         verify(sink).offer(one);
         verify(sink).offer(one.inverseEvent());

@@ -11,6 +11,7 @@ import deism.adapter.EventSourceStatelessGeneratorAdapter;
 import deism.adapter.FilteredEventSink;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
+import deism.core.Flushable;
 import deism.core.Stateful;
 import deism.core.Event;
 import deism.core.EventCondition;
@@ -254,6 +255,7 @@ public class DefaultTimewarpProcessBuilderTest {
         assertTrue(addedSink instanceof TimewarpEventSinkAdapter);
 
         verify(process).addStatefulObject((StateHistory<Long>) addedSink);
+        verify(process).addFlushable((Flushable) addedSink);
         verifyNoMoreInteractions(process);
     }
 
@@ -389,6 +391,7 @@ public class DefaultTimewarpProcessBuilderTest {
         assertNotNull(addedSink);
         assertTrue(addedSink instanceof TimewarpEventSinkAdapter);
         verify(process).addStatefulObject((StateHistory<Long>) addedSink);
+        verify(process).addFlushable((Flushable) addedSink);
 
         // dispatcher
         verify(process).addEventDispatcher(dummy);
