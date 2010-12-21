@@ -20,9 +20,6 @@ import deism.core.EventSource;
 import deism.core.Startable;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
-import deism.legacy.Blocking;
-import deism.legacy.ThreadedEventSinkRunner;
-import deism.legacy.ThreadedEventSourceRunner;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
@@ -44,7 +41,7 @@ public class DefaultProcessBuilderTest {
 
     @Before
     public void setUp() {
-        builder = new DefaultProcessBuilder(process, null, importer, exporter);
+        builder = new DefaultProcessBuilder(process, importer, exporter);
     }
 
     @Mock
@@ -56,41 +53,6 @@ public class DefaultProcessBuilderTest {
         builder.add(source);
 
         verify(process).addEventSource(source);
-        verifyNoMoreInteractions(process);
-    }
-
-    /**
-     * Verify that a blocking source is wrapped into a ThreadedEventSourceRunner
-     * and that this runner is added to the process as an EventSource and as a
-     * Startable.
-     */
-    @Test
-    public void testAddBlockingSource() {
-        // We cannot mock here because we'd loose annotations
-        @Blocking
-        final class BlockingEventSource implements EventSource {
-            @Override
-            public Event peek(long currentSimtime) {
-                return null;
-            }
-
-            @Override
-            public void remove(Event event) {
-            }
-        }
-
-        BlockingEventSource blockingSource = new BlockingEventSource();
-        builder.add(blockingSource);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof ThreadedEventSourceRunner);
-
-        verify(process).addStartable((Startable) addedSource);
         verifyNoMoreInteractions(process);
     }
 
@@ -128,50 +90,6 @@ public class DefaultProcessBuilderTest {
         verifyNoMoreInteractions(process);
     }
 
-    /**
-     * Verify that a blocking startable source will be wrapped into a
-     * ThreadedEventSourceRunner and that it also gets added as startable.
-     */
-    @Test
-    public void testAddBlockingStartableSource() {
-        // We cannot mock here because we'd loose annotations
-        @Blocking
-        final class BlockingStartableSource implements EventSource, Startable {
-            @Override
-            public Event peek(long currentSimtime) {
-                return null;
-            }
-
-            @Override
-            public void remove(Event event) {
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        BlockingStartableSource blockingStartableSource = new BlockingStartableSource();
-        builder.add(blockingStartableSource);
-
-        verify(process).addStartable(blockingStartableSource);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof ThreadedEventSourceRunner);
-
-        verify(process).addStartable((Startable) addedSource);
-        verifyNoMoreInteractions(process);
-    }
-
     @Mock
     private StatefulEventGenerator statefulGenerator;
 
@@ -187,33 +105,6 @@ public class DefaultProcessBuilderTest {
         assertNotNull(addedSource);
         assertTrue(addedSource instanceof EventSourceStatefulGeneratorAdapter);
 
-        verifyNoMoreInteractions(process);
-    }
-
-    @Test
-    public void testAddBlockingStatefulEventGenerator() {
-        // We cannot mock here because we'd loose annotations
-        @Blocking
-        final class BlockingStatefulEventGenerator implements
-                StatefulEventGenerator {
-            @Override
-            public Event poll() {
-                return null;
-            }
-        }
-
-        BlockingStatefulEventGenerator generator = new BlockingStatefulEventGenerator();
-        builder.add(generator);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof ThreadedEventSourceRunner);
-
-        verify(process).addStartable((Startable) addedSource);
         verifyNoMoreInteractions(process);
     }
 
@@ -252,43 +143,6 @@ public class DefaultProcessBuilderTest {
         verifyNoMoreInteractions(process);
     }
 
-    @Test
-    public void testAddBlockingStartableStatefulEventGenerator() {
-        // We cannot mock here because we'd loose annotations
-        @Blocking
-        final class BlockingStartableStatefulEventGenerator implements
-                Startable, StatefulEventGenerator {
-            @Override
-            public Event poll() {
-                return null;
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        BlockingStartableStatefulEventGenerator generator = new BlockingStartableStatefulEventGenerator();
-        builder.add(generator);
-
-        verify(process).addStartable(generator);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof ThreadedEventSourceRunner);
-
-        verify(process).addStartable((Startable) addedSource);
-        verifyNoMoreInteractions(process);
-    }
-
     @Mock
     private StatelessEventGenerator statelessGenerator;
 
@@ -304,33 +158,6 @@ public class DefaultProcessBuilderTest {
         assertNotNull(addedSource);
         assertTrue(addedSource instanceof EventSourceStatelessGeneratorAdapter);
 
-        verifyNoMoreInteractions(process);
-    }
-
-    @Test
-    public void testAddBlockingStatelessEventGenerator() {
-        // We cannot mock here because we'd loose annotations
-        @Blocking
-        final class BlockingStatelessEventGenerator implements
-                StatelessEventGenerator {
-            @Override
-            public Event peek(long simtime) {
-                return null;
-            }
-        }
-
-        BlockingStatelessEventGenerator generator = new BlockingStatelessEventGenerator();
-        builder.add(generator);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof ThreadedEventSourceRunner);
-
-        verify(process).addStartable((Startable) addedSource);
         verifyNoMoreInteractions(process);
     }
 
@@ -366,43 +193,6 @@ public class DefaultProcessBuilderTest {
         assertNotNull(addedSource);
         assertTrue(addedSource instanceof EventSourceStatelessGeneratorAdapter);
 
-        verifyNoMoreInteractions(process);
-    }
-
-    @Test
-    public void testAddBlockingStartableStatelessEventGenerator() {
-        // We cannot mock here because we'd loose annotations
-        @Blocking
-        final class BlockingStartableStatelessEventGenerator implements
-                Startable, StatelessEventGenerator {
-            @Override
-            public Event peek(long simtime) {
-                return null;
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        BlockingStartableStatelessEventGenerator generator = new BlockingStartableStatelessEventGenerator();
-        builder.add(generator);
-
-        verify(process).addStartable(generator);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof ThreadedEventSourceRunner);
-
-        verify(process).addStartable((Startable) addedSource);
         verifyNoMoreInteractions(process);
     }
 
@@ -452,30 +242,6 @@ public class DefaultProcessBuilderTest {
     }
 
     @Test
-    public void testAddBlockingEventSink() {
-        @Blocking
-        final class Sink implements EventSink {
-            @Override
-            public void offer(Event event) {
-            }
-        }
-
-        Sink sink = new Sink();
-        builder.add(sink);
-
-        ArgumentCaptor<EventSink> argument = ArgumentCaptor
-                .forClass(EventSink.class);
-        verify(process).addEventSink(argument.capture());
-
-        EventSink addedSink = argument.getValue();
-        assertNotNull(addedSink);
-        assertTrue(addedSink instanceof ThreadedEventSinkRunner);
-
-        verify(process).addStartable((Startable) addedSink);
-        verifyNoMoreInteractions(process);
-    }
-
-    @Test
     public void testAddStartableEventSink() {
         final class Sink implements EventSink, Startable {
             @Override
@@ -496,40 +262,6 @@ public class DefaultProcessBuilderTest {
 
         verify(process).addEventSink(sink);
         verify(process).addStartable(sink);
-        verifyNoMoreInteractions(process);
-    }
-
-    @Test
-    public void testAddBlockingStartableEventSink() {
-        @Blocking
-        final class Sink implements EventSink, Startable {
-            @Override
-            public void offer(Event event) {
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        Sink sink = new Sink();
-        builder.add(sink);
-
-        verify(process).addStartable(sink);
-
-        ArgumentCaptor<EventSink> argument = ArgumentCaptor
-                .forClass(EventSink.class);
-        verify(process).addEventSink(argument.capture());
-
-        EventSink addedSink = argument.getValue();
-        assertNotNull(addedSink);
-        assertTrue(addedSink instanceof ThreadedEventSinkRunner);
-
-        verify(process).addStartable((Startable) addedSink);
         verifyNoMoreInteractions(process);
     }
 

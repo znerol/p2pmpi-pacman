@@ -76,7 +76,7 @@ public class Pingpong {
         DefaultTimewarpDiscreteEventProcess process =
             new DefaultTimewarpDiscreteEventProcess();
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                process, governor, fakeImporter, fakeExporter);
+                process, fakeImporter, fakeExporter);
 
         builder.add(new BallEventGenerator(me * 50, 100, me, other));
         builder.add(new MpiEventGenerator(MPI.COMM_WORLD, other, 0, governor));

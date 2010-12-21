@@ -58,7 +58,7 @@ public class StupidTimewarpJobQueueSimulation {
         DefaultTimewarpDiscreteEventProcess process = 
             new DefaultTimewarpDiscreteEventProcess();
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                process, governor, fakeImporter, fakeExporter);
+                process, fakeImporter, fakeExporter);
 
         OptimisticRunnableClientArrivedSource clientArrivedSource =
             new OptimisticRunnableClientArrivedSource(rng, governor, speed,

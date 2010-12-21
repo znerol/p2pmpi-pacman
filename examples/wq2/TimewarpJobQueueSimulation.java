@@ -65,7 +65,7 @@ public class TimewarpJobQueueSimulation {
         DefaultTimewarpDiscreteEventProcess process = 
             new DefaultTimewarpDiscreteEventProcess();
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                process, governor, fakeImporter, fakeExporter);
+                process, fakeImporter, fakeExporter);
 
         builder.add(new ClientArrivedGenerator(rng, 1000, 1600));
         

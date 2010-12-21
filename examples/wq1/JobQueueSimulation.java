@@ -66,7 +66,7 @@ public class JobQueueSimulation {
 
         DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
         DefaultProcessBuilder builder = new DefaultProcessBuilder(process,
-                governor, fakeImporter, fakeExporter);
+                fakeImporter, fakeExporter);
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         if (multithread) {

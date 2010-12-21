@@ -46,8 +46,7 @@ public class DefaultTimewarpProcessBuilderTest {
 
     @Before
     public void setUp() {
-        builder = new DefaultTimewarpProcessBuilder(process, null, importer,
-                exporter);
+        builder = new DefaultTimewarpProcessBuilder(process, importer, exporter);
     }
 
     // event sources

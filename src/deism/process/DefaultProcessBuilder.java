@@ -18,22 +18,17 @@ import deism.core.Flushable;
 import deism.core.Startable;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
-import deism.legacy.Blocking;
-import deism.legacy.ThreadedEventSinkRunner;
-import deism.legacy.ThreadedEventSourceRunner;
-import deism.run.ExecutionGovernor;
 
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;
-    private final ExecutionGovernor governor;
     private final EventImporter importer;
     private final EventExporter exporter;
-    private final static Logger logger = Logger.getLogger(DefaultProcessBuilder.class);
+    private final static Logger logger = Logger
+            .getLogger(DefaultProcessBuilder.class);
 
     public DefaultProcessBuilder(DefaultDiscreteEventProcess process,
-            ExecutionGovernor governor, EventImporter importer, EventExporter exporter) {
+            EventImporter importer, EventExporter exporter) {
         this.process = process;
-        this.governor = governor;
         this.importer = importer;
         this.exporter = exporter;
     }
@@ -56,8 +51,7 @@ public class DefaultProcessBuilder {
 
     /**
      * Adapt the given EventSource according to the properties of the adaptee.
-     * If the adaptee is Blocking, a ThreadedEventSourceRunner is wrapped around
-     * the source.
+     * No action performed in this implementation
      * 
      * @param source
      *            the event source to decorate if necessary
@@ -66,14 +60,7 @@ public class DefaultProcessBuilder {
      * @return
      */
     protected EventSource decorate(EventSource source, Object adaptee) {
-        EventSource result = source;
-        if (adaptee.getClass().isAnnotationPresent(Blocking.class)) {
-            logger.debug("Decorate blocking " + adaptee + " with worker thread");
-            result = new ThreadedEventSourceRunner(governor, source);
-            register(result);
-        }
-
-        return result;
+        return source;
     }
 
     /**
@@ -90,7 +77,8 @@ public class DefaultProcessBuilder {
      * Wrap the given generator into an ExternalEventGeneratorAdapter registered
      * with the builders importer if @External annotation is present on adaptee.
      */
-    protected StatefulEventGenerator decorate(StatefulEventGenerator generator, Object adaptee) {
+    protected StatefulEventGenerator decorate(StatefulEventGenerator generator,
+            Object adaptee) {
         StatefulEventGenerator result = generator;
         if (adaptee.getClass().isAnnotationPresent(External.class)) {
             logger.debug("Decorate external " + adaptee + " with importer");
@@ -154,13 +142,13 @@ public class DefaultProcessBuilder {
 
     /**
      * Adapt the given EventSink according to the properties of the adaptee. If
-     * the adaptee is Blocking, a ThreadedEventSinkRunner is wrapped around the
-     * source.
+     * the {@link External} annotation is present on the adaptee parameter, it
+     * gets wrapped into an {@link ExternalEventSinkAdapter}.
      * 
      * @param source
      *            the event source to decorate if necessary
      * @param adaptee
-     *            the original object, possibly equal to source
+     *            the original object, possibly the same as the source
      * @return
      */
     protected EventSink decorate(EventSink sink, Object adaptee) {
@@ -169,12 +157,6 @@ public class DefaultProcessBuilder {
         if (adaptee.getClass().isAnnotationPresent(External.class)) {
             logger.debug("Decorate external " + adaptee + " with exporter");
             result = new ExternalEventSinkAdapter(result, exporter);
-            register(result);
-        }
-
-        if (adaptee.getClass().isAnnotationPresent(Blocking.class)) {
-            logger.debug("Decorate blocking " + adaptee + " with worker thread");
-            result = new ThreadedEventSinkRunner(result);
             register(result);
         }
 
@@ -239,8 +221,9 @@ public class DefaultProcessBuilder {
     /**
      * Add a child process, registering supplementary interfaces and decorating
      * it if necessary.
-     *
-     * @param process child process
+     * 
+     * @param process
+     *            child process
      */
     public void add(DiscreteEventProcess process) {
         register(process);

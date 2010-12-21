@@ -8,17 +8,16 @@ import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.Stateful;
 import deism.process.DefaultProcessBuilder;
-import deism.run.ExecutionGovernor;
 
 public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
     private DefaultTimewarpDiscreteEventProcess timewarpProcess;
-    private final static Logger logger = Logger.getLogger(DefaultTimewarpProcessBuilder.class);
+    private final static Logger logger = Logger
+            .getLogger(DefaultTimewarpProcessBuilder.class);
 
     public DefaultTimewarpProcessBuilder(
             DefaultTimewarpDiscreteEventProcess process,
-            ExecutionGovernor governor, EventImporter importer,
-            EventExporter exporter) {
-        super(process, governor, importer, exporter);
+            EventImporter importer, EventExporter exporter) {
+        super(process, importer, exporter);
         timewarpProcess = process;
     }
 
@@ -50,7 +49,8 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
 
         if (!(adaptee instanceof StateHistory<?>)
                 && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
-            logger.debug("Decorate stateful " + adaptee + " with timewarp source adapter");
+            logger.debug("Decorate stateful " + adaptee
+                    + " with timewarp source adapter");
             result = new TimewarpEventSourceAdapter(result);
             register(result);
         }
@@ -74,7 +74,8 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
 
         if (!(adaptee instanceof StateHistory<?>)
                 && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
-            logger.debug("Decorate stateful " + adaptee + " with timewarp sink adapter");
+            logger.debug("Decorate stateful " + adaptee
+                    + " with timewarp sink adapter");
             result = new TimewarpEventSinkAdapter(result);
             register(result);
         }
