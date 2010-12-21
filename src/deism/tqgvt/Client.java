@@ -148,7 +148,7 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
             // send new report message to gvt master
             master.send(new ReportMessage(process, tq, lvt, mvt, send, recv
                     .valueMap()));
-            advanceTq(tq);
+            advanceTq(newtq);
         }
     }
 
