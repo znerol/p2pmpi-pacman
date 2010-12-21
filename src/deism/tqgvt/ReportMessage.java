@@ -73,4 +73,9 @@ public class ReportMessage implements Message {
     public Map<Long, Long> getRecv() {
         return recv;
     }
+
+    public String toString() {
+        return "[ReportMessage p=" + process + " tq=" + tq + " lvt=" + lvt
+                + " mvt=" + mvt + " send=" + send + " recv=" + recv + "]";
+    }
 }
