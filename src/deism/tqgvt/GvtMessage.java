@@ -13,4 +13,29 @@ public class GvtMessage implements Message {
     public long getGvt() {
         return gvt;
     }
+
+    @Override
+    public String toString() {
+        return "[GvtMessage gvt=" + gvt + "]";
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || this.getClass() != other.getClass()) {
+            return false;
+        }
+        GvtMessage otherEvent = (GvtMessage)other;
+        return this.gvt == otherEvent.gvt;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + (int)(gvt ^ (gvt >>> 32));
+        return hash;
+    }
+
 }
