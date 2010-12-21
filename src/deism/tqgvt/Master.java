@@ -1,6 +1,5 @@
 package deism.tqgvt;
 
-import java.util.Arrays;
 import java.util.Map.Entry;
 
 import deism.core.Message;
@@ -45,8 +44,6 @@ public class Master implements MessageHandler {
         this.lvt = new long[processCount];
         this.mvt = new LongMap<Long>();
         this.transit = new LongMap<Long>();
-
-        Arrays.fill(this.lvt, Long.MAX_VALUE);
     }
 
     @Override
@@ -92,6 +89,7 @@ public class Master implements MessageHandler {
 
         if (newGvt != gvt) {
             assert (newGvt > gvt);
+            gvt = newGvt;
             clients.send(new GvtMessage(gvt));
         }
     }
