@@ -4,17 +4,26 @@ import deism.core.Event;
 import deism.core.EventDispatcher;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
+import deism.core.Message;
+import deism.core.MessageHandler;
 import deism.core.MessageSender;
 import deism.run.SystemTimeProxy;
+import deism.run.TimewarpRunloopRecoveryStrategy;
 import deism.util.LongMap;
 
-public class Client implements EventExporter, EventImporter, EventDispatcher {
+public class Client implements EventExporter, EventImporter, EventDispatcher,
+        MessageHandler {
     private SystemTimeProxy systime;
 
     /**
      * The destination where gvt reports should be sent to
      */
     private final MessageSender master;
+
+    /**
+     * State controller of this simulation
+     */
+    private final TimewarpRunloopRecoveryStrategy stateController;
 
     /**
      * Process id of this process
@@ -57,8 +66,11 @@ public class Client implements EventExporter, EventImporter, EventDispatcher {
      * @param process
      * @param tqlength
      */
-    public Client(int process, long tqlength, MessageSender master) {
+    public Client(int process, long tqlength,
+            TimewarpRunloopRecoveryStrategy stateController,
+            MessageSender master) {
         this.master = master;
+        this.stateController = stateController;
         this.process = process;
         this.tqlength = tqlength;
 
@@ -92,6 +104,12 @@ public class Client implements EventExporter, EventImporter, EventDispatcher {
     @Override
     public void dispatchEvent(Event event) {
         lvt = Math.min(lvt, event.getSimtime());
+    }
+
+    @Override
+    public void handle(Message message) {
+        assert (message instanceof GvtMessage);
+        stateController.commit(((GvtMessage) message).getGvt());
     }
 
     public void updateReport() {
