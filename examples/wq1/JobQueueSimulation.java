@@ -19,9 +19,9 @@ import deism.core.Message;
 import deism.core.MessageHandler;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
-import deism.run.EventRunloopRecoveryStrategy;
+import deism.run.StateController;
 import deism.run.ExecutionGovernor;
-import deism.run.FailFastRunloopRecoveryStrategy;
+import deism.run.NoStateController;
 import deism.run.DefaultEventRunloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
@@ -85,8 +85,8 @@ public class JobQueueSimulation {
 
         builder.add(new JobAggregator(jobs));
         
-        EventRunloopRecoveryStrategy recoveryStrategy =
-            new FailFastRunloopRecoveryStrategy();
+        StateController stateController =
+            new NoStateController();
 
         EventCondition noSnapshots = new EventCondition() {
             @Override
@@ -102,7 +102,7 @@ public class JobQueueSimulation {
         };
 
         DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
-                recoveryStrategy, noSnapshots, messageHandler);
+                stateController, noSnapshots, messageHandler);
         runloop.run(process);
     }
 }

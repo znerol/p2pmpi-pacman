@@ -6,17 +6,17 @@ import java.util.TreeSet;
 import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
-public class TimewarpRunloopRecoveryStrategy
-        implements EventRunloopRecoveryStrategy {
+public class StateHistoryController implements StateController {
 
     private SortedSet<Long> snapshots;
     private SortedSet<Long> unusableSnapshots = new TreeSet<Long>();
     private StateHistory<Long> stateObject;
-    public TimewarpRunloopRecoveryStrategy(StateHistory<Long> stateObject) {
+
+    public StateHistoryController(StateHistory<Long> stateObject) {
         this.stateObject = stateObject;
         this.snapshots = new TreeSet<Long>();
     }
-        
+
     @Override
     public void save(Long timestamp) {
         if (unusableSnapshots.contains(timestamp)) {
@@ -27,7 +27,7 @@ public class TimewarpRunloopRecoveryStrategy
             snapshots.remove(timestamp);
             return;
         }
-        
+
         stateObject.save(timestamp);
         snapshots.add(timestamp);
     }
@@ -51,7 +51,7 @@ public class TimewarpRunloopRecoveryStrategy
             throw new StateHistoryException(
                     "Attempt to rollback to a timestamp which was never recorded");
         }
-        
+
         Long snapshotKey = snapshots.first();
         stateObject.commit(snapshotKey);
     }

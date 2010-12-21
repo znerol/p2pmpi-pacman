@@ -2,7 +2,7 @@ package deism.run;
 
 import deism.stateful.StateHistoryException;
 
-public interface EventRunloopRecoveryStrategy {
+public interface StateController {
     /**
      * Take a snapshot of the current state of the simulation for the given
      * timestamp and store it for later rollback or commit operations.

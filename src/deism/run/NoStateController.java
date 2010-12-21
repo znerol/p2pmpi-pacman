@@ -3,10 +3,10 @@ package deism.run;
 import deism.stateful.StateHistoryException;
 
 /**
- * Implementation of EventRunloopRecoveryStrategy which does nothing at all.
+ * Implementation of {@link StateController} which does nothing at all.
  */
-public class FailFastRunloopRecoveryStrategy implements
-        EventRunloopRecoveryStrategy {
+public class NoStateController implements
+        StateController {
 
     @Override
     public void save(Long key) throws StateHistoryException {

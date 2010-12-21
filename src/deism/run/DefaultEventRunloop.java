@@ -25,7 +25,7 @@ public class DefaultEventRunloop implements EventRunloop {
     private EventCondition terminationCondition = null;
     private ExecutionGovernor governor;
     private long currentSimtime = 0;
-    private EventRunloopRecoveryStrategy recoveryStrategy;
+    private StateController stateController;
     private EventCondition snapshotCondition;
     private Queue<Message> messages = new ArrayDeque<Message>();
     private MessageHandler messageHandler;
@@ -34,12 +34,12 @@ public class DefaultEventRunloop implements EventRunloop {
 
     public DefaultEventRunloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
-            EventRunloopRecoveryStrategy recoveryStrategy,
+            StateController stateController,
             EventCondition snapshotCondition,
             MessageHandler messageHandler) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
-        this.recoveryStrategy = recoveryStrategy;
+        this.stateController = stateController;
         this.snapshotCondition = snapshotCondition;
         this.messageHandler = messageHandler;
     }
@@ -65,7 +65,7 @@ public class DefaultEventRunloop implements EventRunloop {
         long maxSimtime = currentSimtime;
 
         // support rollback to before very first event
-        recoveryStrategy.save(currentSimtime - 1);
+        stateController.save(currentSimtime - 1);
 
         logger.debug("Start governor, source, sink");
         governor.start(currentSimtime);
@@ -153,7 +153,7 @@ public class DefaultEventRunloop implements EventRunloop {
 
                 logger.debug("Initiate rollback caused by peekEvent "
                         + peekEvent);
-                recoveryStrategy.rollback(currentSimtime);
+                stateController.rollback(currentSimtime);
                 lastSimtime = currentSimtime;
                 logger.debug("Restart runloop cycle at " + currentSimtime);
                 continue;
@@ -169,7 +169,7 @@ public class DefaultEventRunloop implements EventRunloop {
 
             if (snapshotCondition.match(peekEvent)) {
                 logger.info("Take snapshot at " + currentSimtime);
-                recoveryStrategy.save(currentSimtime);
+                stateController.save(currentSimtime);
             }
 
             lastSimtime = currentSimtime;

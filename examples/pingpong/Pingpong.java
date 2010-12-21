@@ -18,12 +18,12 @@ import deism.core.Message;
 import deism.core.MessageHandler;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
-import deism.run.EventRunloopRecoveryStrategy;
+import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
-import deism.run.TimewarpRunloopRecoveryStrategy;
+import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.DefaultTimewarpProcessBuilder;
 
@@ -98,8 +98,8 @@ public class Pingpong {
         process.addEventDispatcher(new EventLogger());
         process.addStatefulObject(new StateHistoryLogger());
 
-        EventRunloopRecoveryStrategy recoveryStrategy =
-            new TimewarpRunloopRecoveryStrategy(process);
+        StateController stateController =
+            new StateHistoryController(process);
 
         EventCondition snapshotAll = new EventCondition() {
             @Override
@@ -115,7 +115,7 @@ public class Pingpong {
         };
 
         DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
-                recoveryStrategy, snapshotAll, messageHandler);
+                stateController, snapshotAll, messageHandler);
 
         runloop.run(process);
 

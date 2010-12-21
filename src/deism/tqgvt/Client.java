@@ -7,8 +7,8 @@ import deism.core.EventImporter;
 import deism.core.Message;
 import deism.core.MessageHandler;
 import deism.core.MessageSender;
+import deism.run.StateController;
 import deism.run.SystemTimeProxy;
-import deism.run.TimewarpRunloopRecoveryStrategy;
 import deism.util.LongMap;
 
 public class Client implements EventExporter, EventImporter, EventDispatcher,
@@ -23,7 +23,7 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
     /**
      * State controller of this simulation
      */
-    private final TimewarpRunloopRecoveryStrategy stateController;
+    private final StateController stateController;
 
     /**
      * Process id of this process
@@ -66,8 +66,7 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
      * @param process
      * @param tqlength
      */
-    public Client(int process, long tqlength,
-            TimewarpRunloopRecoveryStrategy stateController,
+    public Client(int process, long tqlength, StateController stateController,
             MessageSender master) {
         this.master = master;
         this.stateController = stateController;

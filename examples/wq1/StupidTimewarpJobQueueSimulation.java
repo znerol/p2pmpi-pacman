@@ -16,11 +16,11 @@ import deism.core.EventImporter;
 import deism.core.Message;
 import deism.core.MessageHandler;
 import deism.run.EventRunloop;
-import deism.run.EventRunloopRecoveryStrategy;
+import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;
 import deism.run.RealtimeExecutionGovernor;
-import deism.run.TimewarpRunloopRecoveryStrategy;
+import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.DefaultTimewarpProcessBuilder;
 
@@ -79,8 +79,8 @@ public class StupidTimewarpJobQueueSimulation {
             }
         };
 
-        EventRunloopRecoveryStrategy recoveryStrategy =
-            new TimewarpRunloopRecoveryStrategy(process);
+        StateController stateController =
+            new StateHistoryController(process);
 
         MessageHandler messageHandler = new MessageHandler() {
             @Override
@@ -89,7 +89,7 @@ public class StupidTimewarpJobQueueSimulation {
         };
 
         EventRunloop runloop = new DefaultEventRunloop(governor, termCond,
-                recoveryStrategy, snapshotAll, messageHandler);
+                stateController, snapshotAll, messageHandler);
 
         runloop.run(process);
     }

@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import deism.run.TimewarpRunloopRecoveryStrategy;
+import deism.run.StateHistoryController;
 import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 import deism.stateful.TimewarpEventSource;
@@ -16,29 +16,29 @@ import deism.stateful.TimewarpEventSource;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TimewarpRunloopRecoveryStrategyTest {
+public class StateHistoryControllerTest {
     @Mock TimewarpEventSource eventSource;
     List<StateHistory<Long>> stateObjects;
-    TimewarpRunloopRecoveryStrategy strategy;
+    StateHistoryController stateController;
 
     @Before
     public void setUp() {
-        strategy = new TimewarpRunloopRecoveryStrategy(eventSource);
+        stateController = new StateHistoryController(eventSource);
     }
 
     @Test
     public void testSaveRollback() {
-        // FIXME: tbd, the current RunloopRecoveryStrategy.rollback tries to
+        // FIXME: tbd, the current StateController.rollback tries to
         // rollback to the state preceding the timestamp argument. Therefore
         // its impossible to rollback to the first state recorded.
         // This is actually an odd behavior but matches the needs of
         // EventRunloop best.
-        strategy.save(-1L);
-        strategy.save(0L);
-        strategy.save(42L);
+        stateController.save(-1L);
+        stateController.save(0L);
+        stateController.save(42L);
         
-        strategy.rollback(42L);
-        strategy.rollback(0L);
+        stateController.rollback(42L);
+        stateController.rollback(0L);
 
         verify(eventSource).save(-1L);
         verify(eventSource).save(0L);
@@ -50,11 +50,11 @@ public class TimewarpRunloopRecoveryStrategyTest {
 
     @Test
     public void testSaveCommit() {
-        strategy.save(0L);
-        strategy.save(42L);
+        stateController.save(0L);
+        stateController.save(42L);
         
-        strategy.commit(0L);
-        strategy.commit(42L);
+        stateController.commit(0L);
+        stateController.commit(42L);
 
         verify(eventSource).save(0L);
         verify(eventSource).save(42L);
@@ -64,11 +64,11 @@ public class TimewarpRunloopRecoveryStrategyTest {
 
     @Test(expected = StateHistoryException.class)
     public void testCommitWithInvalidKey() {
-        strategy.commit(23L);
+        stateController.commit(23L);
     }
 
     @Test(expected = StateHistoryException.class)
     public void testRollbackWithInvalidKey() {
-        strategy.rollback(23L);
+        stateController.rollback(23L);
     }
 }

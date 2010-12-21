@@ -12,7 +12,7 @@ import deism.core.EventCondition;
 import deism.core.MessageHandler;
 import deism.process.DiscreteEventProcess;
 import deism.run.DefaultEventRunloop;
-import deism.run.EventRunloopRecoveryStrategy;
+import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.stateful.StateHistoryException;
 import static org.mockito.Mockito.*;
@@ -26,7 +26,7 @@ public class DefaultEventRunloopTest {
     @Mock
     EventCondition terminationCondition;
     @Mock
-    EventRunloopRecoveryStrategy recoveryStrategy;
+    StateController stateController;
     @Mock
     EventCondition snapshotCondition;
     @Mock
@@ -39,7 +39,7 @@ public class DefaultEventRunloopTest {
     @Test
     public void runNoEvent() {
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
-                terminationCondition, recoveryStrategy, snapshotCondition,
+                terminationCondition, stateController, snapshotCondition,
                 messageHandler);
 
         when(process.peek(0)).thenReturn(null);
@@ -63,7 +63,7 @@ public class DefaultEventRunloopTest {
         final Event one = new Event(1);
         final Event two = new Event(2);
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
-                terminationCondition, recoveryStrategy, snapshotCondition,
+                terminationCondition, stateController, snapshotCondition,
                 messageHandler);
 
         /*
@@ -105,7 +105,7 @@ public class DefaultEventRunloopTest {
         final Event three = new Event(3);
 
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
-                terminationCondition, recoveryStrategy, snapshotCondition,
+                terminationCondition, stateController, snapshotCondition,
                 messageHandler);
 
         when(process.peek(0)).thenReturn(one);
@@ -147,7 +147,7 @@ public class DefaultEventRunloopTest {
         final Event one = new Event(2);
 
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
-                terminationCondition, recoveryStrategy, snapshotCondition,
+                terminationCondition, stateController, snapshotCondition,
                 messageHandler);
 
         when(process.peek(0)).thenReturn(one);
@@ -174,15 +174,14 @@ public class DefaultEventRunloopTest {
     }
     /**
      * If an EventSource returns events which are not ordered by ascending
-     * timestamp we expect FastWordwardRunloop to try a
-     * recoveryStrategy.rollback()
+     * timestamp we expect FastWordwardRunloop to try a rollback()
      */
     @Test(expected = StateHistoryException.class)
     public void runSourceWithWrongEventOrder() {
         final Event one = new Event(1);
         final Event two = new Event(2);
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
-                terminationCondition, recoveryStrategy, snapshotCondition,
+                terminationCondition, stateController, snapshotCondition,
                 messageHandler);
 
         /*
@@ -199,7 +198,7 @@ public class DefaultEventRunloopTest {
 
         /* throw a state history exception whenever rollback is called */
         doThrow(new StateHistoryException("")).when(
-                recoveryStrategy).rollback(anyLong());
+                stateController).rollback(anyLong());
 
         r.run(process);
 

@@ -15,10 +15,10 @@ import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSource;
 import deism.core.MessageHandler;
-import deism.run.EventRunloopRecoveryStrategy;
+import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;
-import deism.run.TimewarpRunloopRecoveryStrategy;
+import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.StateHistory;
 import deism.stateful.TimewarpEventSource;
@@ -40,7 +40,7 @@ public class TimewarpRunloopTest {
     MessageHandler messageHandler;
 
     List<StateHistory<Long>> stateObjects;
-    EventRunloopRecoveryStrategy recoveryStrategy;
+    StateController stateController;
     DefaultEventRunloop runloop;
     
     ArrayDeque<Event> eventQueue;
@@ -71,9 +71,9 @@ public class TimewarpRunloopTest {
         process.addStatefulObject(eventSource);
         process.addEventDispatcher(eventDispatcher);
 
-        recoveryStrategy = new TimewarpRunloopRecoveryStrategy(process);
+        stateController = new StateHistoryController(process);
         runloop = new DefaultEventRunloop(governor, terminationCondition,
-                recoveryStrategy, snapshotCondition, messageHandler);
+                stateController, snapshotCondition, messageHandler);
     }
 
     @Test
