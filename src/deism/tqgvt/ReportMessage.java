@@ -2,9 +2,9 @@ package deism.tqgvt;
 
 import java.util.Map;
 
-import deism.core.Event;
+import deism.core.Message;
 
-public class ReportEvent extends Event {
+public class ReportMessage implements Message {
     private static final long serialVersionUID = 4825754443295424225L;
 
     /**
@@ -40,9 +40,8 @@ public class ReportEvent extends Event {
      */
     private final Map<Long, Long> recv;
 
-    public ReportEvent(int process, long tq, long lvt, long mvt, long send,
+    public ReportMessage(int process, long tq, long lvt, long mvt, long send,
             Map<Long, Long> recv) {
-        super(0);
         this.process = process;
         this.tq = tq;
         this.lvt = lvt;

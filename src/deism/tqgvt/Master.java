@@ -3,11 +3,17 @@ package deism.tqgvt;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
-import deism.core.Event;
-import deism.process.DiscreteEventProcess;
+import deism.core.Message;
+import deism.core.MessageHandler;
+import deism.core.MessageSender;
 import deism.util.CounterMap;
 
-public class Master implements DiscreteEventProcess {
+public class Master implements MessageHandler {
+    /**
+     * Destination for gvt messages
+     */
+    private final MessageSender clients;
+
     /**
      * Global virtual time
      */
@@ -29,15 +35,11 @@ public class Master implements DiscreteEventProcess {
     private CounterMap<Long> transit;
 
     /**
-     * Current gvt event
-     */
-    private GvtEvent currentEvent;
-
-    /**
      * @param processCount
      *            number of participating processes
      */
-    public Master(int processCount) {
+    public Master(int processCount, MessageSender clients) {
+        this.clients = clients;
         this.gvt = 0;
         this.lvt = new long[processCount];
         this.mvt = new CounterMap<Long>();
@@ -47,29 +49,13 @@ public class Master implements DiscreteEventProcess {
     }
 
     @Override
-    public Event peek(long currentSimtime) {
-        return currentEvent;
-    }
-
-    @Override
-    public void remove(Event event) {
-        assert (event == currentEvent);
-        currentEvent = null;
-    }
-
-    @Override
-    public void offer(Event event) {
-        // ignore
-    }
-
-    @Override
-    public void dispatchEvent(Event event) {
-        assert (event instanceof ReportEvent);
-        processReport((ReportEvent) event);
+    public void handle(Message message) {
+        assert (message instanceof ReportMessage);
+        processReport((ReportMessage) message);
         updateGvt();
     }
 
-    public void processReport(ReportEvent reportEvent) {
+    public void processReport(ReportMessage reportEvent) {
         // store local virtual time of this process
         lvt[reportEvent.getProcess()] = reportEvent.getLvt();
 
@@ -105,7 +91,7 @@ public class Master implements DiscreteEventProcess {
 
         if (newGvt != gvt) {
             assert (newGvt > gvt);
-            currentEvent = new GvtEvent(gvt);
+            clients.send(new GvtMessage(gvt));
         }
     }
 }

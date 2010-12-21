@@ -1,15 +1,20 @@
 package deism.tqgvt;
 
 import deism.core.Event;
+import deism.core.EventDispatcher;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
-import deism.process.DiscreteEventProcess;
+import deism.core.MessageSender;
 import deism.run.SystemTimeProxy;
 import deism.util.CounterMap;
 
-public class Client implements EventExporter, EventImporter,
-        DiscreteEventProcess {
+public class Client implements EventExporter, EventImporter, EventDispatcher {
     private SystemTimeProxy systime;
+
+    /**
+     * The destination where gvt reports should be sent to
+     */
+    private final MessageSender master;
 
     /**
      * Process id of this process
@@ -20,11 +25,6 @@ public class Client implements EventExporter, EventImporter,
      * Duration of a time quantum in milliseconds
      */
     private final long tqlength;
-
-    /**
-     * Current report event
-     */
-    private Event currentReport;
 
     /**
      * Current time quantum
@@ -57,14 +57,16 @@ public class Client implements EventExporter, EventImporter,
      * @param process
      * @param tqlength
      */
-    public Client(int process, long tqlength) {
+    public Client(int process, long tqlength, MessageSender master) {
+        this.master = master;
         this.process = process;
         this.tqlength = tqlength;
+
         this.systime = new SystemTimeProxy();
         this.recv = new CounterMap<Long>();
 
-        this.currentReport = null;
         this.lvt = 0;
+        this.tq = -1;
 
         advanceTq(getCurrentTq());
     }
@@ -92,29 +94,13 @@ public class Client implements EventExporter, EventImporter,
         lvt = Math.min(lvt, event.getSimtime());
     }
 
-    @Override
-    public Event peek(long simtime) {
-        return currentReport;
-    }
-
-    @Override
-    public void remove(Event event) {
-        assert(event == currentReport);
-        currentReport = null;
-    }
-
-    @Override
-    public void offer(Event event) {
-        // ignore
-    }
-
     public void updateReport() {
         long newtq = getCurrentTq();
 
         if (newtq != tq) {
-            // add new tq report to the queue and reset values
-            currentReport = new ReportEvent(process, tq, lvt, mvt, send,
-                    recv.valueMap());
+            // send new report message to gvt master
+            master.send(new ReportMessage(process, tq, lvt, mvt, send, recv
+                    .valueMap()));
             advanceTq(tq);
         }
     }
@@ -124,9 +110,10 @@ public class Client implements EventExporter, EventImporter,
     }
 
     private void advanceTq(long newTq) {
-        assert(newTq > tq);
+        assert (newTq > tq);
         send = 0;
         recv.clear();
         mvt = Long.MAX_VALUE;
+        tq = newTq;
     }
 }
