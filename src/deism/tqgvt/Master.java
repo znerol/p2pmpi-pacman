@@ -6,7 +6,8 @@ import java.util.Map.Entry;
 import deism.core.Message;
 import deism.core.MessageHandler;
 import deism.core.MessageSender;
-import deism.util.CounterMap;
+import deism.util.LongMap;
+import deism.util.MutableLong;
 
 public class Master implements MessageHandler {
     /**
@@ -27,12 +28,12 @@ public class Master implements MessageHandler {
     /**
      * Minimal virtual time of outgoing events by time quantum
      */
-    private CounterMap<Long> mvt;
+    private LongMap<Long> mvt;
 
     /**
      * Number of messages in transit by time quantum
      */
-    private CounterMap<Long> transit;
+    private LongMap<Long> transit;
 
     /**
      * @param processCount
@@ -42,8 +43,8 @@ public class Master implements MessageHandler {
         this.clients = clients;
         this.gvt = 0;
         this.lvt = new long[processCount];
-        this.mvt = new CounterMap<Long>();
-        this.transit = new CounterMap<Long>();
+        this.mvt = new LongMap<Long>();
+        this.transit = new LongMap<Long>();
 
         Arrays.fill(this.lvt, Long.MAX_VALUE);
     }
@@ -61,15 +62,15 @@ public class Master implements MessageHandler {
 
         // store
         long tq = reportEvent.getTq();
-        mvt.minimize(tq, reportEvent.getMvt());
+        mvt.get(tq, Long.MAX_VALUE).min(reportEvent.getMvt());
 
         // increment number of sent messages for the senders tq in transit map
-        transit.increment(tq, reportEvent.getSend());
+        transit.get(tq, 0).add(reportEvent.getSend());
 
         // decrement number of received messages from given tqs from transit
         // map.
         for (Entry<Long, Long> entry : reportEvent.getRecv().entrySet()) {
-            transit.increment(entry.getKey(), -entry.getValue());
+            transit.get(entry.getKey(), 0).add(-entry.getValue());
         }
     }
 
@@ -81,9 +82,9 @@ public class Master implements MessageHandler {
             newGvt = Math.min(newGvt, plvt);
         }
 
-        for (Entry<Long, CounterMap<Long>.Counter> entry : mvt.entrySet()) {
-            CounterMap<Long>.Counter t = transit.get(entry.getKey());
+        for (Entry<Long, MutableLong> entry : mvt.entrySet()) {
             long tqmvt = entry.getValue().get();
+            MutableLong t = transit.get(entry.getKey());
             if (t != null && t.get() != 0 && tqmvt != 0) {
                 newGvt = Math.min(newGvt, tqmvt);
             }

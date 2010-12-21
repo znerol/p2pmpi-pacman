@@ -1,4 +1,4 @@
-package deism;
+package deism.stateful;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package deism;
+package deism.run;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;

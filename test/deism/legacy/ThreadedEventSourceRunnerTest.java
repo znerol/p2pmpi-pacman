@@ -1,4 +1,4 @@
-package deism;
+package deism.legacy;
 
 import org.junit.Before;
 import org.junit.Test;

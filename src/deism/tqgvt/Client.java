@@ -6,7 +6,7 @@ import deism.core.EventExporter;
 import deism.core.EventImporter;
 import deism.core.MessageSender;
 import deism.run.SystemTimeProxy;
-import deism.util.CounterMap;
+import deism.util.LongMap;
 
 public class Client implements EventExporter, EventImporter, EventDispatcher {
     private SystemTimeProxy systime;
@@ -50,7 +50,7 @@ public class Client implements EventExporter, EventImporter, EventDispatcher {
     /**
      * Number of events received from other processes by time quantum.
      */
-    private CounterMap<Long> recv;
+    private LongMap<Long> recv;
 
     /**
      * 
@@ -63,7 +63,7 @@ public class Client implements EventExporter, EventImporter, EventDispatcher {
         this.tqlength = tqlength;
 
         this.systime = new SystemTimeProxy();
-        this.recv = new CounterMap<Long>();
+        this.recv = new LongMap<Long>();
 
         this.lvt = 0;
         this.tq = -1;
@@ -77,7 +77,7 @@ public class Client implements EventExporter, EventImporter, EventDispatcher {
         WrappedEvent wrappedEvent = (WrappedEvent) event;
 
         // register time quantum
-        recv.increment(wrappedEvent.getTq(), 1);
+        recv.get(wrappedEvent.getTq(), 0).add(1);
 
         return wrappedEvent.getEvent();
     }

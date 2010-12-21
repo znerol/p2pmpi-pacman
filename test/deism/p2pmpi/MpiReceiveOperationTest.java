@@ -1,4 +1,4 @@
-package deism;
+package deism.p2pmpi;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,8 +9,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
-import deism.p2pmpi.MpiEventGenerator;
-import deism.run.ExecutionGovernor;
 
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
@@ -20,18 +18,16 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MpiEventGeneratorTest {
+public class MpiReceiveOperationTest {
 
     @Mock
     private IntraComm comm;
-    @Mock
-    private ExecutionGovernor governor;
 
-    private MpiEventGenerator generator;
+    private MpiReceiveOperation<Event> operation;
 
     @Before
     public void setUp() {
-        generator = new MpiEventGenerator(comm, 1, 2, governor);
+        operation = new MpiReceiveOperation<Event>(comm, 1, 2);
     }
 
     @Test
@@ -45,13 +41,13 @@ public class MpiEventGeneratorTest {
                     public Status answer(InvocationOnMock invocation)
                             throws Throwable {
                         // place event into the buffer array (first argument)
-                        Event[] buffer = (Event[])invocation.getArguments()[0];
+                        Object[] buffer = (Object[])invocation.getArguments()[0];
                         buffer[0] = event;
                         return new Status(1, 2, 1);
                     }
                 });
 
-        Event result = generator.poll();
+        Event result = operation.receive();
         assertEquals(event, result);
     }
 }

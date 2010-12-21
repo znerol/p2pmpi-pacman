@@ -1,4 +1,4 @@
-package deism;
+package deism.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

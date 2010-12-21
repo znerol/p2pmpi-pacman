@@ -1,4 +1,4 @@
-package deism;
+package deism.run;
 
 import org.junit.Test;
 

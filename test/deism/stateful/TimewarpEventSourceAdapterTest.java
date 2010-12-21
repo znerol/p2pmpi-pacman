@@ -1,4 +1,4 @@
-package deism;
+package deism.stateful;
 
 import static org.junit.Assert.*;
 
