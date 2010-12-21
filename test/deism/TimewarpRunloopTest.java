@@ -14,6 +14,7 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSource;
+import deism.core.MessageHandler;
 import deism.run.EventRunloopRecoveryStrategy;
 import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;
@@ -35,6 +36,8 @@ public class TimewarpRunloopTest {
     EventCondition terminationCondition;
     @Mock
     EventCondition snapshotCondition;
+    @Mock
+    MessageHandler messageHandler;
 
     List<StateHistory<Long>> stateObjects;
     EventRunloopRecoveryStrategy recoveryStrategy;
@@ -70,7 +73,7 @@ public class TimewarpRunloopTest {
 
         recoveryStrategy = new TimewarpRunloopRecoveryStrategy(process);
         runloop = new DefaultEventRunloop(governor, terminationCondition,
-                recoveryStrategy, snapshotCondition);
+                recoveryStrategy, snapshotCondition, messageHandler);
     }
 
     @Test

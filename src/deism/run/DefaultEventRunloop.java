@@ -1,10 +1,15 @@
 package deism.run;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+
 import org.apache.log4j.Logger;
 
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.Flushable;
+import deism.core.Message;
+import deism.core.MessageHandler;
 import deism.core.Startable;
 import deism.process.DiscreteEventProcess;
 
@@ -22,17 +27,21 @@ public class DefaultEventRunloop implements EventRunloop {
     private long currentSimtime = 0;
     private EventRunloopRecoveryStrategy recoveryStrategy;
     private EventCondition snapshotCondition;
+    private Queue<Message> messages = new ArrayDeque<Message>();
+    private MessageHandler messageHandler;
     private final static Logger logger = Logger
             .getLogger(DefaultEventRunloop.class);
 
     public DefaultEventRunloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             EventRunloopRecoveryStrategy recoveryStrategy,
-            EventCondition snapshotCondition) {
+            EventCondition snapshotCondition,
+            MessageHandler messageHandler) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.recoveryStrategy = recoveryStrategy;
         this.snapshotCondition = snapshotCondition;
+        this.messageHandler = messageHandler;
     }
 
     /**
@@ -64,11 +73,30 @@ public class DefaultEventRunloop implements EventRunloop {
             ((Startable) process).start(currentSimtime);
         }
 
+        // main runloop
         while (!stop) {
             logger.debug("Begin runloop cycle");
+
+            // fetch and handle system messages
+            while(true) {
+                Message message;
+                synchronized(messages) {
+                    message = messages.poll();
+                }
+
+                if (message == null) {
+                    break;
+                }
+
+                logger.info("Handle system message " + message);
+                messageHandler.handle(message);
+            }
+
+            // identify simulation event with the smallest timestamp
             Event peekEvent = process.peek(currentSimtime);
             logger.info("Optained peekEvent from event source " + peekEvent);
 
+            // terminate runloop if event matches termination condition
             if (terminationCondition.match(peekEvent)) {
                 logger.info("Event matches termination condition, exit runloop");
                 break;
@@ -155,6 +183,14 @@ public class DefaultEventRunloop implements EventRunloop {
         governor.stop(currentSimtime);
 
         logger.info("End runloop");
+    }
+
+    @Override
+    public void send(Message message) {
+        synchronized (messages) {
+            messages.offer(message);
+        }
+        governor.resume();
     }
 
     @Override
