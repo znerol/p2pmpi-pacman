@@ -12,12 +12,11 @@ import util.StateHistoryLogger;
 import util.TerminateAfterDuration;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.core.EventExporter;
-import deism.core.EventImporter;
 import deism.core.Message;
 import deism.core.MessageHandler;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
+import deism.p2pmpi.MpiMessageSender;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;
@@ -26,6 +25,7 @@ import deism.run.RealtimeExecutionGovernor;
 import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.DefaultTimewarpProcessBuilder;
+import deism.tqgvt.Client;
 
 public class Pingpong {
 
@@ -59,24 +59,17 @@ public class Pingpong {
         final int me = MPI.COMM_WORLD.Rank();
         final int other = 1 - me;
 
-        EventImporter fakeImporter = new EventImporter() {
-            @Override
-            public Event unpack(Event event) {
-                return event;
-            }
-        };
-
-        EventExporter fakeExporter = new EventExporter() {
-            @Override
-            public Event pack(Event event) {
-                return event;
-            }
-        };
-
         DefaultTimewarpDiscreteEventProcess process =
             new DefaultTimewarpDiscreteEventProcess();
+        StateController stateController =
+            new StateHistoryController(process);
+
+        final MpiMessageSender master = new MpiMessageSender(MPI.COMM_WORLD, other, 1);
+        Client tqclient = new Client(me, 100, stateController, master);
+        process.addStartable(master);
+
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                process, fakeImporter, fakeExporter);
+                process, tqclient, tqclient);
 
         builder.add(new BallEventGenerator(me * 50, 100, me, other));
         builder.add(new MpiEventGenerator(MPI.COMM_WORLD, other, 0, governor));
@@ -96,10 +89,8 @@ public class Pingpong {
 
         process.addEventSink(new EventLogger());
         process.addEventDispatcher(new EventLogger());
+        process.addEventDispatcher(tqclient);
         process.addStatefulObject(new StateHistoryLogger());
-
-        StateController stateController =
-            new StateHistoryController(process);
 
         EventCondition snapshotAll = new EventCondition() {
             @Override
