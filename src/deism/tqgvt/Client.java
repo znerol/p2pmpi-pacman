@@ -11,6 +11,15 @@ import deism.run.StateController;
 import deism.run.SystemTimeProxy;
 import deism.util.LongMap;
 
+/**
+ * Time quantum GVT client implementation
+ * 
+ * @see <a href="http://www.cs.rpi.edu/~szymansk/papers/scpe.07.pdf">TQ-GVT</a>
+ *      TIME QUANTUM GVT: A SCALABLE COMPUTATION OF THE GLOBAL VIRTUAL TIME IN
+ *      PARALLEL DISCRETE EVENT SIMULATIONS by GILBERT G. CHEN AND BOLESLAW K.
+ *      SZYMANSKI, Scalable Computing: Practice and Experience, vol. 8, no. 4,
+ *      2008, pp. 423-435
+ */
 public class Client implements EventExporter, EventImporter, EventDispatcher,
         MessageHandler {
     private SystemTimeProxy systime;
@@ -87,30 +96,51 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
         assert (event instanceof WrappedEvent);
         WrappedEvent wrappedEvent = (WrappedEvent) event;
 
-        // register time quantum
+        // increment receive count for the time quantum this message came from
         recv.get(wrappedEvent.getTq(), 0).add(1);
 
+        // unwrap event
         return wrappedEvent.getEvent();
     }
 
     @Override
     public Event pack(Event event) {
+        // update the minimum virtual time we're sending a message for
+        mvt = Math.min(mvt, event.getSimtime());
+
+        // send a new report to the master if necessary and update tq
         updateReport();
+
+        // wrap up event into a tq-gvt event and associate our current tq with
+        // it.
         WrappedEvent wrappedEvent = new WrappedEvent(event, tq);
         return wrappedEvent;
     }
 
+    /**
+     * Update local virtual time
+     * 
+     * FIXME: probably we should do that in a special hook after event dispatch.
+     */
     @Override
     public void dispatchEvent(Event event) {
-        lvt = Math.min(lvt, event.getSimtime());
+        lvt = event.getSimtime();
     }
 
+    /**
+     * Handle a gvt message from the master. Commit the states up to but not
+     * including gvt.
+     */
     @Override
     public void handle(Message message) {
         assert (message instanceof GvtMessage);
         stateController.commit(((GvtMessage) message).getGvt());
     }
 
+    /**
+     * Calculate current time quantum. If it changed from the previous value,
+     * create a new TQ-GVT report message and send it to the tq master.
+     */
     public void updateReport() {
         long newtq = getCurrentTq();
 
@@ -122,10 +152,21 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
         }
     }
 
+    /**
+     * Calculate current time quantum.
+     * 
+     * @return current time quantum
+     */
     public long getCurrentTq() {
         return systime.get() / tqlength;
     }
 
+    /**
+     * Reset gvt report variables and advance to given time quantum.
+     * 
+     * @param newTq
+     *            new time quantum
+     */
     private void advanceTq(long newTq) {
         assert (newTq > tq);
         send = 0;
