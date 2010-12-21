@@ -1,37 +1,62 @@
 package deism.p2pmpi;
 
-import org.apache.log4j.Logger;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 import p2pmpi.mpi.IntraComm;
-import p2pmpi.mpi.MPI;
 
-import deism.core.Blocking;
 import deism.core.Event;
 import deism.core.External;
+import deism.core.Startable;
 import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
+import deism.ipc.async.BlockingReceiveOperation;
+import deism.ipc.async.ReceiveThread;
+import deism.ipc.base.Handler;
+import deism.run.ExecutionGovernor;
 
 @Stateful
-@Blocking
 @External
-public class MpiEventGenerator implements StatefulEventGenerator {
+public class MpiEventGenerator implements StatefulEventGenerator, Startable,
+        Handler<Event> {
 
-    private final int mpisender;
-    private final int mpitag;
-    private final IntraComm mpicomm;
-    private final static Logger logger = Logger.getLogger(MpiEventGenerator.class);
+    private final ExecutionGovernor governor;
+    private final ReceiveThread<Event> receiver;
+    private final Queue<Event> events = new ArrayDeque<Event>();
 
-    public MpiEventGenerator(IntraComm comm, int mpisender, int mpitag) {
-        this.mpicomm = comm;
-        this.mpisender = mpisender;
-        this.mpitag = mpitag;
+    public MpiEventGenerator(IntraComm comm, int mpisender, int mpitag,
+            ExecutionGovernor governor) {
+        BlockingReceiveOperation<Event> operation = new MpiReceiveOperation<Event>(
+                comm, mpisender, mpitag);
+        this.governor = governor;
+        this.receiver = new ReceiveThread<Event>(operation, this);
     }
 
     @Override
     public Event poll() {
-        Event[] recvBuffer = { null };
-        mpicomm.Recv(recvBuffer, 0, 1, MPI.OBJECT, mpisender, mpitag);
-        logger.debug("Received from " + mpisender + " event " + recvBuffer[0]);
-        return recvBuffer[0];
+        synchronized (events) {
+            return events.poll();
+        }
+    }
+
+    @Override
+    public void handle(Event item) {
+        Event peekEvent;
+        synchronized (events) {
+            events.offer(item);
+            peekEvent = events.peek();
+        }
+
+        governor.resume(peekEvent.getSimtime());
+    }
+
+    @Override
+    public void start(long simtime) {
+        receiver.start();
+    }
+
+    @Override
+    public void stop(long simtime) {
+        receiver.terminate();
     }
 }

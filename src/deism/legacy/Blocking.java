@@ -1,4 +1,4 @@
-package deism.core;
+package deism.legacy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

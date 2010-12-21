@@ -1,13 +1,13 @@
 package deism.run;
 
-import deism.core.MessageDestination;
+import deism.core.MessageHandler;
 import deism.process.DiscreteEventProcess;
 
 
 /**
  * EventRunloop implementations iterate thru events from an eventSource
  */
-public interface EventRunloop extends MessageDestination {
+public interface EventRunloop extends MessageHandler {
     /**
      * Loops thru all events from the event source and delegates them to the
      * dispatcher.

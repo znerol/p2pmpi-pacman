@@ -10,6 +10,7 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.p2pmpi.MpiEventGenerator;
+import deism.run.ExecutionGovernor;
 
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
@@ -23,11 +24,14 @@ public class MpiEventGeneratorTest {
 
     @Mock
     private IntraComm comm;
+    @Mock
+    private ExecutionGovernor governor;
+
     private MpiEventGenerator generator;
 
     @Before
     public void setUp() {
-        generator = new MpiEventGenerator(comm, 1, 2);
+        generator = new MpiEventGenerator(comm, 1, 2, governor);
     }
 
     @Test

@@ -15,6 +15,8 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
+import deism.core.Message;
+import deism.core.MessageHandler;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.run.EventRunloopRecoveryStrategy;
@@ -92,9 +94,15 @@ public class JobQueueSimulation {
                 return false;
             }
         };
-        
+
+        MessageHandler messageHandler = new MessageHandler() {
+            @Override
+            public void handle(Message item) {
+            }
+        };
+
         DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
-                recoveryStrategy, noSnapshots);
+                recoveryStrategy, noSnapshots, messageHandler);
         runloop.run(process);
     }
 }

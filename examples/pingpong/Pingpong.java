@@ -14,6 +14,8 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
+import deism.core.Message;
+import deism.core.MessageHandler;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
 import deism.run.EventRunloopRecoveryStrategy;
@@ -77,7 +79,7 @@ public class Pingpong {
                 process, governor, fakeImporter, fakeExporter);
 
         builder.add(new BallEventGenerator(me * 50, 100, me, other));
-        builder.add(new MpiEventGenerator(MPI.COMM_WORLD, other, 0));
+        builder.add(new MpiEventGenerator(MPI.COMM_WORLD, other, 0, governor));
 
         EventCondition onlyMine = new EventCondition() {
             @Override
@@ -106,8 +108,14 @@ public class Pingpong {
             }
         };
 
+        MessageHandler messageHandler = new MessageHandler() {
+            @Override
+            public void handle(Message item) {
+            }
+        };
+
         DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
-                recoveryStrategy, snapshotAll);
+                recoveryStrategy, snapshotAll, messageHandler);
 
         runloop.run(process);
 

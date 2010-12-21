@@ -1,38 +1,39 @@
 package deism.p2pmpi;
 
-
-import org.apache.log4j.Logger;
-
 import p2pmpi.mpi.IntraComm;
-import p2pmpi.mpi.MPI;
 
-import deism.core.Blocking;
 import deism.core.Event;
 import deism.core.EventSink;
 import deism.core.External;
+import deism.core.Startable;
 import deism.core.Stateful;
+import deism.ipc.async.BlockingSendOperation;
+import deism.ipc.async.SendThread;
 
 @Stateful
-@Blocking
 @External
-public class MpiEventSink implements EventSink {
+public class MpiEventSink implements EventSink, Startable {
 
-    private final int mpireceiver;
-    private final int mpitag;
-    private final IntraComm mpicomm;
-    private final static Logger logger = Logger.getLogger(MpiEventSink.class);
+    private final SendThread<Event> sender;
 
     public MpiEventSink(IntraComm comm, int mpireceiver, int mpitag) {
-        this.mpicomm = comm;
-        this.mpireceiver = mpireceiver;
-        this.mpitag = mpitag;
+        BlockingSendOperation<Event> operation = new MpiSendOperation<Event>(
+                comm, mpireceiver, mpitag);
+        sender = new SendThread<Event>(operation);
     }
 
     @Override
     public void offer(Event event) {
-        Event[] buffer = {event};
-        logger.debug("Start sending to " + mpireceiver + " event " + event);
-        mpicomm.Send(buffer, 0, 1, MPI.OBJECT, mpireceiver, mpitag);
-        logger.debug("Completed send to " + mpireceiver + " event " + event);
+        sender.send(event);
+    }
+
+    @Override
+    public void start(long simtime) {
+        sender.start();
+    }
+
+    @Override
+    public void stop(long simtime) {
+        sender.terminate();
     }
 }

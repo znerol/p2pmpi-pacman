@@ -186,7 +186,7 @@ public class DefaultEventRunloop implements EventRunloop {
     }
 
     @Override
-    public void send(Message message) {
+    public void handle(Message message) {
         synchronized (messages) {
             messages.offer(message);
         }

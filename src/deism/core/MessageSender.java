@@ -1,5 +1,5 @@
 package deism.core;
 
-public interface MessageDestination {
+public interface MessageSender {
     public void send(Message message);
 }
