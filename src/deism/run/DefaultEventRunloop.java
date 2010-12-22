@@ -1,8 +1,5 @@
 package deism.run;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
-
 import org.apache.log4j.Logger;
 
 import deism.core.Event;
@@ -11,6 +8,7 @@ import deism.core.Flushable;
 import deism.core.Startable;
 import deism.ipc.base.Message;
 import deism.ipc.base.MessageHandler;
+import deism.ipc.base.MessageQueue;
 import deism.process.DiscreteEventProcess;
 
 /**
@@ -27,21 +25,21 @@ public class DefaultEventRunloop implements EventRunloop {
     private long currentSimtime = 0;
     private StateController stateController;
     private EventCondition snapshotCondition;
-    private Queue<Message> messages = new ArrayDeque<Message>();
     private MessageHandler messageHandler;
+    private MessageQueue messageQueue;
     private final static Logger logger = Logger
             .getLogger(DefaultEventRunloop.class);
 
     public DefaultEventRunloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
-            StateController stateController,
-            EventCondition snapshotCondition,
-            MessageHandler messageHandler) {
+            StateController stateController, EventCondition snapshotCondition,
+            MessageQueue messageQueue, MessageHandler messageHandler) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.stateController = stateController;
         this.snapshotCondition = snapshotCondition;
         this.messageHandler = messageHandler;
+        this.messageQueue = messageQueue;
     }
 
     /**
@@ -78,16 +76,8 @@ public class DefaultEventRunloop implements EventRunloop {
             logger.debug("Begin runloop cycle");
 
             // fetch and handle system messages
-            while(true) {
-                Message message;
-                synchronized(messages) {
-                    message = messages.poll();
-                }
-
-                if (message == null) {
-                    break;
-                }
-
+            Message message;
+            while ((message = messageQueue.poll()) != null) {
                 logger.info("Handle system message " + message);
                 messageHandler.handle(message);
             }
@@ -114,7 +104,7 @@ public class DefaultEventRunloop implements EventRunloop {
                 if (process instanceof Flushable
                         && peekEvent.getSimtime() > maxSimtime) {
                     logger.debug("Flush");
-                    ((Flushable)process).flush(peekEvent.getSimtime());
+                    ((Flushable) process).flush(peekEvent.getSimtime());
                 }
 
                 logger.debug("Suspend runloop until " + peekEvent.getSimtime());
@@ -123,7 +113,7 @@ public class DefaultEventRunloop implements EventRunloop {
             else {
                 if (process instanceof Flushable) {
                     logger.debug("Flush");
-                    ((Flushable)process).flush(Long.MAX_VALUE);
+                    ((Flushable) process).flush(Long.MAX_VALUE);
                 }
 
                 logger.debug("Suspend runloop indefinitely");
@@ -183,14 +173,6 @@ public class DefaultEventRunloop implements EventRunloop {
         governor.stop(currentSimtime);
 
         logger.info("End runloop");
-    }
-
-    @Override
-    public void handle(Message message) {
-        synchronized (messages) {
-            messages.offer(message);
-        }
-        governor.resume();
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.mockito.stubbing.Answer;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.ipc.base.MessageHandler;
+import deism.ipc.base.MessageQueue;
 import deism.process.DiscreteEventProcess;
 import deism.run.DefaultEventRunloop;
 import deism.run.StateController;
@@ -30,6 +31,8 @@ public class DefaultEventRunloopTest {
     @Mock
     EventCondition snapshotCondition;
     @Mock
+    MessageQueue messageQueue;
+    @Mock
     MessageHandler messageHandler;
 
     /**
@@ -40,7 +43,7 @@ public class DefaultEventRunloopTest {
     public void runNoEvent() {
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageHandler);
+                messageQueue, messageHandler);
 
         when(process.peek(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
@@ -64,7 +67,7 @@ public class DefaultEventRunloopTest {
         final Event two = new Event(2);
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageHandler);
+                messageQueue, messageHandler);
 
         /*
          * On each call to receive() process will return event one, then
@@ -106,7 +109,7 @@ public class DefaultEventRunloopTest {
 
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageHandler);
+                messageQueue, messageHandler);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(two);
@@ -148,7 +151,7 @@ public class DefaultEventRunloopTest {
 
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageHandler);
+                messageQueue, messageHandler);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(one);
@@ -182,7 +185,7 @@ public class DefaultEventRunloopTest {
         final Event two = new Event(2);
         final DefaultEventRunloop r = new DefaultEventRunloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageHandler);
+                messageQueue, messageHandler);
 
         /*
          * Simulate event source which returns events in the wrong order.

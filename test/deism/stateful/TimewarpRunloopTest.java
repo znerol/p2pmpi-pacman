@@ -15,6 +15,7 @@ import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSource;
 import deism.ipc.base.MessageHandler;
+import deism.ipc.base.MessageQueue;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;
@@ -36,6 +37,8 @@ public class TimewarpRunloopTest {
     EventCondition terminationCondition;
     @Mock
     EventCondition snapshotCondition;
+    @Mock
+    MessageQueue messageQueue;
     @Mock
     MessageHandler messageHandler;
 
@@ -73,7 +76,8 @@ public class TimewarpRunloopTest {
 
         stateController = new StateHistoryController(process);
         runloop = new DefaultEventRunloop(governor, terminationCondition,
-                stateController, snapshotCondition, messageHandler);
+                stateController, snapshotCondition, messageQueue,
+                messageHandler);
     }
 
     @Test

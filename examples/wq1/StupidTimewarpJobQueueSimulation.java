@@ -15,6 +15,8 @@ import deism.core.EventExporter;
 import deism.core.EventImporter;
 import deism.ipc.base.Message;
 import deism.ipc.base.MessageHandler;
+import deism.ipc.base.MessageQueue;
+import deism.run.DefaultRunloopMessageQueue;
 import deism.run.EventRunloop;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
@@ -88,8 +90,10 @@ public class StupidTimewarpJobQueueSimulation {
             }
         };
 
+        MessageQueue messageQueue = new DefaultRunloopMessageQueue(governor);
+
         EventRunloop runloop = new DefaultEventRunloop(governor, termCond,
-                stateController, snapshotAll, messageHandler);
+                stateController, snapshotAll, messageQueue, messageHandler);
 
         runloop.run(process);
     }
