@@ -9,8 +9,8 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.ipc.base.MessageHandler;
-import deism.ipc.base.MessageQueue;
+import deism.ipc.base.Handler;
+import deism.ipc.base.Message;
 import deism.process.DiscreteEventProcess;
 import deism.run.Runloop;
 import deism.run.StateController;
@@ -31,9 +31,9 @@ public class RunloopTest {
     @Mock
     EventCondition snapshotCondition;
     @Mock
-    MessageQueue messageQueue;
+    IpcEndpoint endpoint;
     @Mock
-    MessageHandler messageHandler;
+    Handler<Message> ipcHandler;
 
     /**
      * FastForwardRunloop.run must return immediately when EventSource.peek
@@ -43,7 +43,7 @@ public class RunloopTest {
     public void runNoEvent() {
         final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageQueue, messageHandler);
+                endpoint, ipcHandler);
 
         when(process.peek(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
@@ -67,7 +67,7 @@ public class RunloopTest {
         final Event two = new Event(2);
         final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageQueue, messageHandler);
+                endpoint, ipcHandler);
 
         /*
          * On each call to receive() process will return event one, then
@@ -109,7 +109,7 @@ public class RunloopTest {
 
         final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageQueue, messageHandler);
+                endpoint, ipcHandler);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(two);
@@ -151,7 +151,7 @@ public class RunloopTest {
 
         final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageQueue, messageHandler);
+                endpoint, ipcHandler);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(one);
@@ -185,7 +185,7 @@ public class RunloopTest {
         final Event two = new Event(2);
         final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
-                messageQueue, messageHandler);
+                endpoint, ipcHandler);
 
         /*
          * Simulate event source which returns events in the wrong order.

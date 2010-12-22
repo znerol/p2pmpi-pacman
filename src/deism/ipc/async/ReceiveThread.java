@@ -2,10 +2,10 @@ package deism.ipc.async;
 
 import org.apache.log4j.Logger;
 
-import deism.ipc.base.Handler;
+import deism.ipc.base.Endpoint;
 
 public class ReceiveThread<T> extends Thread {
-    private final Handler<T> messageHandler;
+    private final Endpoint<T> endpoint;
     private final BlockingReceiveOperation<T> receiveOperation;
     private final ThreadListener threadListener;
     private boolean done = false;
@@ -14,15 +14,15 @@ public class ReceiveThread<T> extends Thread {
             .getLogger(ReceiveThread.class);
 
     public ReceiveThread(BlockingReceiveOperation<T> receiveOperation,
-            Handler<T> messageHandler) {
-        this(receiveOperation, messageHandler, null);
+            Endpoint<T> endpoint) {
+        this(receiveOperation, endpoint, null);
     }
 
     public ReceiveThread(BlockingReceiveOperation<T> receiveOperation,
-            Handler<T> messageHandler,
+            Endpoint<T> endpoint,
             ThreadListener threadListener) {
         this.receiveOperation = receiveOperation;
-        this.messageHandler = messageHandler;
+        this.endpoint = endpoint;
         this.threadListener = threadListener;
     }
 
@@ -50,7 +50,7 @@ public class ReceiveThread<T> extends Thread {
 
             if (item != null) {
                 logger.debug("Received item from original queue " + item);
-                messageHandler.handle(item);
+                endpoint.send(item);
             }
         }
 

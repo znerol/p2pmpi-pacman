@@ -5,9 +5,9 @@ import deism.core.Startable;
 import deism.ipc.async.BlockingSendOperation;
 import deism.ipc.async.SendThread;
 import deism.ipc.base.Message;
-import deism.ipc.base.MessageSender;
+import deism.ipc.base.Endpoint;
 
-public class MpiMessageSender implements MessageSender, Startable {
+public class MpiMessageSender implements Endpoint<Message>, Startable {
 
     private final SendThread<Message> sender;
 

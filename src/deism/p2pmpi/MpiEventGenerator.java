@@ -12,13 +12,13 @@ import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 import deism.ipc.async.BlockingReceiveOperation;
 import deism.ipc.async.ReceiveThread;
-import deism.ipc.base.Handler;
+import deism.ipc.base.Endpoint;
 import deism.run.ExecutionGovernor;
 
 @Stateful
 @External
 public class MpiEventGenerator implements StatefulEventGenerator, Startable,
-        Handler<Event> {
+        Endpoint<Event> {
 
     private final ExecutionGovernor governor;
     private final ReceiveThread<Event> receiver;
@@ -40,7 +40,7 @@ public class MpiEventGenerator implements StatefulEventGenerator, Startable,
     }
 
     @Override
-    public void handle(Event item) {
+    public void send(Event item) {
         Event peekEvent;
         synchronized (events) {
             events.offer(item);

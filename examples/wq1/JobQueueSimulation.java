@@ -15,12 +15,11 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
+import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
-import deism.ipc.base.MessageHandler;
-import deism.ipc.base.MessageQueue;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
-import deism.run.DefaultRunloopMessageQueue;
+import deism.run.IpcEndpoint;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.NoStateController;
@@ -97,16 +96,16 @@ public class JobQueueSimulation {
             }
         };
 
-        MessageHandler messageHandler = new MessageHandler() {
+        Handler<Message> ipcHandler = new Handler<Message>() {
             @Override
             public void handle(Message item) {
             }
         };
 
-        MessageQueue messageQueue = new DefaultRunloopMessageQueue(governor);
+        IpcEndpoint ipcEndpoint = new IpcEndpoint(governor);
 
         Runloop runloop = new Runloop(governor, termCond,
-                stateController, noSnapshots, messageQueue, messageHandler);
+                stateController, noSnapshots, ipcEndpoint, ipcHandler);
         runloop.run(process);
     }
 }

@@ -3,28 +3,27 @@ package deism.run;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import deism.ipc.base.Endpoint;
 import deism.ipc.base.Message;
-import deism.ipc.base.MessageQueue;
 
-public class DefaultRunloopMessageQueue implements MessageQueue {
+public class IpcEndpoint implements Endpoint<Message> {
 
     private final ExecutionGovernor governor;
     private final Queue<Message> queue = new ArrayDeque<Message>();
 
-    public DefaultRunloopMessageQueue(ExecutionGovernor governor) {
+    public IpcEndpoint(ExecutionGovernor governor) {
         this.governor = governor;
     }
 
+    public synchronized Message poll() {
+        return queue.poll();
+    }
+
     @Override
-    public void handle(Message item) {
+    public void send(Message item) {
         synchronized (this) {
             queue.offer(item);
         }
         governor.resume();
-    }
-
-    @Override
-    public synchronized Message poll() {
-        return queue.poll();
     }
 }

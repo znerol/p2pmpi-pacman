@@ -12,15 +12,15 @@ import util.StateHistoryLogger;
 import util.TerminateAfterDuration;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.ipc.base.MessageHandler;
-import deism.ipc.base.MessageQueue;
+import deism.ipc.base.Handler;
+import deism.ipc.base.Message;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
 import deism.p2pmpi.MpiMessageReceiver;
 import deism.p2pmpi.MpiMessageSender;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DiscreteEventProcess;
-import deism.run.DefaultRunloopMessageQueue;
+import deism.run.IpcEndpoint;
 import deism.run.NoStateController;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
@@ -35,9 +35,9 @@ import deism.tqgvt.Master;
 
 public class Pingpong {
 
-    public static MessageHandler buildPlayer(
+    public static Handler<Message> buildPlayer(
             DefaultTimewarpDiscreteEventProcess process,
-            MessageQueue messageQueue, StateController stateController,
+            IpcEndpoint ipcEndpoint, StateController stateController,
             ExecutionGovernor governor) {
         final int me = MPI.COMM_WORLD.Rank();
         final int other = 1 - me;
@@ -47,7 +47,7 @@ public class Pingpong {
         Client tqclient = new Client(me, 100, stateController, toMaster);
         process.addStartable(toMaster);
         final MpiMessageReceiver fromMaster = new MpiMessageReceiver(
-                MPI.COMM_WORLD, 2, 1, messageQueue);
+                MPI.COMM_WORLD, 2, 1, ipcEndpoint);
         process.addStartable(fromMaster);
 
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
@@ -107,9 +107,9 @@ public class Pingpong {
 
         DiscreteEventProcess process;
         StateController stateController;
-        MessageHandler messageHandler;
+        Handler<Message> ipcHandler;
         EventCondition snapshotCondition;
-        MessageQueue messageQueue = new DefaultRunloopMessageQueue(governor);
+        IpcEndpoint ipcEndpoint = new IpcEndpoint(governor);
         if (MPI.COMM_WORLD.Rank() == 2) {
             DefaultDiscreteEventProcess desProcess = new DefaultDiscreteEventProcess();
             stateController = new NoStateController();
@@ -124,10 +124,10 @@ public class Pingpong {
                     MPI.COMM_WORLD, 0, 1);
             desProcess.addStartable(toClients);
             final MpiMessageReceiver fromClients = new MpiMessageReceiver(
-                    MPI.COMM_WORLD, MPI.ANY_SOURCE, 1, messageQueue);
+                    MPI.COMM_WORLD, MPI.ANY_SOURCE, 1, ipcEndpoint);
             desProcess.addStartable(fromClients);
             final Master tqmaster = new Master(2, toClients);
-            messageHandler = tqmaster;
+            ipcHandler = tqmaster;
             process = desProcess;
         }
         else {
@@ -142,13 +142,13 @@ public class Pingpong {
                 }
             };
 
-            messageHandler = buildPlayer(timewarpProcess, messageQueue,
+            ipcHandler = buildPlayer(timewarpProcess, ipcEndpoint,
                     stateController, governor);
         }
 
         Runloop runloop = new Runloop(governor, termCond,
-                stateController, snapshotCondition, messageQueue,
-                messageHandler);
+                stateController, snapshotCondition, ipcEndpoint,
+                ipcHandler);
         runloop.run(process);
 
         MPI.Finalize();

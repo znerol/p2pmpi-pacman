@@ -8,14 +8,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import deism.ipc.base.MessageSender;
+import deism.ipc.base.Endpoint;
+import deism.ipc.base.Message;
 
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MasterTest {
     @Mock
-    private MessageSender clients;
+    private Endpoint<Message> clients;
 
     private Master master;
 

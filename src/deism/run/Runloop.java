@@ -6,9 +6,8 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.Flushable;
 import deism.core.Startable;
+import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
-import deism.ipc.base.MessageHandler;
-import deism.ipc.base.MessageQueue;
 import deism.process.DiscreteEventProcess;
 
 /**
@@ -25,21 +24,21 @@ public class Runloop {
     private long currentSimtime = 0;
     private StateController stateController;
     private EventCondition snapshotCondition;
-    private MessageHandler messageHandler;
-    private MessageQueue messageQueue;
+    private Handler<Message> ipcHandler;
+    private IpcEndpoint ipcEndpoint;
     private final static Logger logger = Logger
             .getLogger(Runloop.class);
 
     public Runloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             StateController stateController, EventCondition snapshotCondition,
-            MessageQueue messageQueue, MessageHandler messageHandler) {
+            IpcEndpoint ipcEndpoint, Handler<Message> ipcHandler) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.stateController = stateController;
         this.snapshotCondition = snapshotCondition;
-        this.messageHandler = messageHandler;
-        this.messageQueue = messageQueue;
+        this.ipcHandler = ipcHandler;
+        this.ipcEndpoint = ipcEndpoint;
     }
 
     /**
@@ -75,9 +74,9 @@ public class Runloop {
 
             // fetch and handle system messages
             Message message;
-            while ((message = messageQueue.poll()) != null) {
+            while ((message = ipcEndpoint.poll()) != null) {
                 logger.info("Handle system message " + message);
-                messageHandler.handle(message);
+                ipcHandler.handle(message);
             }
 
             // identify simulation event with the smallest timestamp
