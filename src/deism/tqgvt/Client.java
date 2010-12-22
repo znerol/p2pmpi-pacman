@@ -105,11 +105,14 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
 
     @Override
     public Event pack(Event event) {
+        // send a new report to the master if necessary and update tq
+        updateReport();
+
         // update the minimum virtual time we're sending a message for
         mvt = Math.min(mvt, event.getSimtime());
 
-        // send a new report to the master if necessary and update tq
-        updateReport();
+        // increment send count for the current time quantum
+        send++;
 
         // wrap up event into a tq-gvt event and associate our current tq with
         // it.
