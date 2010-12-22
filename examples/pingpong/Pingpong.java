@@ -21,7 +21,6 @@ import deism.p2pmpi.MpiMessageSender;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DiscreteEventProcess;
 import deism.run.DefaultRunloopMessageQueue;
-import deism.run.EventRunloop;
 import deism.run.NoStateController;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
@@ -147,7 +146,7 @@ public class Pingpong {
                     stateController, governor);
         }
 
-        EventRunloop runloop = new DefaultEventRunloop(governor, termCond,
+        DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
                 stateController, snapshotCondition, messageQueue,
                 messageHandler);
         runloop.run(process);

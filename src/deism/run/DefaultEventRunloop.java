@@ -18,7 +18,7 @@ import deism.process.DiscreteEventProcess;
  * supplied by the event source such that if an event for a future point in time
  * is received, execution is delayed adequately.
  */
-public class DefaultEventRunloop implements EventRunloop {
+public class DefaultEventRunloop {
     private boolean stop = false;
     private EventCondition terminationCondition = null;
     private ExecutionGovernor governor;
@@ -54,8 +54,6 @@ public class DefaultEventRunloop implements EventRunloop {
      * @param e
      * @throws InterruptedException
      */
-
-    @Override
     public void run(DiscreteEventProcess process) {
         logger.debug("Start runloop at simulation time: " + currentSimtime);
 
@@ -175,7 +173,6 @@ public class DefaultEventRunloop implements EventRunloop {
         logger.info("End runloop");
     }
 
-    @Override
     public void stop() {
         stop = true;
         governor.resume();
