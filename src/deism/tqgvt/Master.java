@@ -1,6 +1,9 @@
 package deism.tqgvt;
 
+import java.util.Arrays;
 import java.util.Map.Entry;
+
+import org.apache.log4j.Logger;
 
 import deism.ipc.base.Message;
 import deism.ipc.base.MessageHandler;
@@ -44,6 +47,11 @@ public class Master implements MessageHandler {
     private LongMap<Long> transit;
 
     /**
+     * log4j
+     */
+    private static final Logger logger = Logger.getLogger(Master.class);
+
+    /**
      * @param processCount
      *            number of participating processes
      */
@@ -78,6 +86,11 @@ public class Master implements MessageHandler {
         for (Entry<Long, Long> entry : reportEvent.getRecv().entrySet()) {
             transit.get(entry.getKey(), 0).add(-entry.getValue());
         }
+
+        logger.debug("Finished processing gvt report");
+        logger.debug("  lvt=" + Arrays.toString(lvt));
+        logger.debug("  mvt=" + mvt.valueMap());
+        logger.debug("  tns=" + transit.valueMap());
     }
 
     public void updateGvt() {
@@ -96,9 +109,12 @@ public class Master implements MessageHandler {
             }
         }
 
+        logger.debug("Result of gvt calculation newGvt=" + newGvt + " current gvt=" + gvt);
+
         if (newGvt != gvt) {
             assert (newGvt > gvt);
             gvt = newGvt;
+            logger.info("New GVT: " + gvt);
             clients.send(new GvtMessage(gvt));
         }
     }
