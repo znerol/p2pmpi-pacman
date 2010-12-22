@@ -14,10 +14,12 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
+import deism.p2pmpi.MpiBroadcastEndpoint;
+import deism.p2pmpi.MpiBroadcastListener;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
-import deism.p2pmpi.MpiListener;
-import deism.p2pmpi.MpiEndpoint;
+import deism.p2pmpi.MpiUnicastListener;
+import deism.p2pmpi.MpiUnicastEndpoint;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DiscreteEventProcess;
 import deism.run.IpcEndpoint;
@@ -35,38 +37,47 @@ import deism.tqgvt.Master;
 
 public class Pingpong {
 
+    private static int MASTER_RANK = 2;
+    private static int BALL_TAG = 0;
+    private static int REPORT_TAG = 1;
+
     public static Handler<Message> buildPlayer(
             DefaultTimewarpDiscreteEventProcess process,
             IpcEndpoint ipcEndpoint, StateController stateController,
             ExecutionGovernor governor) {
-        final int me = MPI.COMM_WORLD.Rank();
-        final int other = 1 - me;
+        final int MY_RANK = MPI.COMM_WORLD.Rank();
+        final int PEER_RANK = 1 - MY_RANK;
 
-        final MpiEndpoint toMaster = new MpiEndpoint(MPI.COMM_WORLD, 2, 1);
-        Client tqclient = new Client(me, 100, stateController, toMaster);
+        final MpiUnicastEndpoint toMaster = new MpiUnicastEndpoint(MPI.COMM_WORLD,
+                MASTER_RANK, REPORT_TAG);
+        Client tqclient = new Client(MY_RANK, 100, stateController, toMaster);
         process.addStartable(toMaster);
-        final MpiListener fromMaster = new MpiListener(MPI.COMM_WORLD, 2, 1,
-                ipcEndpoint);
+
+        final MpiBroadcastListener fromMaster = new MpiBroadcastListener(
+                MPI.COMM_WORLD, MASTER_RANK, ipcEndpoint);
         process.addStartable(fromMaster);
 
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
                 process, tqclient, tqclient);
 
-        builder.add(new BallEventGenerator(me * 50, 100, me, other));
-        builder.add(new MpiEventGenerator(MPI.COMM_WORLD, other, 0, governor));
+        builder.add(new BallEventGenerator(MY_RANK * 50, 100, MY_RANK,
+                PEER_RANK));
+        builder.add(new MpiEventGenerator(MPI.COMM_WORLD, PEER_RANK, BALL_TAG,
+                governor));
 
         EventCondition onlyMine = new EventCondition() {
             @Override
             public boolean match(Event event) {
                 if (event instanceof BallEvent) {
                     BallEvent ballEvent = (BallEvent) event;
-                    return ballEvent.getSender() == me;
+                    return ballEvent.getSender() == MY_RANK;
                 }
                 return false;
             }
         };
 
-        builder.add(new MpiEventSink(MPI.COMM_WORLD, other, 0), onlyMine);
+        builder.add(new MpiEventSink(MPI.COMM_WORLD, PEER_RANK, BALL_TAG),
+                onlyMine);
 
         process.addEventSink(new EventLogger());
         process.addEventDispatcher(new EventLogger());
@@ -119,13 +130,15 @@ public class Pingpong {
                 }
             };
 
-            final MpiEndpoint toClients = new MpiEndpoint(MPI.COMM_WORLD, 0, 1);
+            final MpiBroadcastEndpoint toClients = new MpiBroadcastEndpoint(
+                    MPI.COMM_WORLD, MASTER_RANK);
             desProcess.addStartable(toClients);
-            final MpiListener fromClients = new MpiListener(MPI.COMM_WORLD,
-                    MPI.ANY_SOURCE, 1, ipcEndpoint);
+
+            final MpiUnicastListener fromClients = new MpiUnicastListener(MPI.COMM_WORLD,
+                    MPI.ANY_SOURCE, REPORT_TAG, ipcEndpoint);
             desProcess.addStartable(fromClients);
-            final Master tqmaster = new Master(2, toClients);
-            ipcHandler = tqmaster;
+
+            ipcHandler = new Master(2, toClients);
             process = desProcess;
         }
         else {

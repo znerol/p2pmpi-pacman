@@ -7,14 +7,15 @@ import deism.ipc.async.ReceiveThread;
 import deism.ipc.base.Endpoint;
 import deism.ipc.base.Message;
 
-public class MpiListener implements Startable {
+public class MpiBroadcastListener implements Startable {
 
     private final ReceiveThread<Message> receiver;
 
-    public MpiListener(IntraComm comm, int mpisender, int mpitag,
+    public MpiBroadcastListener(IntraComm comm, int mpiroot,
             Endpoint<Message> endpoint) {
-        BlockingReceiveOperation<Message> operation = new MpiReceiveOperation<Message>(
-                comm, mpisender, mpitag);
+        assert(comm.Rank() != mpiroot);
+        BlockingReceiveOperation<Message> operation = new MpiBroadcastOperation<Message>(
+                comm, mpiroot);
         receiver = new ReceiveThread<Message>(operation, endpoint);
     }
 

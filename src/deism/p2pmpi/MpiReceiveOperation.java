@@ -13,9 +13,9 @@ public class MpiReceiveOperation<T> implements BlockingReceiveOperation<T> {
     private final static Logger logger = Logger
             .getLogger(MpiReceiveOperation.class);
 
-    public MpiReceiveOperation(IntraComm comm, int mpisender, int mpitag) {
+    public MpiReceiveOperation(IntraComm comm, int mpiroot, int mpitag) {
         this.mpicomm = comm;
-        this.mpisender = mpisender;
+        this.mpisender = mpiroot;
         this.mpitag = mpitag;
     }
 

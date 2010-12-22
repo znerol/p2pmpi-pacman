@@ -7,11 +7,11 @@ import deism.ipc.async.SendThread;
 import deism.ipc.base.Message;
 import deism.ipc.base.Endpoint;
 
-public class MpiEndpoint implements Endpoint<Message>, Startable {
+public class MpiUnicastEndpoint implements Endpoint<Message>, Startable {
 
     private final SendThread<Message> sender;
 
-    public MpiEndpoint(IntraComm mpicomm, int mpireceiver, int mpitag) {
+    public MpiUnicastEndpoint(IntraComm mpicomm, int mpireceiver, int mpitag) {
         BlockingSendOperation<Message> operation = new MpiSendOperation<Message>(
                 mpicomm, mpireceiver, mpitag);
         sender = new SendThread<Message>(operation);
