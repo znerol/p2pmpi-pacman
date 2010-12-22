@@ -1,6 +1,6 @@
 package deism.tqgvt;
 
-import deism.core.Message;
+import deism.ipc.base.Message;
 
 public class GvtMessage implements Message {
     private static final long serialVersionUID = -7073545460339405226L;

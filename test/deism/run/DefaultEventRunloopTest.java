@@ -9,7 +9,7 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.core.MessageHandler;
+import deism.ipc.base.MessageHandler;
 import deism.process.DiscreteEventProcess;
 import deism.run.DefaultEventRunloop;
 import deism.run.StateController;

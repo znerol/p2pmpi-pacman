@@ -8,9 +8,9 @@ import org.apache.log4j.Logger;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.Flushable;
-import deism.core.Message;
-import deism.core.MessageHandler;
 import deism.core.Startable;
+import deism.ipc.base.Message;
+import deism.ipc.base.MessageHandler;
 import deism.process.DiscreteEventProcess;
 
 /**

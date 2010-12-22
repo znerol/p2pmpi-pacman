@@ -2,7 +2,7 @@ package deism.tqgvt;
 
 import java.util.Map;
 
-import deism.core.Message;
+import deism.ipc.base.Message;
 
 public class ReportMessage implements Message {
     private static final long serialVersionUID = 4825754443295424225L;

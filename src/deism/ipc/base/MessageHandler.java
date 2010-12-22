@@ -1,6 +1,5 @@
-package deism.core;
+package deism.ipc.base;
 
-import deism.ipc.base.Handler;
 
 public interface MessageHandler extends Handler<Message> {
 }

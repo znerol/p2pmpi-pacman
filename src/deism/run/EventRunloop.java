@@ -1,6 +1,6 @@
 package deism.run;
 
-import deism.core.MessageHandler;
+import deism.ipc.base.MessageHandler;
 import deism.process.DiscreteEventProcess;
 
 

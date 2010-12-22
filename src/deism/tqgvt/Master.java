@@ -2,9 +2,9 @@ package deism.tqgvt;
 
 import java.util.Map.Entry;
 
-import deism.core.Message;
-import deism.core.MessageHandler;
-import deism.core.MessageSender;
+import deism.ipc.base.Message;
+import deism.ipc.base.MessageHandler;
+import deism.ipc.base.MessageSender;
 import deism.util.LongMap;
 import deism.util.MutableLong;
 

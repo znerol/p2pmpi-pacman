@@ -1,4 +1,4 @@
-package deism.core;
+package deism.ipc.base;
 
 import java.io.Serializable;
 

@@ -14,7 +14,7 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSource;
-import deism.core.MessageHandler;
+import deism.ipc.base.MessageHandler;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.DefaultEventRunloop;

@@ -1,11 +1,11 @@
 package deism.p2pmpi;
 
 import p2pmpi.mpi.IntraComm;
-import deism.core.Message;
-import deism.core.MessageSender;
 import deism.core.Startable;
 import deism.ipc.async.BlockingSendOperation;
 import deism.ipc.async.SendThread;
+import deism.ipc.base.Message;
+import deism.ipc.base.MessageSender;
 
 public class MpiMessageSender implements MessageSender, Startable {
 
