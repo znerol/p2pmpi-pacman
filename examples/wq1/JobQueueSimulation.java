@@ -24,7 +24,7 @@ import deism.run.DefaultRunloopMessageQueue;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.NoStateController;
-import deism.run.DefaultEventRunloop;
+import deism.run.Runloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 
@@ -105,7 +105,7 @@ public class JobQueueSimulation {
 
         MessageQueue messageQueue = new DefaultRunloopMessageQueue(governor);
 
-        DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
+        Runloop runloop = new Runloop(governor, termCond,
                 stateController, noSnapshots, messageQueue, messageHandler);
         runloop.run(process);
     }

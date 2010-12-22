@@ -24,7 +24,7 @@ import deism.run.DefaultRunloopMessageQueue;
 import deism.run.NoStateController;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
-import deism.run.DefaultEventRunloop;
+import deism.run.Runloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.StateHistoryController;
@@ -146,7 +146,7 @@ public class Pingpong {
                     stateController, governor);
         }
 
-        DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
+        Runloop runloop = new Runloop(governor, termCond,
                 stateController, snapshotCondition, messageQueue,
                 messageHandler);
         runloop.run(process);

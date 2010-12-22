@@ -12,14 +12,14 @@ import deism.core.EventCondition;
 import deism.ipc.base.MessageHandler;
 import deism.ipc.base.MessageQueue;
 import deism.process.DiscreteEventProcess;
-import deism.run.DefaultEventRunloop;
+import deism.run.Runloop;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.stateful.StateHistoryException;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultEventRunloopTest {
+public class RunloopTest {
     @Mock
     DiscreteEventProcess process;
     @Mock
@@ -41,7 +41,7 @@ public class DefaultEventRunloopTest {
      */
     @Test
     public void runNoEvent() {
-        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
+        final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
                 messageQueue, messageHandler);
 
@@ -65,7 +65,7 @@ public class DefaultEventRunloopTest {
     public void runSomeEvents() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
+        final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
                 messageQueue, messageHandler);
 
@@ -107,7 +107,7 @@ public class DefaultEventRunloopTest {
         final Event two = new Event(2);
         final Event three = new Event(3);
 
-        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
+        final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
                 messageQueue, messageHandler);
 
@@ -149,7 +149,7 @@ public class DefaultEventRunloopTest {
     {
         final Event one = new Event(2);
 
-        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
+        final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
                 messageQueue, messageHandler);
 
@@ -183,7 +183,7 @@ public class DefaultEventRunloopTest {
     public void runSourceWithWrongEventOrder() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final DefaultEventRunloop r = new DefaultEventRunloop(governor,
+        final Runloop r = new Runloop(governor,
                 terminationCondition, stateController, snapshotCondition,
                 messageQueue, messageHandler);
 

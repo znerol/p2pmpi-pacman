@@ -18,7 +18,7 @@ import deism.ipc.base.MessageQueue;
 import deism.run.DefaultRunloopMessageQueue;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
-import deism.run.DefaultEventRunloop;
+import deism.run.Runloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.StateHistoryController;
@@ -104,7 +104,7 @@ public class TimewarpJobQueueSimulation {
 
         MessageQueue messageQueue = new DefaultRunloopMessageQueue(governor);
 
-        DefaultEventRunloop runloop = new DefaultEventRunloop(governor, termCond,
+        Runloop runloop = new Runloop(governor, termCond,
                 stateController, snapshotAll, messageQueue, messageHandler);
 
         runloop.run(process);

@@ -18,7 +18,7 @@ import deism.process.DiscreteEventProcess;
  * supplied by the event source such that if an event for a future point in time
  * is received, execution is delayed adequately.
  */
-public class DefaultEventRunloop {
+public class Runloop {
     private boolean stop = false;
     private EventCondition terminationCondition = null;
     private ExecutionGovernor governor;
@@ -28,9 +28,9 @@ public class DefaultEventRunloop {
     private MessageHandler messageHandler;
     private MessageQueue messageQueue;
     private final static Logger logger = Logger
-            .getLogger(DefaultEventRunloop.class);
+            .getLogger(Runloop.class);
 
-    public DefaultEventRunloop(ExecutionGovernor governor,
+    public Runloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             StateController stateController, EventCondition snapshotCondition,
             MessageQueue messageQueue, MessageHandler messageHandler) {
