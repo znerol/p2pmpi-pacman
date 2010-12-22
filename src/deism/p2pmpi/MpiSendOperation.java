@@ -11,7 +11,7 @@ public class MpiSendOperation<T> implements BlockingSendOperation<T> {
     private final int mpitag;
     private final IntraComm mpicomm;
     private final static Logger logger = Logger
-    .getLogger(MpiEventGenerator.class);
+    .getLogger(MpiSendOperation.class);
 
     public MpiSendOperation(IntraComm comm, int mpireceiver, int mpitag) {
         this.mpicomm = comm;
@@ -20,12 +20,10 @@ public class MpiSendOperation<T> implements BlockingSendOperation<T> {
     }
 
     @Override
-    public void send(T message) {
-        Object[] buffer = { message };
-        logger.debug("Start sending to " + mpireceiver + " message "
-                + message);
+    public void send(T item) {
+        Object[] buffer = { item };
+        logger.debug("Start sending to " + mpireceiver  + " " + item);
         mpicomm.Send(buffer, 0, 1, MPI.OBJECT, mpireceiver, mpitag);
-        logger.debug("Completed send to " + mpireceiver + " message "
-                + message);
+        logger.debug("Completed send to " + mpireceiver + " " + item);
     }
 }
