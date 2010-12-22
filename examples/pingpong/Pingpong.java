@@ -16,8 +16,8 @@ import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
-import deism.p2pmpi.MpiMessageReceiver;
-import deism.p2pmpi.MpiMessageSender;
+import deism.p2pmpi.MpiListener;
+import deism.p2pmpi.MpiEndpoint;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DiscreteEventProcess;
 import deism.run.IpcEndpoint;
@@ -42,12 +42,11 @@ public class Pingpong {
         final int me = MPI.COMM_WORLD.Rank();
         final int other = 1 - me;
 
-        final MpiMessageSender toMaster = new MpiMessageSender(MPI.COMM_WORLD,
-                2, 1);
+        final MpiEndpoint toMaster = new MpiEndpoint(MPI.COMM_WORLD, 2, 1);
         Client tqclient = new Client(me, 100, stateController, toMaster);
         process.addStartable(toMaster);
-        final MpiMessageReceiver fromMaster = new MpiMessageReceiver(
-                MPI.COMM_WORLD, 2, 1, ipcEndpoint);
+        final MpiListener fromMaster = new MpiListener(MPI.COMM_WORLD, 2, 1,
+                ipcEndpoint);
         process.addStartable(fromMaster);
 
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
@@ -120,11 +119,10 @@ public class Pingpong {
                 }
             };
 
-            final MpiMessageSender toClients = new MpiMessageSender(
-                    MPI.COMM_WORLD, 0, 1);
+            final MpiEndpoint toClients = new MpiEndpoint(MPI.COMM_WORLD, 0, 1);
             desProcess.addStartable(toClients);
-            final MpiMessageReceiver fromClients = new MpiMessageReceiver(
-                    MPI.COMM_WORLD, MPI.ANY_SOURCE, 1, ipcEndpoint);
+            final MpiListener fromClients = new MpiListener(MPI.COMM_WORLD,
+                    MPI.ANY_SOURCE, 1, ipcEndpoint);
             desProcess.addStartable(fromClients);
             final Master tqmaster = new Master(2, toClients);
             ipcHandler = tqmaster;
@@ -146,9 +144,8 @@ public class Pingpong {
                     stateController, governor);
         }
 
-        Runloop runloop = new Runloop(governor, termCond,
-                stateController, snapshotCondition, ipcEndpoint,
-                ipcHandler);
+        Runloop runloop = new Runloop(governor, termCond, stateController,
+                snapshotCondition, ipcEndpoint, ipcHandler);
         runloop.run(process);
 
         MPI.Finalize();

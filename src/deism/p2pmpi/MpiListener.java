@@ -7,11 +7,11 @@ import deism.ipc.async.ReceiveThread;
 import deism.ipc.base.Endpoint;
 import deism.ipc.base.Message;
 
-public class MpiMessageReceiver implements Startable {
+public class MpiListener implements Startable {
 
     private final ReceiveThread<Message> receiver;
 
-    public MpiMessageReceiver(IntraComm comm, int mpisender, int mpitag,
+    public MpiListener(IntraComm comm, int mpisender, int mpitag,
             Endpoint<Message> endpoint) {
         BlockingReceiveOperation<Message> operation = new MpiReceiveOperation<Message>(
                 comm, mpisender, mpitag);
