@@ -14,9 +14,7 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSource;
-import deism.ipc.base.Handler;
-import deism.ipc.base.Message;
-import deism.run.IpcEndpoint;
+import deism.run.MessageCenter;
 import deism.run.ExecutionGovernor;
 import deism.run.LvtListener;
 import deism.run.Runloop;
@@ -39,9 +37,7 @@ public class TimewarpRunloopTest {
     @Mock
     EventCondition snapshotCondition;
     @Mock
-    IpcEndpoint ipcEndpoint;
-    @Mock
-    Handler<Message> ipcHandler;
+    MessageCenter messageCenter;
     @Mock
     LvtListener lvtListener;
 
@@ -80,7 +76,7 @@ public class TimewarpRunloopTest {
         stateController = new StateHistoryController();
         stateController.setStateObject(process);
         runloop = new Runloop(governor, terminationCondition, stateController,
-                snapshotCondition, ipcEndpoint, ipcHandler, lvtListener);
+                snapshotCondition, messageCenter, lvtListener);
     }
 
     @Test

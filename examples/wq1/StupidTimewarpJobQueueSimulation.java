@@ -13,9 +13,7 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
-import deism.ipc.base.Handler;
-import deism.ipc.base.Message;
-import deism.run.IpcEndpoint;
+import deism.run.MessageCenter;
 import deism.run.ExecutionGovernor;
 import deism.run.LvtListener;
 import deism.run.Runloop;
@@ -79,22 +77,16 @@ public class StupidTimewarpJobQueueSimulation {
         StateHistoryController stateController = new StateHistoryController();
         stateController.setStateObject(process);
 
-        Handler<Message> ipcHandler = new Handler<Message>() {
-            @Override
-            public void handle(Message item) {
-            }
-        };
-
         LvtListener lvtListener = new LvtListener() {
             @Override
             public void update(long lvt) {
             }
         };
 
-        IpcEndpoint ipcEndpoint = new IpcEndpoint(governor);
+        MessageCenter messageCenter = new MessageCenter(governor);
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
-                snapshotAll, ipcEndpoint, ipcHandler, lvtListener);
+                snapshotAll, messageCenter, lvtListener);
 
         runloop.run(process);
     }

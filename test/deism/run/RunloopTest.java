@@ -9,8 +9,6 @@ import org.mockito.stubbing.Answer;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.ipc.base.Handler;
-import deism.ipc.base.Message;
 import deism.process.DiscreteEventProcess;
 import deism.run.Runloop;
 import deism.run.StateController;
@@ -31,9 +29,7 @@ public class RunloopTest {
     @Mock
     EventCondition snapshotCondition;
     @Mock
-    IpcEndpoint endpoint;
-    @Mock
-    Handler<Message> ipcHandler;
+    MessageCenter messageCenter;
     @Mock
     LvtListener lvtListener;
 
@@ -43,9 +39,9 @@ public class RunloopTest {
      */
     @Test
     public void runNoEvent() {
-        final Runloop r = new Runloop(governor, terminationCondition,
-                stateController, snapshotCondition, endpoint, ipcHandler,
-                lvtListener);
+        final Runloop r =
+                new Runloop(governor, terminationCondition, stateController,
+                        snapshotCondition, messageCenter, lvtListener);
 
         when(process.peek(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
@@ -58,7 +54,7 @@ public class RunloopTest {
         verify(governor).stop(0);
         verify(terminationCondition).match(null);
     }
-    
+
     /**
      * FastForwardRunloop.run must execute EventDispatcher.dispatchEvent for
      * each event returned by EventSource.receive
@@ -67,13 +63,13 @@ public class RunloopTest {
     public void runSomeEvents() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final Runloop r = new Runloop(governor, terminationCondition,
-                stateController, snapshotCondition, endpoint, ipcHandler,
-                lvtListener);
+        final Runloop r =
+                new Runloop(governor, terminationCondition, stateController,
+                        snapshotCondition, messageCenter, lvtListener);
 
         /*
-         * On each call to receive() process will return event one, then
-         * two and finally null.
+         * On each call to receive() process will return event one, then two and
+         * finally null.
          */
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(two);
@@ -85,7 +81,7 @@ public class RunloopTest {
         when(terminationCondition.match(null)).thenReturn(true);
 
         r.run(process);
-        
+
         verify(process).peek(0);
         verify(process).peek(1);
         verify(process).peek(2);
@@ -95,7 +91,7 @@ public class RunloopTest {
         verify(process).dispatchEvent(two);
         verify(governor).suspendUntil(1);
         verify(governor).suspendUntil(2);
-        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
+        when(terminationCondition.match((Event) isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
     }
 
@@ -109,9 +105,9 @@ public class RunloopTest {
         final Event two = new Event(2);
         final Event three = new Event(3);
 
-        final Runloop r = new Runloop(governor, terminationCondition,
-                stateController, snapshotCondition, endpoint, ipcHandler,
-                lvtListener);
+        final Runloop r =
+                new Runloop(governor, terminationCondition, stateController,
+                        snapshotCondition, messageCenter, lvtListener);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(two);
@@ -120,7 +116,7 @@ public class RunloopTest {
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
-        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
+        when(terminationCondition.match((Event) isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
 
         /* call r.stop() when process.dispatchEvent(two) is called */
@@ -145,22 +141,21 @@ public class RunloopTest {
         verify(terminationCondition).match(one);
         verify(terminationCondition).match(two);
     }
-    
+
     @Test
-    public void testReevaluateWhenTimeoutNotReached()
-    {
+    public void testReevaluateWhenTimeoutNotReached() {
         final Event one = new Event(2);
 
-        final Runloop r = new Runloop(governor, terminationCondition,
-                stateController, snapshotCondition, endpoint, ipcHandler,
-                lvtListener);
+        final Runloop r =
+                new Runloop(governor, terminationCondition, stateController,
+                        snapshotCondition, messageCenter, lvtListener);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(one);
         when(process.peek(2)).thenReturn(null);
         when(governor.suspendUntil(2)).thenReturn(1L, 2L);
         when(governor.suspendUntil(3)).thenReturn(3L);
-        when(terminationCondition.match((Event)isNotNull())).thenReturn(false);
+        when(terminationCondition.match((Event) isNotNull())).thenReturn(false);
         when(terminationCondition.match(null)).thenReturn(true);
 
         r.run(process);
@@ -177,6 +172,7 @@ public class RunloopTest {
         verify(terminationCondition, times(2)).match(one);
         verify(terminationCondition).match(null);
     }
+
     /**
      * If an EventSource returns events which are not ordered by ascending
      * timestamp we expect FastWordwardRunloop to try a rollback()
@@ -185,9 +181,9 @@ public class RunloopTest {
     public void runSourceWithWrongEventOrder() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final Runloop r = new Runloop(governor, terminationCondition,
-                stateController, snapshotCondition, endpoint, ipcHandler,
-                lvtListener);
+        final Runloop r =
+                new Runloop(governor, terminationCondition, stateController,
+                        snapshotCondition, messageCenter, lvtListener);
 
         /*
          * Simulate event source which returns events in the wrong order.
@@ -195,15 +191,15 @@ public class RunloopTest {
         when(process.peek(0)).thenReturn(two);
         when(process.peek(2)).thenReturn(one);
         when(process.peek(3)).thenReturn(null);
-        
+
         when(governor.suspendUntil(1)).thenReturn(1L);
         when(governor.suspendUntil(2)).thenReturn(2L);
         when(terminationCondition.match(two)).thenReturn(false);
         when(terminationCondition.match(one)).thenReturn(false);
 
         /* throw a state history exception whenever rollback is called */
-        doThrow(new StateHistoryException("")).when(
-                stateController).rollback(anyLong());
+        doThrow(new StateHistoryException("")).when(stateController).rollback(
+                anyLong());
 
         r.run(process);
 
@@ -212,7 +208,7 @@ public class RunloopTest {
         verify(process).offer(two);
         verify(process).offer(one);
         verify(process).offer(one.inverseEvent());
-        
+
         /* Event two must have been delivered properly */
         verify(process).dispatchEvent(two);
         verify(governor).suspendUntil(1);

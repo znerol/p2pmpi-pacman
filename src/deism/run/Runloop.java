@@ -6,8 +6,6 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.Flushable;
 import deism.core.Startable;
-import deism.ipc.base.Handler;
-import deism.ipc.base.Message;
 import deism.process.DiscreteEventProcess;
 
 /**
@@ -24,21 +22,18 @@ public class Runloop {
     private long currentSimtime = 0;
     private StateController stateController;
     private EventCondition snapshotCondition;
-    private Handler<Message> ipcHandler;
-    private IpcEndpoint ipcEndpoint;
+    private MessageCenter ipcEndpoint;
     private LvtListener lvtListener;
     private final static Logger logger = Logger.getLogger(Runloop.class);
 
     public Runloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             StateController stateController, EventCondition snapshotCondition,
-            IpcEndpoint ipcEndpoint, Handler<Message> ipcHandler,
-            LvtListener lvtListener) {
+            MessageCenter ipcEndpoint, LvtListener lvtListener) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.stateController = stateController;
         this.snapshotCondition = snapshotCondition;
-        this.ipcHandler = ipcHandler;
         this.ipcEndpoint = ipcEndpoint;
         this.lvtListener = lvtListener;
     }
@@ -75,11 +70,7 @@ public class Runloop {
             logger.debug("Begin runloop cycle");
 
             // fetch and handle system messages
-            Message message;
-            while ((message = ipcEndpoint.poll()) != null) {
-                logger.info("Handle system message " + message);
-                ipcHandler.handle(message);
-            }
+            ipcEndpoint.process();
 
             // identify simulation event with the smallest timestamp
             Event peekEvent = process.peek(currentSimtime);

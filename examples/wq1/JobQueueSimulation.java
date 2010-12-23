@@ -15,11 +15,9 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
-import deism.ipc.base.Handler;
-import deism.ipc.base.Message;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
-import deism.run.IpcEndpoint;
+import deism.run.MessageCenter;
 import deism.run.LvtListener;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
@@ -97,22 +95,16 @@ public class JobQueueSimulation {
             }
         };
 
-        Handler<Message> ipcHandler = new Handler<Message>() {
-            @Override
-            public void handle(Message item) {
-            }
-        };
-
         LvtListener lvtListener = new LvtListener() {
             @Override
             public void update(long lvt) {
             }
         };
 
-        IpcEndpoint ipcEndpoint = new IpcEndpoint(governor);
+        MessageCenter messageCenter = new MessageCenter(governor);
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
-                noSnapshots, ipcEndpoint, ipcHandler, lvtListener);
+                noSnapshots, messageCenter, lvtListener);
         runloop.run(process);
     }
 }

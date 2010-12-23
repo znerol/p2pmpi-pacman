@@ -15,8 +15,6 @@ import deism.core.EventCondition;
 import deism.core.Startable;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
-import deism.ipc.base.Handler;
-import deism.ipc.base.Message;
 import deism.p2pmpi.MpiBroadcast;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
@@ -24,7 +22,7 @@ import deism.p2pmpi.MpiUnicastListener;
 import deism.p2pmpi.MpiUnicastEndpoint;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DiscreteEventProcess;
-import deism.run.IpcEndpoint;
+import deism.run.MessageCenter;
 import deism.run.LvtListener;
 import deism.run.NoStateController;
 import deism.run.StateController;
@@ -82,8 +80,9 @@ public class Pingpong {
         MPI.Init(args);
         assert (MPI.COMM_WORLD.Size() == 3);
 
-        Layout layout = new PatternLayout(MPI.COMM_WORLD.Rank() + " "
-                + PatternLayout.TTCC_CONVERSION_PATTERN);
+        Layout layout =
+                new PatternLayout(MPI.COMM_WORLD.Rank() + " "
+                        + PatternLayout.TTCC_CONVERSION_PATTERN);
         Appender appender = new ConsoleAppender(layout);
         BasicConfigurator.configure(appender);
 
@@ -105,17 +104,16 @@ public class Pingpong {
 
         DiscreteEventProcess process;
         StateController stateController;
-        Handler<Message> ipcHandler;
         EventCondition snapshotCondition;
 
         final ArrayDeque<Startable> startables = new ArrayDeque<Startable>();
-        final IpcEndpoint runloopIpcEndpoint = new IpcEndpoint(governor);
+        final MessageCenter messageCenter = new MessageCenter(governor);
         final LvtListener lvtListener;
 
         // build tq master
         if (MPI.COMM_WORLD.Rank() == 2) {
             // build environment
-            DefaultDiscreteEventProcess desProcess = new DefaultDiscreteEventProcess();
+            // input: governor
             stateController = new NoStateController();
             snapshotCondition = new EventCondition() {
                 @Override
@@ -125,25 +123,31 @@ public class Pingpong {
             };
 
             // gvt
-            final MpiBroadcast gvtMessageToClients = new MpiBroadcast(
-                    MPI.COMM_WORLD, MASTER_RANK);
+            // input: messageCenter
+            final MpiBroadcast gvtMessageToClients =
+                    new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
             startables.add(gvtMessageToClients);
-            final MpiUnicastListener gvtReportFromClients = new MpiUnicastListener(
-                    MPI.COMM_WORLD, MPI.ANY_SOURCE, REPORT_TAG);
+            final MpiUnicastListener gvtReportFromClients =
+                    new MpiUnicastListener(MPI.COMM_WORLD, MPI.ANY_SOURCE,
+                            REPORT_TAG);
             startables.add(gvtReportFromClients);
-            lvtListener = null;  // dangerous!
+            lvtListener = null; // dangerous!
 
             final Master tqmaster = new Master(2);
             tqmaster.setEndpoint(gvtMessageToClients);
-            gvtReportFromClients.setEndpoint(runloopIpcEndpoint);
+            gvtReportFromClients.setEndpoint(messageCenter);
+            messageCenter.addHandler(tqmaster);
 
             // build process
+            // input: -
+            DefaultDiscreteEventProcess desProcess =
+                    new DefaultDiscreteEventProcess();
 
-            ipcHandler = tqmaster;
             process = desProcess;
         }
         else {
             // build environment
+            // input: governor
             StateHistoryController shc = new StateHistoryController();
             stateController = shc;
             snapshotCondition = new EventCondition() {
@@ -154,41 +158,41 @@ public class Pingpong {
             };
 
             // gvt
-            final MpiBroadcast gvtMessageFromMaster = new MpiBroadcast(
-                    MPI.COMM_WORLD, MASTER_RANK);
+            // input: messageCenter, stateController
+            final MpiBroadcast gvtMessageFromMaster =
+                    new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
             startables.add(gvtMessageFromMaster);
-            final MpiUnicastEndpoint gvtReportToMaster = new MpiUnicastEndpoint(
-                    MPI.COMM_WORLD, MASTER_RANK, REPORT_TAG);
+            final MpiUnicastEndpoint gvtReportToMaster =
+                    new MpiUnicastEndpoint(MPI.COMM_WORLD, MASTER_RANK,
+                            REPORT_TAG);
             startables.add(gvtReportToMaster);
-            Client tqclient = new Client(MPI.COMM_WORLD.Rank(), 100,
-                    stateController);
+            Client tqclient =
+                    new Client(MPI.COMM_WORLD.Rank(), 100, stateController);
             tqclient.setEndpoint(gvtReportToMaster);
-            gvtMessageFromMaster.setEndpoint(runloopIpcEndpoint);
+            gvtMessageFromMaster.setEndpoint(messageCenter);
+            messageCenter.addHandler(tqclient);
             lvtListener = tqclient;
 
             final EventExporter exporter = tqclient;
             final EventImporter importer = tqclient;
 
             // build process
-            DefaultTimewarpDiscreteEventProcess timewarpProcess = new DefaultTimewarpDiscreteEventProcess();
+            // input: governor, importer, exporter (gvtclient)
+            DefaultTimewarpDiscreteEventProcess timewarpProcess =
+                    new DefaultTimewarpDiscreteEventProcess();
             shc.setStateObject(timewarpProcess);
 
-            DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                    timewarpProcess, importer, exporter);
+            DefaultTimewarpProcessBuilder builder =
+                    new DefaultTimewarpProcessBuilder(timewarpProcess,
+                            importer, exporter);
             Player.build(builder, governor);
 
-            /*
-             * timewarpProcess.addEventSink(new EventLogger());
-             * timewarpProcess.addEventDispatcher(new EventLogger());
-             * timewarpProcess.addStatefulObject(new StateHistoryLogger());
-             */
-
-            ipcHandler = tqclient;
             process = timewarpProcess;
         }
 
-        Runloop runloop = new Runloop(governor, termCond, stateController,
-                snapshotCondition, runloopIpcEndpoint, ipcHandler, lvtListener);
+        Runloop runloop =
+                new Runloop(governor, termCond, stateController,
+                        snapshotCondition, messageCenter, lvtListener);
 
         for (Startable startable : startables) {
             startable.start(0);
