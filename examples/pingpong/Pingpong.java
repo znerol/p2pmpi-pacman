@@ -179,10 +179,9 @@ public class Pingpong {
             // input: governor, importer, exporter (gvtclient)
             DefaultTimewarpDiscreteEventProcess timewarpProcess =
                     new DefaultTimewarpDiscreteEventProcess();
-            shc.setStateObject(timewarpProcess);
 
             DefaultTimewarpProcessBuilder builder =
-                    new DefaultTimewarpProcessBuilder(timewarpProcess,
+                    new DefaultTimewarpProcessBuilder(timewarpProcess, shc,
                             importer, exporter, service);
             Player.build(builder, governor);
 

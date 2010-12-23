@@ -63,10 +63,12 @@ public class TimewarpJobQueueSimulation {
             }
         };
 
+        StateHistoryController stateController = new StateHistoryController();
+
         DefaultTimewarpDiscreteEventProcess process = 
             new DefaultTimewarpDiscreteEventProcess();
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                process, fakeImporter, fakeExporter, service);
+                process, stateController, fakeImporter, fakeExporter, service);
 
         builder.add(new ClientArrivedGenerator(rng, 1000, 1600));
         
@@ -92,9 +94,6 @@ public class TimewarpJobQueueSimulation {
                 return true;
             }
         };
-
-        StateHistoryController stateController = new StateHistoryController();
-        stateController.setStateObject(process);
 
         LvtListener lvtListener = new LvtListener() {
             @Override

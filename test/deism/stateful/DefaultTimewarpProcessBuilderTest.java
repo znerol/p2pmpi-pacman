@@ -22,6 +22,7 @@ import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
 import deism.process.DiscreteEventProcess;
 import deism.run.Service;
+import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.DefaultTimewarpProcessBuilder;
 import deism.stateful.StateHistory;
@@ -39,6 +40,8 @@ public class DefaultTimewarpProcessBuilderTest {
     @Mock
     private DefaultTimewarpDiscreteEventProcess process;
     @Mock
+    private StateHistoryController stateHistoryController;
+    @Mock
     private EventImporter importer;
     @Mock
     private EventExporter exporter;
@@ -50,8 +53,8 @@ public class DefaultTimewarpProcessBuilderTest {
     @Before
     public void setUp() {
         builder =
-                new DefaultTimewarpProcessBuilder(process, importer, exporter,
-                        service);
+                new DefaultTimewarpProcessBuilder(process,
+                        stateHistoryController, importer, exporter, service);
     }
 
     // event sources
@@ -131,8 +134,8 @@ public class DefaultTimewarpProcessBuilderTest {
         Source source = new Source();
         builder.add(source);
 
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
+        ArgumentCaptor<EventSource> argument =
+                ArgumentCaptor.forClass(EventSource.class);
         verify(process).addEventSource(argument.capture());
 
         EventSource addedSource = argument.getValue();
@@ -157,8 +160,8 @@ public class DefaultTimewarpProcessBuilderTest {
         Generator generator = new Generator();
         builder.add(generator);
 
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
+        ArgumentCaptor<EventSource> argument =
+                ArgumentCaptor.forClass(EventSource.class);
         verify(process).addEventSource(argument.capture());
 
         EventSource addedSource = argument.getValue();
@@ -181,8 +184,8 @@ public class DefaultTimewarpProcessBuilderTest {
         Generator generator = new Generator();
         builder.add(generator);
 
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
+        ArgumentCaptor<EventSource> argument =
+                ArgumentCaptor.forClass(EventSource.class);
         verify(process).addEventSource(argument.capture());
 
         EventSource addedSource = argument.getValue();
@@ -226,8 +229,8 @@ public class DefaultTimewarpProcessBuilderTest {
         Condition condition = new Condition();
         builder.add(sink, condition);
 
-        ArgumentCaptor<EventSink> argument = ArgumentCaptor
-                .forClass(EventSink.class);
+        ArgumentCaptor<EventSink> argument =
+                ArgumentCaptor.forClass(EventSink.class);
         verify(process).addEventSink(argument.capture());
 
         EventSink addedSink = argument.getValue();
@@ -250,8 +253,8 @@ public class DefaultTimewarpProcessBuilderTest {
         Sink sink = new Sink();
         builder.add(sink);
 
-        ArgumentCaptor<EventSink> argument = ArgumentCaptor
-                .forClass(EventSink.class);
+        ArgumentCaptor<EventSink> argument =
+                ArgumentCaptor.forClass(EventSink.class);
         verify(process).addEventSink(argument.capture());
 
         EventSink addedSink = argument.getValue();
@@ -377,8 +380,8 @@ public class DefaultTimewarpProcessBuilderTest {
         builder.add(dummy);
 
         // source
-        ArgumentCaptor<EventSource> sourceArgument = ArgumentCaptor
-                .forClass(EventSource.class);
+        ArgumentCaptor<EventSource> sourceArgument =
+                ArgumentCaptor.forClass(EventSource.class);
         verify(process).addEventSource(sourceArgument.capture());
 
         EventSource addedSource = sourceArgument.getValue();
@@ -387,8 +390,8 @@ public class DefaultTimewarpProcessBuilderTest {
         verify(process).addStatefulObject((StateHistory<Long>) addedSource);
 
         // sink
-        ArgumentCaptor<EventSink> sinkArgument = ArgumentCaptor
-                .forClass(EventSink.class);
+        ArgumentCaptor<EventSink> sinkArgument =
+                ArgumentCaptor.forClass(EventSink.class);
         verify(process).addEventSink(sinkArgument.capture());
 
         EventSink addedSink = sinkArgument.getValue();
