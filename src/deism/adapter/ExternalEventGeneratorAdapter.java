@@ -1,8 +1,8 @@
 package deism.adapter;
 
 import deism.core.Event;
-import deism.core.EventImporter;
 import deism.core.StatefulEventGenerator;
+import deism.ipc.base.EventImporter;
 
 public class ExternalEventGeneratorAdapter implements StatefulEventGenerator {
     private final StatefulEventGenerator generator;

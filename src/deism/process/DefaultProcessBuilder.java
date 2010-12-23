@@ -9,8 +9,6 @@ import deism.adapter.ExternalEventSinkAdapter;
 import deism.adapter.FilteredEventSink;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
-import deism.core.EventExporter;
-import deism.core.EventImporter;
 import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.External;
@@ -18,6 +16,8 @@ import deism.core.Flushable;
 import deism.core.Startable;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
+import deism.ipc.base.EventExporter;
+import deism.ipc.base.EventImporter;
 
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;

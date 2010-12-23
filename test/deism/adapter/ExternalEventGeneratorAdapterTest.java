@@ -8,8 +8,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import deism.adapter.ExternalEventGeneratorAdapter;
 import deism.core.Event;
-import deism.core.EventImporter;
 import deism.core.StatefulEventGenerator;
+import deism.ipc.base.EventImporter;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

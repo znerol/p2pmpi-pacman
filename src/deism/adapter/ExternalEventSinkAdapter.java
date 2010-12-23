@@ -1,8 +1,8 @@
 package deism.adapter;
 
 import deism.core.Event;
-import deism.core.EventExporter;
 import deism.core.EventSink;
+import deism.ipc.base.EventExporter;
 
 public class ExternalEventSinkAdapter implements EventSink {
     private final EventSink sink;

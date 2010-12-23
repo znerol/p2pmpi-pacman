@@ -11,8 +11,8 @@ import wqcommon.OptimisticRunnableClientArrivedSource;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.core.EventExporter;
-import deism.core.EventImporter;
+import deism.ipc.base.EventExporter;
+import deism.ipc.base.EventImporter;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.run.IpcEndpoint;

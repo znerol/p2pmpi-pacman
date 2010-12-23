@@ -9,8 +9,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import deism.adapter.EventSourceStatelessGeneratorAdapter;
 import deism.adapter.FilteredEventSink;
-import deism.core.EventExporter;
-import deism.core.EventImporter;
 import deism.core.Flushable;
 import deism.core.Stateful;
 import deism.core.Event;
@@ -20,6 +18,8 @@ import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
+import deism.ipc.base.EventExporter;
+import deism.ipc.base.EventImporter;
 import deism.process.DiscreteEventProcess;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.DefaultTimewarpProcessBuilder;

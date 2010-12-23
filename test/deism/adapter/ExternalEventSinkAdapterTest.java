@@ -8,8 +8,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import deism.adapter.ExternalEventSinkAdapter;
 import deism.core.Event;
-import deism.core.EventExporter;
 import deism.core.EventSink;
+import deism.ipc.base.EventExporter;
 
 import static org.mockito.Mockito.*;
 

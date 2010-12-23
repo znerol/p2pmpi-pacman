@@ -2,11 +2,11 @@ package deism.stateful;
 
 import org.apache.log4j.Logger;
 
-import deism.core.EventExporter;
-import deism.core.EventImporter;
 import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.Stateful;
+import deism.ipc.base.EventExporter;
+import deism.ipc.base.EventImporter;
 import deism.process.DefaultProcessBuilder;
 
 public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
