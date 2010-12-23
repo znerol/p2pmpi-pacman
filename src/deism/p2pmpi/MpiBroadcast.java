@@ -4,16 +4,17 @@ import p2pmpi.mpi.IntraComm;
 import deism.core.Startable;
 import deism.ipc.async.ReceiveThread;
 import deism.ipc.async.SendThread;
+import deism.ipc.base.Emitter;
 import deism.ipc.base.Message;
 import deism.ipc.base.Endpoint;
 
-public class MpiBroadcast implements Endpoint<Message>, Startable {
+public class MpiBroadcast implements Endpoint<Message>, Emitter<Message>,
+        Startable {
 
     private final SendThread<Message> sender;
     private final ReceiveThread<Message> receiver;
 
-    public MpiBroadcast(IntraComm mpicomm, int mpiroot,
-            Endpoint<Message> endpoint) {
+    public MpiBroadcast(IntraComm mpicomm, int mpiroot) {
 
         MpiBroadcastOperation<Message> operation = new MpiBroadcastOperation<Message>(
                 mpicomm, mpiroot);
@@ -24,7 +25,7 @@ public class MpiBroadcast implements Endpoint<Message>, Startable {
         }
         else {
             sender = null;
-            receiver = new ReceiveThread<Message>(operation, endpoint);
+            receiver = new ReceiveThread<Message>(operation);
         }
     }
 
@@ -52,5 +53,17 @@ public class MpiBroadcast implements Endpoint<Message>, Startable {
     public void send(Message message) {
         assert (sender != null);
         sender.send(message);
+    }
+
+    @Override
+    public Endpoint<Message> getEndpoint(Class<Message> clazz) {
+        assert (receiver != null);
+        return receiver.getEndpoint(clazz);
+    }
+
+    @Override
+    public void setEndpoint(Endpoint<Message> endpoint) {
+        assert (receiver != null);
+        receiver.setEndpoint(endpoint);
     }
 }

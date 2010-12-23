@@ -2,10 +2,11 @@ package deism.ipc.async;
 
 import org.apache.log4j.Logger;
 
+import deism.ipc.base.Emitter;
 import deism.ipc.base.Endpoint;
 
-public class ReceiveThread<T> extends Thread {
-    private final Endpoint<T> endpoint;
+public class ReceiveThread<T> extends Thread implements Emitter<T> {
+    private Endpoint<T> endpoint;
     private final BlockingReceiveOperation<T> receiveOperation;
     private final ThreadListener threadListener;
     private boolean done = false;
@@ -13,16 +14,13 @@ public class ReceiveThread<T> extends Thread {
     private final static Logger logger = Logger
             .getLogger(ReceiveThread.class);
 
-    public ReceiveThread(BlockingReceiveOperation<T> receiveOperation,
-            Endpoint<T> endpoint) {
-        this(receiveOperation, endpoint, null);
+    public ReceiveThread(BlockingReceiveOperation<T> receiveOperation) {
+        this(receiveOperation, null);
     }
 
     public ReceiveThread(BlockingReceiveOperation<T> receiveOperation,
-            Endpoint<T> endpoint,
             ThreadListener threadListener) {
         this.receiveOperation = receiveOperation;
-        this.endpoint = endpoint;
         this.threadListener = threadListener;
     }
 
@@ -69,5 +67,15 @@ public class ReceiveThread<T> extends Thread {
             logger.debug("Terminating worker thread");
             interrupt();
         }
+    }
+
+    @Override
+    public Endpoint<T> getEndpoint(Class<T> clazz) {
+        return endpoint;
+    }
+
+    @Override
+    public void setEndpoint(Endpoint<T> endpoint) {
+        this.endpoint = endpoint;
     }
 }

@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
+import deism.ipc.base.Emitter;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.ipc.base.Endpoint;
@@ -20,11 +21,11 @@ import deism.util.MutableLong;
  *      SZYMANSKI, Scalable Computing: Practice and Experience, vol. 8, no. 4,
  *      2008, pp. 423-435
  */
-public class Master implements Handler<Message> {
+public class Master implements Handler<Message>, Emitter<Message> {
     /**
      * Destination for gvt messages
      */
-    private final Endpoint<Message> clients;
+    private Endpoint<Message> clients;
 
     /**
      * Global virtual time
@@ -55,8 +56,7 @@ public class Master implements Handler<Message> {
      * @param processCount
      *            number of participating processes
      */
-    public Master(int processCount, Endpoint<Message> clients) {
-        this.clients = clients;
+    public Master(int processCount) {
         this.gvt = 0;
         this.lvt = new long[processCount];
         this.mvt = new LongMap<Long>();
@@ -117,5 +117,15 @@ public class Master implements Handler<Message> {
             logger.info("New GVT: " + gvt);
             clients.send(new GvtMessage(gvt));
         }
+    }
+
+    @Override
+    public Endpoint<Message> getEndpoint(Class<Message> clazz) {
+        return clients;
+    }
+
+    @Override
+    public void setEndpoint(Endpoint<Message> endpoint) {
+        this.clients = endpoint;
     }
 }

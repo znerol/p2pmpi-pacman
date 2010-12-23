@@ -22,7 +22,8 @@ public class MasterTest {
 
     @Before
     public void setUp() {
-        master = new Master(2, clients);
+        master = new Master(2);
+        master.setEndpoint(clients);
     }
 
     @Test

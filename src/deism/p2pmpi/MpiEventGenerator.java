@@ -29,7 +29,8 @@ public class MpiEventGenerator implements StatefulEventGenerator, Startable,
         BlockingReceiveOperation<Event> operation = new MpiReceiveOperation<Event>(
                 comm, mpisender, mpitag);
         this.governor = governor;
-        this.receiver = new ReceiveThread<Event>(operation, this);
+        this.receiver = new ReceiveThread<Event>(operation);
+        this.receiver.setEndpoint(this);
     }
 
     @Override

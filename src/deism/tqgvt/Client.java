@@ -4,6 +4,7 @@ import deism.core.Event;
 import deism.core.EventDispatcher;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
+import deism.ipc.base.Emitter;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.ipc.base.Endpoint;
@@ -21,13 +22,13 @@ import deism.util.LongMap;
  *      2008, pp. 423-435
  */
 public class Client implements EventExporter, EventImporter, EventDispatcher,
-        Handler<Message> {
+        Handler<Message>, Emitter<Message> {
     private SystemTimeProxy systime;
 
     /**
      * The destination where gvt reports should be sent to
      */
-    private final Endpoint<Message> master;
+    private Endpoint<Message> master;
 
     /**
      * State controller of this simulation
@@ -75,9 +76,7 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
      * @param process
      * @param tqlength
      */
-    public Client(int process, long tqlength, StateController stateController,
-            Endpoint<Message> master) {
-        this.master = master;
+    public Client(int process, long tqlength, StateController stateController) {
         this.stateController = stateController;
         this.process = process;
         this.tqlength = tqlength;
@@ -176,5 +175,15 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
         recv.clear();
         mvt = Long.MAX_VALUE;
         tq = newTq;
+    }
+
+    @Override
+    public Endpoint<Message> getEndpoint(Class<Message> clazz) {
+        return master;
+    }
+
+    @Override
+    public void setEndpoint(Endpoint<Message> endpoint) {
+        this.master = endpoint;
     }
 }

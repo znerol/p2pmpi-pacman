@@ -26,8 +26,7 @@ public class Runloop {
     private EventCondition snapshotCondition;
     private Handler<Message> ipcHandler;
     private IpcEndpoint ipcEndpoint;
-    private final static Logger logger = Logger
-            .getLogger(Runloop.class);
+    private final static Logger logger = Logger.getLogger(Runloop.class);
 
     public Runloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
