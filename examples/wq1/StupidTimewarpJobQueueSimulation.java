@@ -17,6 +17,7 @@ import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.run.IpcEndpoint;
 import deism.run.ExecutionGovernor;
+import deism.run.LvtListener;
 import deism.run.Runloop;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.StateHistoryController;
@@ -84,10 +85,16 @@ public class StupidTimewarpJobQueueSimulation {
             }
         };
 
+        LvtListener lvtListener = new LvtListener() {
+            @Override
+            public void update(long lvt) {
+            }
+        };
+
         IpcEndpoint ipcEndpoint = new IpcEndpoint(governor);
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
-                snapshotAll, ipcEndpoint, ipcHandler);
+                snapshotAll, ipcEndpoint, ipcHandler, lvtListener);
 
         runloop.run(process);
     }

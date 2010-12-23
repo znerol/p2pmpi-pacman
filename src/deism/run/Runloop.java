@@ -26,18 +26,21 @@ public class Runloop {
     private EventCondition snapshotCondition;
     private Handler<Message> ipcHandler;
     private IpcEndpoint ipcEndpoint;
+    private LvtListener lvtListener;
     private final static Logger logger = Logger.getLogger(Runloop.class);
 
     public Runloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             StateController stateController, EventCondition snapshotCondition,
-            IpcEndpoint ipcEndpoint, Handler<Message> ipcHandler) {
+            IpcEndpoint ipcEndpoint, Handler<Message> ipcHandler,
+            LvtListener lvtListener) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.stateController = stateController;
         this.snapshotCondition = snapshotCondition;
         this.ipcHandler = ipcHandler;
         this.ipcEndpoint = ipcEndpoint;
+        this.lvtListener = lvtListener;
     }
 
     /**
@@ -160,6 +163,8 @@ public class Runloop {
 
             lastSimtime = currentSimtime;
             maxSimtime = Math.max(maxSimtime, currentSimtime);
+
+            lvtListener.update(currentSimtime);
         }
 
         logger.debug("Stop source, sink, governor");

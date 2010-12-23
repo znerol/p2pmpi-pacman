@@ -34,6 +34,8 @@ public class RunloopTest {
     IpcEndpoint endpoint;
     @Mock
     Handler<Message> ipcHandler;
+    @Mock
+    LvtListener lvtListener;
 
     /**
      * FastForwardRunloop.run must return immediately when EventSource.peek
@@ -41,9 +43,9 @@ public class RunloopTest {
      */
     @Test
     public void runNoEvent() {
-        final Runloop r = new Runloop(governor,
-                terminationCondition, stateController, snapshotCondition,
-                endpoint, ipcHandler);
+        final Runloop r = new Runloop(governor, terminationCondition,
+                stateController, snapshotCondition, endpoint, ipcHandler,
+                lvtListener);
 
         when(process.peek(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
@@ -65,9 +67,9 @@ public class RunloopTest {
     public void runSomeEvents() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final Runloop r = new Runloop(governor,
-                terminationCondition, stateController, snapshotCondition,
-                endpoint, ipcHandler);
+        final Runloop r = new Runloop(governor, terminationCondition,
+                stateController, snapshotCondition, endpoint, ipcHandler,
+                lvtListener);
 
         /*
          * On each call to receive() process will return event one, then
@@ -107,9 +109,9 @@ public class RunloopTest {
         final Event two = new Event(2);
         final Event three = new Event(3);
 
-        final Runloop r = new Runloop(governor,
-                terminationCondition, stateController, snapshotCondition,
-                endpoint, ipcHandler);
+        final Runloop r = new Runloop(governor, terminationCondition,
+                stateController, snapshotCondition, endpoint, ipcHandler,
+                lvtListener);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(two);
@@ -149,9 +151,9 @@ public class RunloopTest {
     {
         final Event one = new Event(2);
 
-        final Runloop r = new Runloop(governor,
-                terminationCondition, stateController, snapshotCondition,
-                endpoint, ipcHandler);
+        final Runloop r = new Runloop(governor, terminationCondition,
+                stateController, snapshotCondition, endpoint, ipcHandler,
+                lvtListener);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(one);
@@ -183,9 +185,9 @@ public class RunloopTest {
     public void runSourceWithWrongEventOrder() {
         final Event one = new Event(1);
         final Event two = new Event(2);
-        final Runloop r = new Runloop(governor,
-                terminationCondition, stateController, snapshotCondition,
-                endpoint, ipcHandler);
+        final Runloop r = new Runloop(governor, terminationCondition,
+                stateController, snapshotCondition, endpoint, ipcHandler,
+                lvtListener);
 
         /*
          * Simulate event source which returns events in the wrong order.

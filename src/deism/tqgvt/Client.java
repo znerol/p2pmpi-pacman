@@ -1,13 +1,13 @@
 package deism.tqgvt;
 
 import deism.core.Event;
-import deism.core.EventDispatcher;
 import deism.core.EventExporter;
 import deism.core.EventImporter;
 import deism.ipc.base.Emitter;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.ipc.base.Endpoint;
+import deism.run.LvtListener;
 import deism.run.StateController;
 import deism.run.SystemTimeProxy;
 import deism.util.LongMap;
@@ -21,7 +21,7 @@ import deism.util.LongMap;
  *      SZYMANSKI, Scalable Computing: Practice and Experience, vol. 8, no. 4,
  *      2008, pp. 423-435
  */
-public class Client implements EventExporter, EventImporter, EventDispatcher,
+public class Client implements EventExporter, EventImporter, LvtListener,
         Handler<Message>, Emitter<Message> {
     private SystemTimeProxy systime;
 
@@ -121,12 +121,10 @@ public class Client implements EventExporter, EventImporter, EventDispatcher,
 
     /**
      * Update local virtual time
-     * 
-     * FIXME: probably we should do that in a special hook after event dispatch.
      */
     @Override
-    public void dispatchEvent(Event event) {
-        lvt = event.getSimtime();
+    public void update(long lvt) {
+        this.lvt = lvt;
     }
 
     /**

@@ -25,6 +25,7 @@ import deism.p2pmpi.MpiUnicastEndpoint;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DiscreteEventProcess;
 import deism.run.IpcEndpoint;
+import deism.run.LvtListener;
 import deism.run.NoStateController;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
@@ -109,6 +110,7 @@ public class Pingpong {
 
         final ArrayDeque<Startable> startables = new ArrayDeque<Startable>();
         final IpcEndpoint runloopIpcEndpoint = new IpcEndpoint(governor);
+        final LvtListener lvtListener;
 
         // build tq master
         if (MPI.COMM_WORLD.Rank() == 2) {
@@ -129,6 +131,7 @@ public class Pingpong {
             final MpiUnicastListener gvtReportFromClients = new MpiUnicastListener(
                     MPI.COMM_WORLD, MPI.ANY_SOURCE, REPORT_TAG);
             startables.add(gvtReportFromClients);
+            lvtListener = null;  // dangerous!
 
             final Master tqmaster = new Master(2);
             tqmaster.setEndpoint(gvtMessageToClients);
@@ -161,8 +164,7 @@ public class Pingpong {
                     stateController);
             tqclient.setEndpoint(gvtReportToMaster);
             gvtMessageFromMaster.setEndpoint(runloopIpcEndpoint);
-
-            timewarpProcess.addEventDispatcher(tqclient);
+            lvtListener = tqclient;
 
             final EventExporter exporter = tqclient;
             final EventImporter importer = tqclient;
@@ -186,7 +188,7 @@ public class Pingpong {
         }
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
-                snapshotCondition, runloopIpcEndpoint, ipcHandler);
+                snapshotCondition, runloopIpcEndpoint, ipcHandler, lvtListener);
 
         for (Startable startable : startables) {
             startable.start(0);

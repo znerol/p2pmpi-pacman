@@ -20,6 +20,7 @@ import deism.ipc.base.Message;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.run.IpcEndpoint;
+import deism.run.LvtListener;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.NoStateController;
@@ -102,10 +103,16 @@ public class JobQueueSimulation {
             }
         };
 
+        LvtListener lvtListener = new LvtListener() {
+            @Override
+            public void update(long lvt) {
+            }
+        };
+
         IpcEndpoint ipcEndpoint = new IpcEndpoint(governor);
 
-        Runloop runloop = new Runloop(governor, termCond,
-                stateController, noSnapshots, ipcEndpoint, ipcHandler);
+        Runloop runloop = new Runloop(governor, termCond, stateController,
+                noSnapshots, ipcEndpoint, ipcHandler, lvtListener);
         runloop.run(process);
     }
 }

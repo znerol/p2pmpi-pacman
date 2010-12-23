@@ -18,6 +18,7 @@ import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.run.IpcEndpoint;
 import deism.run.ExecutionGovernor;
+import deism.run.LvtListener;
 import deism.run.Runloop;
 import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
@@ -41,6 +42,8 @@ public class TimewarpRunloopTest {
     IpcEndpoint ipcEndpoint;
     @Mock
     Handler<Message> ipcHandler;
+    @Mock
+    LvtListener lvtListener;
 
     List<StateHistory<Long>> stateObjects;
     StateHistoryController stateController;
@@ -76,9 +79,8 @@ public class TimewarpRunloopTest {
 
         stateController = new StateHistoryController();
         stateController.setStateObject(process);
-        runloop = new Runloop(governor, terminationCondition,
-                stateController, snapshotCondition, ipcEndpoint,
-                ipcHandler);
+        runloop = new Runloop(governor, terminationCondition, stateController,
+                snapshotCondition, ipcEndpoint, ipcHandler, lvtListener);
     }
 
     @Test
