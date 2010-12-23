@@ -18,6 +18,7 @@ import deism.run.MessageCenter;
 import deism.run.ExecutionGovernor;
 import deism.run.LvtListener;
 import deism.run.Runloop;
+import deism.run.Service;
 import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.StateHistory;
@@ -40,6 +41,8 @@ public class TimewarpRunloopTest {
     MessageCenter messageCenter;
     @Mock
     LvtListener lvtListener;
+    @Mock
+    Service service;
 
     List<StateHistory<Long>> stateObjects;
     StateHistoryController stateController;
@@ -76,7 +79,7 @@ public class TimewarpRunloopTest {
         stateController = new StateHistoryController();
         stateController.setStateObject(process);
         runloop = new Runloop(governor, terminationCondition, stateController,
-                snapshotCondition, messageCenter, lvtListener);
+                snapshotCondition, messageCenter, lvtListener, service);
     }
 
     @Test

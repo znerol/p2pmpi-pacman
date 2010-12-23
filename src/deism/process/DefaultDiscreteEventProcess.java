@@ -8,14 +8,12 @@ import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.Flushable;
-import deism.core.Startable;
 
 public class DefaultDiscreteEventProcess implements DiscreteEventProcess,
-        Startable, Flushable {
+        Flushable {
     private final List<EventSource> sourceList = new ArrayList<EventSource>();
     private final List<EventSink> sinkList = new ArrayList<EventSink>();
     private final List<EventDispatcher> dispatcherList = new ArrayList<EventDispatcher>();
-    private final List<Startable> startableList = new ArrayList<Startable>();
     private final List<Flushable> flushableList = new ArrayList<Flushable>();
 
     private final EventSourceCollection source = new EventSourceCollection(
@@ -34,10 +32,6 @@ public class DefaultDiscreteEventProcess implements DiscreteEventProcess,
 
     public void addEventDispatcher(EventDispatcher dispatcher) {
         dispatcherList.add(dispatcher);
-    }
-
-    public void addStartable(Startable startable) {
-        startableList.add(startable);
     }
 
     public void addFlushable(Flushable flushable) {
@@ -62,20 +56,6 @@ public class DefaultDiscreteEventProcess implements DiscreteEventProcess,
     @Override
     public void dispatchEvent(Event event) {
         dispatcher.dispatchEvent(event);
-    }
-
-    @Override
-    public void start(long simtime) {
-        for (Startable startable : startableList) {
-            startable.start(simtime);
-        }
-    }
-
-    @Override
-    public void stop(long simtime) {
-        for (Startable startable : startableList) {
-            startable.stop(simtime);
-        }
     }
 
     @Override

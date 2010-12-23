@@ -8,6 +8,7 @@ import deism.core.Stateful;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
 import deism.process.DefaultProcessBuilder;
+import deism.run.Service;
 
 public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
     private DefaultTimewarpDiscreteEventProcess timewarpProcess;
@@ -16,8 +17,8 @@ public class DefaultTimewarpProcessBuilder extends DefaultProcessBuilder {
 
     public DefaultTimewarpProcessBuilder(
             DefaultTimewarpDiscreteEventProcess process,
-            EventImporter importer, EventExporter exporter) {
-        super(process, importer, exporter);
+            EventImporter importer, EventExporter exporter, Service service) {
+        super(process, importer, exporter, service);
         timewarpProcess = process;
     }
 

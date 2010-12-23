@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.Flushable;
-import deism.core.Startable;
 import deism.process.DiscreteEventProcess;
 
 /**
@@ -24,18 +23,20 @@ public class Runloop {
     private EventCondition snapshotCondition;
     private MessageCenter ipcEndpoint;
     private LvtListener lvtListener;
+    private Service service;
     private final static Logger logger = Logger.getLogger(Runloop.class);
 
     public Runloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             StateController stateController, EventCondition snapshotCondition,
-            MessageCenter ipcEndpoint, LvtListener lvtListener) {
+            MessageCenter ipcEndpoint, LvtListener lvtListener, Service service) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.stateController = stateController;
         this.snapshotCondition = snapshotCondition;
         this.ipcEndpoint = ipcEndpoint;
         this.lvtListener = lvtListener;
+        this.service = service;
     }
 
     /**
@@ -60,10 +61,7 @@ public class Runloop {
         stateController.save(currentSimtime - 1);
 
         logger.debug("Start governor, source, sink");
-        governor.start(currentSimtime);
-        if (process instanceof Startable) {
-            ((Startable) process).start(currentSimtime);
-        }
+        service.start(currentSimtime);
 
         // main runloop
         while (!stop) {
@@ -159,10 +157,7 @@ public class Runloop {
         }
 
         logger.debug("Stop source, sink, governor");
-        if (process instanceof Startable) {
-            ((Startable) process).stop(currentSimtime);
-        }
-        governor.stop(currentSimtime);
+        service.stop(currentSimtime);
 
         logger.info("End runloop");
     }

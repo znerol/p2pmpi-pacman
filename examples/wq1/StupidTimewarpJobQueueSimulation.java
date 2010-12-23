@@ -18,6 +18,7 @@ import deism.run.ExecutionGovernor;
 import deism.run.LvtListener;
 import deism.run.Runloop;
 import deism.run.RealtimeExecutionGovernor;
+import deism.run.Service;
 import deism.run.StateHistoryController;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.DefaultTimewarpProcessBuilder;
@@ -32,6 +33,8 @@ public class StupidTimewarpJobQueueSimulation {
 
         /* exit simulation after n units of simulation time */
         EventCondition termCond = new TerminateAfterDuration(1000 * 50);
+
+        Service service = new Service();
 
         String speedString = System.getProperty("simulationSpeed", "1.0");
         double speed = Double.valueOf(speedString).doubleValue();
@@ -53,9 +56,11 @@ public class StupidTimewarpJobQueueSimulation {
             }
         };
 
+        service.addStartable(governor);
+
         DefaultTimewarpDiscreteEventProcess process = new DefaultTimewarpDiscreteEventProcess();
         DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                process, fakeImporter, fakeExporter);
+                process, fakeImporter, fakeExporter, service);
 
         OptimisticRunnableClientArrivedSource clientArrivedSource = new OptimisticRunnableClientArrivedSource(
                 rng, governor, speed, 1000, 1600);
@@ -86,7 +91,7 @@ public class StupidTimewarpJobQueueSimulation {
         MessageCenter messageCenter = new MessageCenter(governor);
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
-                snapshotAll, messageCenter, lvtListener);
+                snapshotAll, messageCenter, lvtListener, service);
 
         runloop.run(process);
     }

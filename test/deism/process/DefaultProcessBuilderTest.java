@@ -23,6 +23,7 @@ import deism.ipc.base.EventImporter;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
+import deism.run.Service;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -36,12 +37,14 @@ public class DefaultProcessBuilderTest {
     private EventImporter importer;
     @Mock
     private EventExporter exporter;
+    @Mock
+    private Service service;
 
     private DefaultProcessBuilder builder;
 
     @Before
     public void setUp() {
-        builder = new DefaultProcessBuilder(process, importer, exporter);
+        builder = new DefaultProcessBuilder(process, importer, exporter, service);
     }
 
     @Mock
@@ -86,7 +89,7 @@ public class DefaultProcessBuilderTest {
         builder.add(startableSource);
 
         verify(process).addEventSource(startableSource);
-        verify(process).addStartable(startableSource);
+        verify(service).addStartable(startableSource);
         verifyNoMoreInteractions(process);
     }
 
@@ -130,7 +133,7 @@ public class DefaultProcessBuilderTest {
         StartableStatefulEventGenerator generator = new StartableStatefulEventGenerator();
         builder.add(generator);
 
-        verify(process).addStartable(generator);
+        verify(service).addStartable(generator);
 
         ArgumentCaptor<EventSource> argument = ArgumentCaptor
                 .forClass(EventSource.class);
@@ -183,7 +186,7 @@ public class DefaultProcessBuilderTest {
         StartableStatelessEventGenerator generator = new StartableStatelessEventGenerator();
         builder.add(generator);
 
-        verify(process).addStartable(generator);
+        verify(service).addStartable(generator);
 
         ArgumentCaptor<EventSource> argument = ArgumentCaptor
                 .forClass(EventSource.class);
@@ -261,7 +264,7 @@ public class DefaultProcessBuilderTest {
         builder.add(sink);
 
         verify(process).addEventSink(sink);
-        verify(process).addStartable(sink);
+        verify(service).addStartable(sink);
         verifyNoMoreInteractions(process);
     }
 
@@ -298,7 +301,7 @@ public class DefaultProcessBuilderTest {
         Dispatcher dispatcher = new Dispatcher();
         builder.add(dispatcher);
         verify(process).addEventDispatcher(dispatcher);
-        verify(process).addStartable(dispatcher);
+        verify(service).addStartable(dispatcher);
         verifyNoMoreInteractions(process);
     }
 
@@ -365,7 +368,7 @@ public class DefaultProcessBuilderTest {
         verify(process).addEventSource(dummy);
         verify(process).addEventSink(dummy);
         verify(process).addEventDispatcher(dummy);
-        verify(process).addStartable(dummy);
+        verify(service).addStartable(dummy);
         verifyNoMoreInteractions(process);
     }
 }

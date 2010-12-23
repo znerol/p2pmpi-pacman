@@ -19,6 +19,7 @@ import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.run.MessageCenter;
 import deism.run.LvtListener;
+import deism.run.Service;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.NoStateController;
@@ -36,6 +37,8 @@ public class JobQueueSimulation {
         
         /* exit simulation after n units of simulation time */
         EventCondition termCond = new TerminateAfterDuration(1000 * 50);
+
+        Service service = new Service();
         
         String speedString = System.getProperty("simulationSpeed", "0");
         double speed = Double.valueOf(speedString).doubleValue();
@@ -49,6 +52,8 @@ public class JobQueueSimulation {
             /* run simulation as fast as possible */
             governor = new ImmediateExecutionGovernor();
         }
+
+        service.addStartable(governor);
 
         EventImporter fakeImporter = new EventImporter() {
             @Override
@@ -66,7 +71,7 @@ public class JobQueueSimulation {
 
         DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
         DefaultProcessBuilder builder = new DefaultProcessBuilder(process,
-                fakeImporter, fakeExporter);
+                fakeImporter, fakeExporter, service);
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         if (multithread) {
@@ -104,7 +109,7 @@ public class JobQueueSimulation {
         MessageCenter messageCenter = new MessageCenter(governor);
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
-                noSnapshots, messageCenter, lvtListener);
+                noSnapshots, messageCenter, lvtListener, service);
         runloop.run(process);
     }
 }

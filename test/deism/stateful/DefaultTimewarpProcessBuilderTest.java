@@ -21,6 +21,7 @@ import deism.core.StatelessEventGenerator;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
 import deism.process.DiscreteEventProcess;
+import deism.run.Service;
 import deism.stateful.DefaultTimewarpDiscreteEventProcess;
 import deism.stateful.DefaultTimewarpProcessBuilder;
 import deism.stateful.StateHistory;
@@ -41,12 +42,16 @@ public class DefaultTimewarpProcessBuilderTest {
     private EventImporter importer;
     @Mock
     private EventExporter exporter;
+    @Mock
+    private Service service;
 
     private DefaultTimewarpProcessBuilder builder;
 
     @Before
     public void setUp() {
-        builder = new DefaultTimewarpProcessBuilder(process, importer, exporter);
+        builder =
+                new DefaultTimewarpProcessBuilder(process, importer, exporter,
+                        service);
     }
 
     // event sources

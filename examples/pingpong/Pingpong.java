@@ -1,7 +1,5 @@
 package pingpong;
 
-import java.util.ArrayDeque;
-
 import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
@@ -12,7 +10,6 @@ import p2pmpi.mpi.MPI;
 import util.TerminateAfterDuration;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.core.Startable;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
 import deism.p2pmpi.MpiBroadcast;
@@ -25,6 +22,7 @@ import deism.process.DiscreteEventProcess;
 import deism.run.MessageCenter;
 import deism.run.LvtListener;
 import deism.run.NoStateController;
+import deism.run.Service;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.Runloop;
@@ -106,7 +104,8 @@ public class Pingpong {
         StateController stateController;
         EventCondition snapshotCondition;
 
-        final ArrayDeque<Startable> startables = new ArrayDeque<Startable>();
+        final Service service = new Service();
+        service.addStartable(governor);
         final MessageCenter messageCenter = new MessageCenter(governor);
         final LvtListener lvtListener;
 
@@ -126,11 +125,11 @@ public class Pingpong {
             // input: messageCenter
             final MpiBroadcast gvtMessageToClients =
                     new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
-            startables.add(gvtMessageToClients);
+            service.addStartable(gvtMessageToClients);
             final MpiUnicastListener gvtReportFromClients =
                     new MpiUnicastListener(MPI.COMM_WORLD, MPI.ANY_SOURCE,
                             REPORT_TAG);
-            startables.add(gvtReportFromClients);
+            service.addStartable(gvtReportFromClients);
             lvtListener = null; // dangerous!
 
             final Master tqmaster = new Master(2);
@@ -161,11 +160,11 @@ public class Pingpong {
             // input: messageCenter, stateController
             final MpiBroadcast gvtMessageFromMaster =
                     new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
-            startables.add(gvtMessageFromMaster);
+            service.addStartable(gvtMessageFromMaster);
             final MpiUnicastEndpoint gvtReportToMaster =
                     new MpiUnicastEndpoint(MPI.COMM_WORLD, MASTER_RANK,
                             REPORT_TAG);
-            startables.add(gvtReportToMaster);
+            service.addStartable(gvtReportToMaster);
             Client tqclient =
                     new Client(MPI.COMM_WORLD.Rank(), 100, stateController);
             tqclient.setEndpoint(gvtReportToMaster);
@@ -184,7 +183,7 @@ public class Pingpong {
 
             DefaultTimewarpProcessBuilder builder =
                     new DefaultTimewarpProcessBuilder(timewarpProcess,
-                            importer, exporter);
+                            importer, exporter, service);
             Player.build(builder, governor);
 
             process = timewarpProcess;
@@ -192,17 +191,9 @@ public class Pingpong {
 
         Runloop runloop =
                 new Runloop(governor, termCond, stateController,
-                        snapshotCondition, messageCenter, lvtListener);
-
-        for (Startable startable : startables) {
-            startable.start(0);
-        }
+                        snapshotCondition, messageCenter, lvtListener, service);
 
         runloop.run(process);
-
-        for (Startable startable : startables) {
-            startable.stop(0);
-        }
 
         MPI.Finalize();
     }
