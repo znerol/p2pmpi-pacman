@@ -8,13 +8,16 @@ import deism.stateful.StateHistoryException;
 
 public class StateHistoryController implements StateController {
 
-    private SortedSet<Long> snapshots;
+    private SortedSet<Long> snapshots = new TreeSet<Long>();
     private SortedSet<Long> unusableSnapshots = new TreeSet<Long>();
     private StateHistory<Long> stateObject;
 
-    public StateHistoryController(StateHistory<Long> stateObject) {
+    public StateHistory<Long> getStateObject() {
+        return stateObject;
+    }
+
+    public void setStateObject(StateHistory<Long> stateObject) {
         this.stateObject = stateObject;
-        this.snapshots = new TreeSet<Long>();
     }
 
     @Override

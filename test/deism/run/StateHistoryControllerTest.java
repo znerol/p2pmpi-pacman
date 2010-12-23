@@ -1,7 +1,5 @@
 package deism.run;
 
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import deism.run.StateHistoryController;
-import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 import deism.stateful.TimewarpEventSource;
 
@@ -18,12 +15,11 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class StateHistoryControllerTest {
     @Mock TimewarpEventSource eventSource;
-    List<StateHistory<Long>> stateObjects;
-    StateHistoryController stateController;
+    StateHistoryController stateController = new StateHistoryController();
 
     @Before
     public void setUp() {
-        stateController = new StateHistoryController(eventSource);
+        stateController.setStateObject(eventSource);
     }
 
     @Test

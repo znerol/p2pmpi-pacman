@@ -15,7 +15,6 @@ import deism.core.EventImporter;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.run.IpcEndpoint;
-import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.Runloop;
 import deism.run.ImmediateExecutionGovernor;
@@ -92,8 +91,8 @@ public class TimewarpJobQueueSimulation {
             }
         };
 
-        StateController stateController =
-            new StateHistoryController(process);
+        StateHistoryController stateController = new StateHistoryController();
+        stateController.setStateObject(process);
 
         Handler<Message> ipcHandler = new Handler<Message>() {
             @Override

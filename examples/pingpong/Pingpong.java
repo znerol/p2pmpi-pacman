@@ -141,8 +141,8 @@ public class Pingpong {
         }
         else {
             // build environment
-            DefaultTimewarpDiscreteEventProcess timewarpProcess = new DefaultTimewarpDiscreteEventProcess();
-            stateController = new StateHistoryController(timewarpProcess);
+            StateHistoryController shc = new StateHistoryController();
+            stateController = shc;
             snapshotCondition = new EventCondition() {
                 @Override
                 public boolean match(Event e) {
@@ -168,6 +168,9 @@ public class Pingpong {
             final EventImporter importer = tqclient;
 
             // build process
+            DefaultTimewarpDiscreteEventProcess timewarpProcess = new DefaultTimewarpDiscreteEventProcess();
+            shc.setStateObject(timewarpProcess);
+
             DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
                     timewarpProcess, importer, exporter);
             Player.build(builder, governor);

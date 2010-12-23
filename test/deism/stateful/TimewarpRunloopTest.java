@@ -17,7 +17,6 @@ import deism.core.EventSource;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 import deism.run.IpcEndpoint;
-import deism.run.StateController;
 import deism.run.ExecutionGovernor;
 import deism.run.Runloop;
 import deism.run.StateHistoryController;
@@ -44,7 +43,7 @@ public class TimewarpRunloopTest {
     Handler<Message> ipcHandler;
 
     List<StateHistory<Long>> stateObjects;
-    StateController stateController;
+    StateHistoryController stateController;
     Runloop runloop;
     
     ArrayDeque<Event> eventQueue;
@@ -75,7 +74,8 @@ public class TimewarpRunloopTest {
         process.addStatefulObject(eventSource);
         process.addEventDispatcher(eventDispatcher);
 
-        stateController = new StateHistoryController(process);
+        stateController = new StateHistoryController();
+        stateController.setStateObject(process);
         runloop = new Runloop(governor, terminationCondition,
                 stateController, snapshotCondition, ipcEndpoint,
                 ipcHandler);
