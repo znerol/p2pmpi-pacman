@@ -16,6 +16,7 @@ public class StateHistoryController implements StateController {
         return stateObject;
     }
 
+    @Override
     public void setStateObject(StateHistory<Long> stateObject) {
         this.stateObject = stateObject;
     }

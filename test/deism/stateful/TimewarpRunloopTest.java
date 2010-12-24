@@ -1,7 +1,6 @@
 package deism.stateful;
 
 import java.util.ArrayDeque;
-import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
@@ -14,14 +13,14 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSource;
+import deism.process.DefaultDiscreteEventProcess;
 import deism.run.MessageCenter;
 import deism.run.ExecutionGovernor;
 import deism.run.LvtListener;
 import deism.run.Runloop;
 import deism.run.Service;
+import deism.run.StateController;
 import deism.run.StateHistoryController;
-import deism.stateful.DefaultTimewarpDiscreteEventProcess;
-import deism.stateful.StateHistory;
 import deism.stateful.TimewarpEventSource;
 import deism.stateful.TimewarpEventSourceAdapter;
 
@@ -41,17 +40,15 @@ public class TimewarpRunloopTest {
     MessageCenter messageCenter;
     @Mock
     LvtListener lvtListener;
-    @Mock
-    Service service;
 
-    List<StateHistory<Long>> stateObjects;
-    StateHistoryController stateController;
+    Service service = new Service();
+    StateController stateController;
     Runloop runloop;
     
     ArrayDeque<Event> eventQueue;
     EventSource simpleEventSource;
     TimewarpEventSource eventSource;
-    DefaultTimewarpDiscreteEventProcess process;
+    DefaultDiscreteEventProcess process;
     
     @Before
     public void setUp() {
@@ -71,13 +68,13 @@ public class TimewarpRunloopTest {
         };
         eventSource = new TimewarpEventSourceAdapter(simpleEventSource);
 
-        process = new DefaultTimewarpDiscreteEventProcess();
+        process = new DefaultDiscreteEventProcess();
         process.addEventSource(eventSource);
-        process.addStatefulObject(eventSource);
+        service.addStatefulObject(eventSource);
         process.addEventDispatcher(eventDispatcher);
 
         stateController = new StateHistoryController();
-        stateController.setStateObject(process);
+        stateController.setStateObject(service);
         runloop = new Runloop(governor, terminationCondition, stateController,
                 snapshotCondition, messageCenter, lvtListener, service);
     }

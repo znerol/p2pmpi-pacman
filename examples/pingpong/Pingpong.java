@@ -18,6 +18,7 @@ import deism.p2pmpi.MpiEventGenerator;
 import deism.p2pmpi.MpiUnicastListener;
 import deism.p2pmpi.MpiUnicastEndpoint;
 import deism.process.DefaultDiscreteEventProcess;
+import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
 import deism.run.MessageCenter;
 import deism.run.LvtListener;
@@ -29,8 +30,6 @@ import deism.run.Runloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.StateHistoryController;
-import deism.stateful.DefaultTimewarpDiscreteEventProcess;
-import deism.stateful.DefaultTimewarpProcessBuilder;
 import deism.tqgvt.Client;
 import deism.tqgvt.Master;
 
@@ -41,7 +40,7 @@ public class Pingpong {
     private static int REPORT_TAG = 1;
 
     public static class Player {
-        public static void build(DefaultTimewarpProcessBuilder builder,
+        public static void build(DefaultProcessBuilder builder,
                 ExecutionGovernor governor) {
             final int MY_RANK = MPI.COMM_WORLD.Rank();
             final int PEER_RANK = 1 - MY_RANK;
@@ -147,8 +146,7 @@ public class Pingpong {
         else {
             // build environment
             // input: governor
-            StateHistoryController shc = new StateHistoryController();
-            stateController = shc;
+            stateController = new StateHistoryController();
             snapshotCondition = new EventCondition() {
                 @Override
                 public boolean match(Event e) {
@@ -177,16 +175,18 @@ public class Pingpong {
 
             // build process
             // input: governor, importer, exporter (gvtclient)
-            DefaultTimewarpDiscreteEventProcess timewarpProcess =
-                    new DefaultTimewarpDiscreteEventProcess();
+            DefaultDiscreteEventProcess desProcess =
+                    new DefaultDiscreteEventProcess();
 
-            DefaultTimewarpProcessBuilder builder =
-                    new DefaultTimewarpProcessBuilder(timewarpProcess, shc,
-                            importer, exporter, service);
+            DefaultProcessBuilder builder =
+                    new DefaultProcessBuilder(desProcess, importer, exporter,
+                            service);
             Player.build(builder, governor);
 
-            process = timewarpProcess;
+            process = desProcess;
         }
+
+        stateController.setStateObject(service);
 
         Runloop runloop =
                 new Runloop(governor, termCond, stateController,

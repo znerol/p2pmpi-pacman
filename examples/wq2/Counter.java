@@ -3,11 +3,12 @@ package wq2;
 import java.util.List;
 
 import deism.core.Event;
+import deism.process.DiscreteEventProcess;
 import deism.stateful.AbstractStateHistory;
-import deism.stateful.TimewarpDiscreteEventProcess;
+import deism.stateful.StateHistory;
 
 public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
-        implements TimewarpDiscreteEventProcess {
+        implements DiscreteEventProcess, StateHistory<Long> {
 
     public class CounterState {
         public final CounterAvailableEvent event;

@@ -1,5 +1,6 @@
 package deism.run;
 
+import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
 public interface StateController {
@@ -27,4 +28,10 @@ public interface StateController {
      * must be used.
      */
     public void rollback(Long timestamp) throws StateHistoryException;
+
+    /**
+     * Set controlled state object
+     * @param stateObject
+     */
+    void setStateObject(StateHistory<Long> stateObject);
 }

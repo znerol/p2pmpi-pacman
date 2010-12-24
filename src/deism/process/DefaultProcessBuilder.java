@@ -14,11 +14,15 @@ import deism.core.EventSource;
 import deism.core.External;
 import deism.core.Flushable;
 import deism.core.Startable;
+import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
 import deism.run.Service;
+import deism.stateful.StateHistory;
+import deism.stateful.TimewarpEventSinkAdapter;
+import deism.stateful.TimewarpEventSourceAdapter;
 
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;
@@ -41,6 +45,7 @@ public class DefaultProcessBuilder {
      * 
      * @param object
      */
+    @SuppressWarnings("unchecked")
     protected void register(Object object) {
         if (object instanceof Startable) {
             logger.debug("Register startable " + object);
@@ -50,11 +55,16 @@ public class DefaultProcessBuilder {
             logger.debug("Register flushable " + object);
             process.addFlushable((Flushable) object);
         }
+        if (object instanceof StateHistory<?>) {
+            logger.debug("Register state aware " + object);
+            service.addStatefulObject((StateHistory<Long>) object);
+        }
     }
 
     /**
      * Adapt the given EventSource according to the properties of the adaptee.
-     * No action performed in this implementation
+     * If the adaptee does not record the state history itself, wrap it into a
+     * TimewarpEventSourceAdapter.
      * 
      * @param source
      *            the event source to decorate if necessary
@@ -63,7 +73,17 @@ public class DefaultProcessBuilder {
      * @return
      */
     protected EventSource decorate(EventSource source, Object adaptee) {
-        return source;
+        EventSource result = source;
+
+        if (!(adaptee instanceof StateHistory<?>)
+                && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
+            logger.debug("Decorate stateful " + adaptee
+                    + " with timewarp source adapter");
+            result = new TimewarpEventSourceAdapter(result);
+            register(result);
+        }
+
+        return result;
     }
 
     /**
@@ -146,7 +166,9 @@ public class DefaultProcessBuilder {
     /**
      * Adapt the given EventSink according to the properties of the adaptee. If
      * the {@link External} annotation is present on the adaptee parameter, it
-     * gets wrapped into an {@link ExternalEventSinkAdapter}.
+     * gets wrapped into an {@link ExternalEventSinkAdapter}. Further if
+     * the adaptee does not record the state history itself, wrap it into a
+     * TimewarpEventSourceAdapter.
      * 
      * @param source
      *            the event source to decorate if necessary
@@ -160,6 +182,14 @@ public class DefaultProcessBuilder {
         if (adaptee.getClass().isAnnotationPresent(External.class)) {
             logger.debug("Decorate external " + adaptee + " with exporter");
             result = new ExternalEventSinkAdapter(result, exporter);
+            register(result);
+        }
+
+        if (!(adaptee instanceof StateHistory<?>)
+                && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
+            logger.debug("Decorate stateful " + adaptee
+                    + " with timewarp sink adapter");
+            result = new TimewarpEventSinkAdapter(result);
             register(result);
         }
 

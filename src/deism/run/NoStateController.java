@@ -1,5 +1,6 @@
 package deism.run;
 
+import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
 /**
@@ -22,5 +23,10 @@ public class NoStateController implements
     public void rollback(Long key) throws StateHistoryException {
         throw new StateHistoryException(
                 "Event source returns events out of sequence");
+    }
+
+    @Override
+    public void setStateObject(StateHistory<Long> stateObject) {
+        // do nothing
     }
 }

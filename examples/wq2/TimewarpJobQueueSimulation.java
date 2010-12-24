@@ -12,6 +12,8 @@ import deism.core.Event;
 import deism.core.EventCondition;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
+import deism.process.DefaultDiscreteEventProcess;
+import deism.process.DefaultProcessBuilder;
 import deism.run.MessageCenter;
 import deism.run.ExecutionGovernor;
 import deism.run.LvtListener;
@@ -20,8 +22,6 @@ import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.Service;
 import deism.run.StateHistoryController;
-import deism.stateful.DefaultTimewarpDiscreteEventProcess;
-import deism.stateful.DefaultTimewarpProcessBuilder;
 
 public class TimewarpJobQueueSimulation {
     /**
@@ -64,11 +64,12 @@ public class TimewarpJobQueueSimulation {
         };
 
         StateHistoryController stateController = new StateHistoryController();
+        stateController.setStateObject(service);
 
-        DefaultTimewarpDiscreteEventProcess process = 
-            new DefaultTimewarpDiscreteEventProcess();
-        DefaultTimewarpProcessBuilder builder = new DefaultTimewarpProcessBuilder(
-                process, stateController, fakeImporter, fakeExporter, service);
+        DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
+        DefaultProcessBuilder builder =
+                new DefaultProcessBuilder(process, fakeImporter, fakeExporter,
+                        service);
 
         builder.add(new ClientArrivedGenerator(rng, 1000, 1600));
         
