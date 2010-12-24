@@ -87,10 +87,9 @@ public class Runloop {
                 logger.info("Announce peekEvent to event sink " + peekEvent);
                 process.offer(peekEvent);
 
-                if (process instanceof Flushable
-                        && peekEvent.getSimtime() > maxSimtime) {
+                if (peekEvent.getSimtime() > maxSimtime) {
                     logger.debug("Flush");
-                    ((Flushable) process).flush(peekEvent.getSimtime());
+                    service.flush(peekEvent.getSimtime());
                 }
 
                 logger.debug("Suspend runloop until " + peekEvent.getSimtime());

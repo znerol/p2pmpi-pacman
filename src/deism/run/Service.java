@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import deism.core.Event;
+import deism.core.Flushable;
 import deism.core.Startable;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
 import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
-public class Service implements Startable, StateHistory<Long>, EventImporter,
-        EventExporter, LvtListener {
+public class Service implements Startable, StateHistory<Long>, Flushable,
+        EventImporter, EventExporter, LvtListener {
 
     private static final EventImporter NULL_IMPORTER = new EventImporter() {
         @Override
@@ -36,6 +37,7 @@ public class Service implements Startable, StateHistory<Long>, EventImporter,
     private final List<Startable> startableList = new ArrayList<Startable>();
     private final List<StateHistory<Long>> statefulObjects =
             new ArrayList<StateHistory<Long>>();
+    private final List<Flushable> flushables = new ArrayList<Flushable>();
     private EventImporter eventImporter = NULL_IMPORTER;
     private EventExporter eventExporter = NULL_EXPORTER;
     private LvtListener lvtListener = NULL_LVT_LISTENER;
@@ -46,6 +48,10 @@ public class Service implements Startable, StateHistory<Long>, EventImporter,
 
     public void addStatefulObject(StateHistory<Long> statefulObject) {
         statefulObjects.add(statefulObject);
+    }
+
+    public void addFlushable(Flushable flushable) {
+        flushables.add(flushable);
     }
 
     public void setEventImporter(EventImporter eventImporter) {
@@ -92,6 +98,13 @@ public class Service implements Startable, StateHistory<Long>, EventImporter,
     public void rollback(Long key) throws StateHistoryException {
         for (StateHistory<Long> stateObject : statefulObjects) {
             stateObject.rollback(key);
+        }
+    }
+
+    @Override
+    public void flush(long simtime) {
+        for (Flushable flushable : flushables) {
+            flushable.flush(simtime);
         }
     }
 

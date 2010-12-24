@@ -379,7 +379,7 @@ public class DefaultProcessBuilderTest {
         assertTrue(addedSink instanceof TimewarpEventSinkAdapter);
 
         verify(service).addStatefulObject((StateHistory<Long>) addedSink);
-        verify(process).addFlushable((Flushable) addedSink);
+        verify(service).addFlushable((Flushable) addedSink);
         verifyNoMoreInteractions(process);
     }
 
@@ -577,7 +577,7 @@ public class DefaultProcessBuilderTest {
         assertNotNull(addedSink);
         assertTrue(addedSink instanceof TimewarpEventSinkAdapter);
         verify(service).addStatefulObject((StateHistory<Long>) addedSink);
-        verify(process).addFlushable((Flushable) addedSink);
+        verify(service).addFlushable((Flushable) addedSink);
 
         // dispatcher
         verify(process).addEventDispatcher(dummy);

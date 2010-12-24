@@ -47,7 +47,7 @@ public class DefaultProcessBuilder {
         }
         if (object instanceof Flushable) {
             logger.debug("Register flushable " + object);
-            process.addFlushable((Flushable) object);
+            service.addFlushable((Flushable) object);
         }
         if (object instanceof StateHistory<?>) {
             logger.debug("Register state aware " + object);
