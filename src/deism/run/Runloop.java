@@ -21,19 +21,19 @@ public class Runloop {
     private long currentSimtime = 0;
     private StateController stateController;
     private EventCondition snapshotCondition;
-    private MessageCenter ipcEndpoint;
+    private MessageCenter messageCenter;
     private Service service;
     private final static Logger logger = Logger.getLogger(Runloop.class);
 
     public Runloop(ExecutionGovernor governor,
             EventCondition terminationCondition,
             StateController stateController, EventCondition snapshotCondition,
-            MessageCenter ipcEndpoint, Service service) {
+            MessageCenter messageCenter, Service service) {
         this.governor = governor;
         this.terminationCondition = terminationCondition;
         this.stateController = stateController;
         this.snapshotCondition = snapshotCondition;
-        this.ipcEndpoint = ipcEndpoint;
+        this.messageCenter = messageCenter;
         this.service = service;
     }
 
@@ -66,7 +66,7 @@ public class Runloop {
             logger.debug("Begin runloop cycle");
 
             // fetch and handle system messages
-            ipcEndpoint.process();
+            messageCenter.process();
 
             // identify simulation event with the smallest timestamp
             Event peekEvent = process.peek(currentSimtime);
