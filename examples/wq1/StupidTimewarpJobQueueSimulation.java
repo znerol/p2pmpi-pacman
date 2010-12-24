@@ -11,13 +11,10 @@ import wqcommon.OptimisticRunnableClientArrivedSource;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.ipc.base.EventExporter;
-import deism.ipc.base.EventImporter;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.run.MessageCenter;
 import deism.run.ExecutionGovernor;
-import deism.run.LvtListener;
 import deism.run.Runloop;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.Service;
@@ -41,21 +38,6 @@ public class StupidTimewarpJobQueueSimulation {
 
         ExecutionGovernor governor;
         governor = new RealtimeExecutionGovernor(speed);
-
-        EventImporter fakeImporter = new EventImporter() {
-            @Override
-            public Event unpack(Event event) {
-                return event;
-            }
-        };
-
-        EventExporter fakeExporter = new EventExporter() {
-            @Override
-            public Event pack(Event event) {
-                return event;
-            }
-        };
-
         service.addStartable(governor);
 
         StateHistoryController stateController = new StateHistoryController();
@@ -63,8 +45,7 @@ public class StupidTimewarpJobQueueSimulation {
 
         DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
         DefaultProcessBuilder builder =
-                new DefaultProcessBuilder(process, fakeImporter, fakeExporter,
-                        service);
+                new DefaultProcessBuilder(process, service);
 
         OptimisticRunnableClientArrivedSource clientArrivedSource =
                 new OptimisticRunnableClientArrivedSource(rng, governor, speed,
@@ -85,17 +66,11 @@ public class StupidTimewarpJobQueueSimulation {
             }
         };
 
-        LvtListener lvtListener = new LvtListener() {
-            @Override
-            public void update(long lvt) {
-            }
-        };
-
         MessageCenter messageCenter = new MessageCenter(governor);
 
         Runloop runloop =
                 new Runloop(governor, termCond, stateController, snapshotAll,
-                        messageCenter, lvtListener, service);
+                        messageCenter, service);
 
         runloop.run(process);
     }

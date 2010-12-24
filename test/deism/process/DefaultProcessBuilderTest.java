@@ -20,8 +20,6 @@ import deism.core.Startable;
 import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
-import deism.ipc.base.EventExporter;
-import deism.ipc.base.EventImporter;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
@@ -40,17 +38,13 @@ public class DefaultProcessBuilderTest {
     @Mock
     private DefaultDiscreteEventProcess process;
     @Mock
-    private EventImporter importer;
-    @Mock
-    private EventExporter exporter;
-    @Mock
     private Service service;
 
     private DefaultProcessBuilder builder;
 
     @Before
     public void setUp() {
-        builder = new DefaultProcessBuilder(process, importer, exporter, service);
+        builder = new DefaultProcessBuilder(process, service);
     }
 
     @Test

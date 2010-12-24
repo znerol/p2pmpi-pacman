@@ -76,7 +76,7 @@ public class TimewarpRunloopTest {
         stateController = new StateHistoryController();
         stateController.setStateObject(service);
         runloop = new Runloop(governor, terminationCondition, stateController,
-                snapshotCondition, messageCenter, lvtListener, service);
+                snapshotCondition, messageCenter, service);
     }
 
     @Test

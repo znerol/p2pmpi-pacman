@@ -31,8 +31,6 @@ public class RunloopTest {
     @Mock
     MessageCenter messageCenter;
     @Mock
-    LvtListener lvtListener;
-    @Mock
     Service service;
 
     /**
@@ -43,7 +41,7 @@ public class RunloopTest {
     public void runNoEvent() {
         final Runloop r =
                 new Runloop(governor, terminationCondition, stateController,
-                        snapshotCondition, messageCenter, lvtListener, service);
+                        snapshotCondition, messageCenter, service);
 
         when(process.peek(0)).thenReturn(null);
         when(terminationCondition.match(null)).thenReturn(true);
@@ -67,7 +65,7 @@ public class RunloopTest {
         final Event two = new Event(2);
         final Runloop r =
             new Runloop(governor, terminationCondition, stateController,
-                    snapshotCondition, messageCenter, lvtListener, service);
+                    snapshotCondition, messageCenter, service);
 
         /*
          * On each call to receive() process will return event one, then two and
@@ -109,7 +107,7 @@ public class RunloopTest {
 
         final Runloop r =
             new Runloop(governor, terminationCondition, stateController,
-                    snapshotCondition, messageCenter, lvtListener, service);
+                    snapshotCondition, messageCenter, service);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(two);
@@ -150,7 +148,7 @@ public class RunloopTest {
 
         final Runloop r =
             new Runloop(governor, terminationCondition, stateController,
-                    snapshotCondition, messageCenter, lvtListener, service);
+                    snapshotCondition, messageCenter, service);
 
         when(process.peek(0)).thenReturn(one);
         when(process.peek(1)).thenReturn(one);
@@ -185,7 +183,7 @@ public class RunloopTest {
         final Event two = new Event(2);
         final Runloop r =
             new Runloop(governor, terminationCondition, stateController,
-                    snapshotCondition, messageCenter, lvtListener, service);
+                    snapshotCondition, messageCenter, service);
 
         /*
          * Simulate event source which returns events in the wrong order.

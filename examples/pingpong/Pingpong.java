@@ -10,8 +10,6 @@ import p2pmpi.mpi.MPI;
 import util.TerminateAfterDuration;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.ipc.base.EventExporter;
-import deism.ipc.base.EventImporter;
 import deism.p2pmpi.MpiBroadcast;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
@@ -21,7 +19,6 @@ import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
 import deism.run.MessageCenter;
-import deism.run.LvtListener;
 import deism.run.NoStateController;
 import deism.run.Service;
 import deism.run.StateController;
@@ -106,7 +103,6 @@ public class Pingpong {
         final Service service = new Service();
         service.addStartable(governor);
         final MessageCenter messageCenter = new MessageCenter(governor);
-        final LvtListener lvtListener;
 
         // build tq master
         if (MPI.COMM_WORLD.Rank() == 2) {
@@ -129,7 +125,6 @@ public class Pingpong {
                     new MpiUnicastListener(MPI.COMM_WORLD, MPI.ANY_SOURCE,
                             REPORT_TAG);
             service.addStartable(gvtReportFromClients);
-            lvtListener = null; // dangerous!
 
             final Master tqmaster = new Master(2);
             tqmaster.setEndpoint(gvtMessageToClients);
@@ -168,10 +163,9 @@ public class Pingpong {
             tqclient.setEndpoint(gvtReportToMaster);
             gvtMessageFromMaster.setEndpoint(messageCenter);
             messageCenter.addHandler(tqclient);
-            lvtListener = tqclient;
-
-            final EventExporter exporter = tqclient;
-            final EventImporter importer = tqclient;
+            service.setEventImporter(tqclient);
+            service.setEventExporter(tqclient);
+            service.setLvtListener(tqclient);
 
             // build process
             // input: governor, importer, exporter (gvtclient)
@@ -179,8 +173,7 @@ public class Pingpong {
                     new DefaultDiscreteEventProcess();
 
             DefaultProcessBuilder builder =
-                    new DefaultProcessBuilder(desProcess, importer, exporter,
-                            service);
+                    new DefaultProcessBuilder(desProcess, service);
             Player.build(builder, governor);
 
             process = desProcess;
@@ -190,7 +183,7 @@ public class Pingpong {
 
         Runloop runloop =
                 new Runloop(governor, termCond, stateController,
-                        snapshotCondition, messageCenter, lvtListener, service);
+                        snapshotCondition, messageCenter, service);
 
         runloop.run(process);
 

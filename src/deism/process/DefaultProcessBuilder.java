@@ -17,8 +17,6 @@ import deism.core.Startable;
 import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
-import deism.ipc.base.EventExporter;
-import deism.ipc.base.EventImporter;
 import deism.run.Service;
 import deism.stateful.StateHistory;
 import deism.stateful.TimewarpEventSinkAdapter;
@@ -26,17 +24,13 @@ import deism.stateful.TimewarpEventSourceAdapter;
 
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;
-    private final EventImporter importer;
-    private final EventExporter exporter;
     private final Service service;
     private final static Logger logger = Logger
             .getLogger(DefaultProcessBuilder.class);
 
     public DefaultProcessBuilder(DefaultDiscreteEventProcess process,
-            EventImporter importer, EventExporter exporter, Service service) {
+            Service service) {
         this.process = process;
-        this.importer = importer;
-        this.exporter = exporter;
         this.service = service;
     }
 
@@ -105,7 +99,7 @@ public class DefaultProcessBuilder {
         StatefulEventGenerator result = generator;
         if (adaptee.getClass().isAnnotationPresent(External.class)) {
             logger.debug("Decorate external " + adaptee + " with importer");
-            result = new ExternalEventGeneratorAdapter(generator, importer);
+            result = new ExternalEventGeneratorAdapter(generator, service);
             register(result);
         }
 
@@ -181,7 +175,7 @@ public class DefaultProcessBuilder {
 
         if (adaptee.getClass().isAnnotationPresent(External.class)) {
             logger.debug("Decorate external " + adaptee + " with exporter");
-            result = new ExternalEventSinkAdapter(result, exporter);
+            result = new ExternalEventSinkAdapter(result, service);
             register(result);
         }
 

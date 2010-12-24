@@ -13,12 +13,9 @@ import wqcommon.PestimisticRunnableClientArrivedSource;
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.ipc.base.EventExporter;
-import deism.ipc.base.EventImporter;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.run.MessageCenter;
-import deism.run.LvtListener;
 import deism.run.Service;
 import deism.run.StateController;
 import deism.run.ExecutionGovernor;
@@ -55,23 +52,9 @@ public class JobQueueSimulation {
 
         service.addStartable(governor);
 
-        EventImporter fakeImporter = new EventImporter() {
-            @Override
-            public Event unpack(Event event) {
-                return event;
-            }
-        };
-
-        EventExporter fakeExporter = new EventExporter() {
-            @Override
-            public Event pack(Event event) {
-                return event;
-            }
-        };
-
         DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
-        DefaultProcessBuilder builder = new DefaultProcessBuilder(process,
-                fakeImporter, fakeExporter, service);
+        DefaultProcessBuilder builder =
+                new DefaultProcessBuilder(process, service);
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         if (multithread) {
@@ -100,16 +83,10 @@ public class JobQueueSimulation {
             }
         };
 
-        LvtListener lvtListener = new LvtListener() {
-            @Override
-            public void update(long lvt) {
-            }
-        };
-
         MessageCenter messageCenter = new MessageCenter(governor);
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
-                noSnapshots, messageCenter, lvtListener, service);
+                noSnapshots, messageCenter, service);
         runloop.run(process);
     }
 }
