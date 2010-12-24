@@ -105,7 +105,7 @@ public class Pingpong {
         EventCondition snapshotCondition;
 
         final Service service = new Service();
-        service.addStartable(governor);
+        service.register(governor);
         final MessageCenter messageCenter = new MessageCenter(governor);
 
         // build tq master
@@ -124,11 +124,11 @@ public class Pingpong {
             // input: messageCenter
             final MpiBroadcast gvtMessageToClients =
                     new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
-            service.addStartable(gvtMessageToClients);
+            service.register(gvtMessageToClients);
             final MpiUnicastListener gvtReportFromClients =
                     new MpiUnicastListener(MPI.COMM_WORLD, MPI.ANY_SOURCE,
                             REPORT_TAG);
-            service.addStartable(gvtReportFromClients);
+            service.register(gvtReportFromClients);
 
             final Master tqmaster = new Master(2);
             tqmaster.setEndpoint(gvtMessageToClients);
@@ -154,19 +154,17 @@ public class Pingpong {
             // input: messageCenter, stateController
             final MpiBroadcast gvtMessageFromMaster =
                     new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
-            service.addStartable(gvtMessageFromMaster);
+            service.register(gvtMessageFromMaster);
             final MpiUnicastEndpoint gvtReportToMaster =
                     new MpiUnicastEndpoint(MPI.COMM_WORLD, MASTER_RANK,
                             REPORT_TAG);
-            service.addStartable(gvtReportToMaster);
+            service.register(gvtReportToMaster);
             Client tqclient =
                     new Client(MPI.COMM_WORLD.Rank(), 100, stateController);
             tqclient.setEndpoint(gvtReportToMaster);
             gvtMessageFromMaster.setEndpoint(messageCenter);
             messageCenter.addHandler(tqclient);
-            service.setEventImporter(tqclient);
-            service.setEventExporter(tqclient);
-            service.setLvtListener(tqclient);
+            service.register(tqclient);
 
             // build process
             // input: governor, service

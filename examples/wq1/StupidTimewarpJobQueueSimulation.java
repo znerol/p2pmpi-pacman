@@ -38,7 +38,7 @@ public class StupidTimewarpJobQueueSimulation {
 
         ExecutionGovernor governor;
         governor = new RealtimeExecutionGovernor(speed);
-        service.addStartable(governor);
+        service.register(governor);
 
         StateHistoryController stateController = new StateHistoryController();
         stateController.setStateObject(service);

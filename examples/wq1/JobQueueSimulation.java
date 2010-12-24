@@ -50,7 +50,7 @@ public class JobQueueSimulation {
             governor = new ImmediateExecutionGovernor();
         }
 
-        service.addStartable(governor);
+        service.register(governor);
 
         DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
 

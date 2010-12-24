@@ -70,8 +70,9 @@ public class TimewarpRunloopTest {
 
         process = new DefaultDiscreteEventProcess();
         process.addEventSource(eventSource);
-        service.addStatefulObject(eventSource);
+        service.register(eventSource);
         process.addEventDispatcher(eventDispatcher);
+        service.register(eventDispatcher);
 
         stateController = new StateHistoryController();
         stateController.setStateObject(service);

@@ -64,29 +64,41 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
             logger.debug("Register state aware " + object);
             addStatefulObject((StateHistory<Long>) object);
         }
+        if (object instanceof EventImporter) {
+            logger.debug("Set event importer " + object);
+            setEventImporter((EventImporter) object);
+        }
+        if (object instanceof EventExporter) {
+            logger.debug("Set event exporter " + object);
+            setEventExporter((EventExporter) object);
+        }
+        if (object instanceof LvtListener) {
+            logger.debug("Set lvt listener " + object);
+            setLvtListener((LvtListener) object);
+        }
     }
 
-    public void addStartable(Startable startable) {
+    private void addStartable(Startable startable) {
         startableList.add(startable);
     }
 
-    public void addStatefulObject(StateHistory<Long> statefulObject) {
+    private void addStatefulObject(StateHistory<Long> statefulObject) {
         statefulObjects.add(statefulObject);
     }
 
-    public void addFlushable(Flushable flushable) {
+    private void addFlushable(Flushable flushable) {
         flushables.add(flushable);
     }
 
-    public void setEventImporter(EventImporter eventImporter) {
+    private void setEventImporter(EventImporter eventImporter) {
         this.eventImporter = eventImporter;
     }
 
-    public void setEventExporter(EventExporter eventExporter) {
+    private void setEventExporter(EventExporter eventExporter) {
         this.eventExporter = eventExporter;
     }
 
-    public void setLvtListener(LvtListener lvtListener) {
+    private void setLvtListener(LvtListener lvtListener) {
         this.lvtListener = lvtListener;
     }
 
