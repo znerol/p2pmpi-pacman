@@ -28,7 +28,9 @@ import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.StateHistoryController;
 import deism.tqgvt.Client;
+import deism.tqgvt.GvtMessageFilter;
 import deism.tqgvt.Master;
+import deism.tqgvt.ReportMessageFilter;
 
 public class Pingpong {
 
@@ -125,15 +127,19 @@ public class Pingpong {
             final MpiBroadcast gvtMessageToClients =
                     new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
             service.register(gvtMessageToClients);
+            messageCenter.addEndpoint(gvtMessageToClients,
+                    new GvtMessageFilter());
+
             final MpiUnicastListener gvtReportFromClients =
                     new MpiUnicastListener(MPI.COMM_WORLD, MPI.ANY_SOURCE,
                             REPORT_TAG);
             service.register(gvtReportFromClients);
+            gvtReportFromClients.setEndpoint(messageCenter);
 
             final Master tqmaster = new Master(2);
-            tqmaster.setEndpoint(gvtMessageToClients);
-            gvtReportFromClients.setEndpoint(messageCenter);
-            messageCenter.addHandler(tqmaster);
+            service.register(tqmaster);
+            tqmaster.setEndpoint(messageCenter);
+            messageCenter.addHandler(tqmaster, new ReportMessageFilter());
 
             // build process
             // input: -
@@ -155,16 +161,20 @@ public class Pingpong {
             final MpiBroadcast gvtMessageFromMaster =
                     new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
             service.register(gvtMessageFromMaster);
+            gvtMessageFromMaster.setEndpoint(messageCenter);
+
             final MpiUnicastEndpoint gvtReportToMaster =
                     new MpiUnicastEndpoint(MPI.COMM_WORLD, MASTER_RANK,
                             REPORT_TAG);
             service.register(gvtReportToMaster);
+            messageCenter.addEndpoint(gvtReportToMaster,
+                    new ReportMessageFilter());
+
             Client tqclient =
                     new Client(MPI.COMM_WORLD.Rank(), 100, stateController);
-            tqclient.setEndpoint(gvtReportToMaster);
-            gvtMessageFromMaster.setEndpoint(messageCenter);
-            messageCenter.addHandler(tqclient);
             service.register(tqclient);
+            tqclient.setEndpoint(messageCenter);
+            messageCenter.addHandler(tqclient, new GvtMessageFilter());
 
             // build process
             // input: governor, service
