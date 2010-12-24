@@ -37,10 +37,12 @@ public class Pingpong {
     private static int REPORT_TAG = 1;
 
     public static class Player {
-        public static void build(DefaultProcessBuilder builder,
-                ExecutionGovernor governor) {
+        public static DiscreteEventProcess build(ExecutionGovernor governor,
+                Service service) {
             final int MY_RANK = MPI.COMM_WORLD.Rank();
             final int PEER_RANK = 1 - MY_RANK;
+
+            DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
 
             // my ball event source
             builder.add(new BallEventGenerator(MY_RANK * 50, 100, MY_RANK,
@@ -64,6 +66,8 @@ public class Pingpong {
 
             builder.add(new MpiEventSink(MPI.COMM_WORLD, PEER_RANK, BALL_TAG),
                     onlyMine);
+
+            return builder.getProcess();
         }
     }
 
@@ -133,10 +137,7 @@ public class Pingpong {
 
             // build process
             // input: -
-            DefaultDiscreteEventProcess desProcess =
-                    new DefaultDiscreteEventProcess();
-
-            process = desProcess;
+            process = new DefaultDiscreteEventProcess();
         }
         else {
             // build environment
@@ -168,15 +169,8 @@ public class Pingpong {
             service.setLvtListener(tqclient);
 
             // build process
-            // input: governor, importer, exporter (gvtclient)
-            DefaultDiscreteEventProcess desProcess =
-                    new DefaultDiscreteEventProcess();
-
-            DefaultProcessBuilder builder =
-                    new DefaultProcessBuilder(desProcess, service);
-            Player.build(builder, governor);
-
-            process = desProcess;
+            // input: governor, service
+            process = Player.build(governor, service);
         }
 
         stateController.setStateObject(service);

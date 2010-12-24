@@ -10,8 +10,8 @@ import wqcommon.ClientArrivedGenerator;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
+import deism.process.DiscreteEventProcess;
 import deism.run.MessageCenter;
 import deism.run.ExecutionGovernor;
 import deism.run.Runloop;
@@ -49,9 +49,7 @@ public class TimewarpJobQueueSimulation {
         StateHistoryController stateController = new StateHistoryController();
         stateController.setStateObject(service);
 
-        DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
-        DefaultProcessBuilder builder =
-                new DefaultProcessBuilder(process, service);
+        DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
 
         builder.add(new ClientArrivedGenerator(rng, 1000, 1600));
         
@@ -84,6 +82,7 @@ public class TimewarpJobQueueSimulation {
                 new Runloop(governor, termCond, stateController, snapshotAll,
                         messageCenter, service);
 
+        DiscreteEventProcess process = builder.getProcess();
         runloop.run(process);
     }
 }

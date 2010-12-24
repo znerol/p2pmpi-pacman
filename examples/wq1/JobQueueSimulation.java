@@ -13,8 +13,8 @@ import wqcommon.PestimisticRunnableClientArrivedSource;
 import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
+import deism.process.DiscreteEventProcess;
 import deism.run.MessageCenter;
 import deism.run.Service;
 import deism.run.StateController;
@@ -52,9 +52,7 @@ public class JobQueueSimulation {
 
         service.addStartable(governor);
 
-        DefaultDiscreteEventProcess process = new DefaultDiscreteEventProcess();
-        DefaultProcessBuilder builder =
-                new DefaultProcessBuilder(process, service);
+        DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
 
         boolean multithread = Boolean.getBoolean("simulationMultithread");
         if (multithread) {
@@ -87,6 +85,7 @@ public class JobQueueSimulation {
 
         Runloop runloop = new Runloop(governor, termCond, stateController,
                 noSnapshots, messageCenter, service);
+        DiscreteEventProcess process = builder.getProcess();
         runloop.run(process);
     }
 }

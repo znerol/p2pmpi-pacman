@@ -28,10 +28,20 @@ public class DefaultProcessBuilder {
     private final static Logger logger = Logger
             .getLogger(DefaultProcessBuilder.class);
 
-    public DefaultProcessBuilder(DefaultDiscreteEventProcess process,
-            Service service) {
+    public DefaultProcessBuilder(Service service) {
+        this(new DefaultDiscreteEventProcess(), service);
+    }
+
+    public DefaultProcessBuilder(DefaultDiscreteEventProcess process, Service service) {
         this.process = process;
         this.service = service;
+    }
+
+    /**
+     * Return built process
+     */
+    public DiscreteEventProcess getProcess() {
+        return process;
     }
 
     /**
