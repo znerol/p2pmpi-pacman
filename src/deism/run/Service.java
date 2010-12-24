@@ -3,6 +3,8 @@ package deism.run;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import deism.core.Event;
 import deism.core.Flushable;
 import deism.core.Startable;
@@ -41,6 +43,28 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
     private EventImporter eventImporter = NULL_IMPORTER;
     private EventExporter eventExporter = NULL_EXPORTER;
     private LvtListener lvtListener = NULL_LVT_LISTENER;
+    private final static Logger logger = Logger.getLogger(Service.class);
+
+    /**
+     * Register secondary interfaces of the given object with the process.
+     * 
+     * @param object
+     */
+    @SuppressWarnings("unchecked")
+    public void register(Object object) {
+        if (object instanceof Startable) {
+            logger.debug("Register startable " + object);
+            addStartable((Startable) object);
+        }
+        if (object instanceof Flushable) {
+            logger.debug("Register flushable " + object);
+            addFlushable((Flushable) object);
+        }
+        if (object instanceof StateHistory<?>) {
+            logger.debug("Register state aware " + object);
+            addStatefulObject((StateHistory<Long>) object);
+        }
+    }
 
     public void addStartable(Startable startable) {
         startableList.add(startable);

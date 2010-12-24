@@ -7,7 +7,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.adapter.EventSourceStatelessGeneratorAdapter;
 import deism.adapter.FilteredEventSink;
 import deism.core.Event;
@@ -15,8 +14,6 @@ import deism.core.EventCondition;
 import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
-import deism.core.Flushable;
-import deism.core.Startable;
 import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
@@ -24,8 +21,6 @@ import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
 import deism.run.Service;
-import deism.stateful.StateHistory;
-import deism.stateful.StateHistoryException;
 import deism.stateful.TimewarpEventSinkAdapter;
 import deism.stateful.TimewarpEventSourceAdapter;
 
@@ -65,80 +60,15 @@ public class DefaultProcessBuilderTest {
 
         verify(process).addEventSource(source);
         verifyNoMoreInteractions(process);
-    }
 
-    /**
-     * Verify that a startable source will be added once as an EventSource and
-     * once as a Startable to the process.
-     */
-    @Test
-    public void testAddStartableSource() {
-        // We cannot mock here because we'd loose annotations
-        final class StartableSource implements EventSource, Startable {
-            @Override
-            public Event peek(long currentSimtime) {
-                return null;
-            }
-
-            @Override
-            public void remove(Event event) {
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        StartableSource startableSource = new StartableSource();
-        builder.add(startableSource);
-
-        verify(process).addEventSource(startableSource);
-        verify(service).addStartable(startableSource);
-        verifyNoMoreInteractions(process);
-    }
-
-    @Test
-    public void testAddStateAwareEventSource() {
-        final class Source implements EventSource, StateHistory<Long> {
-            @Override
-            public Event peek(long currentSimtime) {
-                return null;
-            }
-
-            @Override
-            public void remove(Event event) {
-            }
-
-            @Override
-            public void save(Long key) throws StateHistoryException {
-            }
-
-            @Override
-            public void commit(Long key) throws StateHistoryException {
-            }
-
-            @Override
-            public void rollback(Long key) throws StateHistoryException {
-            }
-        }
-
-        Source source = new Source();
-        builder.add(source);
-
-        verify(process).addEventSource(source);
-        verify(service).addStatefulObject(source);
-        verifyNoMoreInteractions(process);
+        verify(service).register(source);
+        verifyNoMoreInteractions(service);
     }
 
     /**
      * Verify that a stateful but not state aware source is wrapped into a
      * TimewarpEventSourceAdapter before it is added to the process.
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void testAddStatefulSource() {
         // We cannot mock here because we'd loose annotations
@@ -165,11 +95,13 @@ public class DefaultProcessBuilderTest {
         assertNotNull(addedSource);
         assertTrue(addedSource instanceof TimewarpEventSourceAdapter);
 
-        verify(service).addStatefulObject((StateHistory<Long>) addedSource);
         verifyNoMoreInteractions(process);
+
+        verify(service).register(source);
+        verify(service).register(addedSource);
+        verifyNoMoreInteractions(service);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testAddStatefulEventGenerator() {
         @Stateful
@@ -191,43 +123,15 @@ public class DefaultProcessBuilderTest {
         assertNotNull(addedSource);
         assertTrue(addedSource instanceof TimewarpEventSourceAdapter);
 
-        verify(service).addStatefulObject((StateHistory<Long>) addedSource);
         verifyNoMoreInteractions(process);
-    }
 
-    @Test
-    public void testAddStartableStatefulEventGenerator() {
-        // We cannot mock here because we'd loose annotations
-        final class StartableStatefulEventGenerator implements Startable,
-                StatefulEventGenerator {
-            @Override
-            public Event poll() {
-                return null;
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        StartableStatefulEventGenerator generator = new StartableStatefulEventGenerator();
-        builder.add(generator);
-
-        verify(service).addStartable(generator);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof EventSourceStatefulGeneratorAdapter);
-
-        verifyNoMoreInteractions(process);
+        // We know the generator and the source but don't have the adapter.
+        // So we simply check that the generator and the source got registered
+        // and require 3 calls overall.
+        verify(service).register(generator);
+        verify(service).register(addedSource);
+        verify(service, times(3)).register(any());
+        verifyNoMoreInteractions(service);
     }
 
     @Test
@@ -251,41 +155,10 @@ public class DefaultProcessBuilderTest {
         assertTrue(addedSource instanceof EventSourceStatelessGeneratorAdapter);
 
         verifyNoMoreInteractions(process);
-    }
 
-    @Test
-    public void testAddStartableStatelessEventGenerator() {
-        // We cannot mock here because we'd loose annotations
-        final class StartableStatelessEventGenerator implements Startable,
-                StatelessEventGenerator {
-            @Override
-            public Event peek(long simtime) {
-                return null;
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        StartableStatelessEventGenerator generator = new StartableStatelessEventGenerator();
-        builder.add(generator);
-
-        verify(service).addStartable(generator);
-
-        ArgumentCaptor<EventSource> argument = ArgumentCaptor
-                .forClass(EventSource.class);
-        verify(process).addEventSource(argument.capture());
-
-        EventSource addedSource = argument.getValue();
-        assertNotNull(addedSource);
-        assertTrue(addedSource instanceof EventSourceStatelessGeneratorAdapter);
-
-        verifyNoMoreInteractions(process);
+        verify(service).register(generator);
+        verify(service).register(addedSource);
+        verifyNoMoreInteractions(service);
     }
 
     @Test
@@ -301,6 +174,9 @@ public class DefaultProcessBuilderTest {
 
         verify(process).addEventSink(sink);
         verifyNoMoreInteractions(process);
+
+        verify(service).register(sink);
+        verifyNoMoreInteractions(service);
     }
 
     @Test
@@ -331,33 +207,12 @@ public class DefaultProcessBuilderTest {
         assertTrue(addedSink instanceof FilteredEventSink);
 
         verifyNoMoreInteractions(process);
+
+        verify(service).register(sink);
+        verify(service).register(addedSink);
+        verifyNoMoreInteractions(service);
     }
 
-    @Test
-    public void testAddStartableEventSink() {
-        final class Sink implements EventSink, Startable {
-            @Override
-            public void offer(Event event) {
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        Sink sink = new Sink();
-        builder.add(sink);
-
-        verify(process).addEventSink(sink);
-        verify(service).addStartable(sink);
-        verifyNoMoreInteractions(process);
-    }
-
-    @SuppressWarnings("unchecked")
     @Test
     public void testAddStatefulEventSink() {
         @Stateful
@@ -378,9 +233,11 @@ public class DefaultProcessBuilderTest {
         assertNotNull(addedSink);
         assertTrue(addedSink instanceof TimewarpEventSinkAdapter);
 
-        verify(service).addStatefulObject((StateHistory<Long>) addedSink);
-        verify(service).addFlushable((Flushable) addedSink);
         verifyNoMoreInteractions(process);
+
+        verify(service).register(sink);
+        verify(service).register(addedSink);
+        verifyNoMoreInteractions(service);
     }
 
     @Test
@@ -395,29 +252,9 @@ public class DefaultProcessBuilderTest {
         builder.add(dispatcher);
         verify(process).addEventDispatcher(dispatcher);
         verifyNoMoreInteractions(process);
-    }
 
-    @Test
-    public void testAddStartableDispatcher() {
-        final class Dispatcher implements Startable, EventDispatcher {
-            @Override
-            public void dispatchEvent(Event e) {
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        Dispatcher dispatcher = new Dispatcher();
-        builder.add(dispatcher);
-        verify(process).addEventDispatcher(dispatcher);
-        verify(service).addStartable(dispatcher);
-        verifyNoMoreInteractions(process);
+        verify(service).register(dispatcher);
+        verifyNoMoreInteractions(service);
     }
 
     @Test
@@ -446,93 +283,11 @@ public class DefaultProcessBuilderTest {
         verify(process).addEventSink(dummy);
         verify(process).addEventDispatcher(dummy);
         verifyNoMoreInteractions(process);
+
+        verify(service).register(dummy);
+        verifyNoMoreInteractions(service);
     }
 
-    @Test
-    public void testAddStartableProcess() {
-        final class Process implements Startable, DiscreteEventProcess {
-            @Override
-            public void dispatchEvent(Event e) {
-            }
-
-            @Override
-            public void offer(Event event) {
-            }
-
-            @Override
-            public Event peek(long currentSimtime) {
-                return null;
-            }
-
-            @Override
-            public void remove(Event event) {
-            }
-
-            @Override
-            public void start(long simtime) {
-            }
-
-            @Override
-            public void stop(long simtime) {
-            }
-        }
-
-        Process dummy = new Process();
-        builder.add(dummy);
-
-        verify(process).addEventSource(dummy);
-        verify(process).addEventSink(dummy);
-        verify(process).addEventDispatcher(dummy);
-        verify(service).addStartable(dummy);
-        verifyNoMoreInteractions(process);
-    }
-
-    @Test
-    public void testStateAwareProcess() {
-        @Stateful
-        final class Process implements DiscreteEventProcess, StateHistory<Long> {
-
-            @Override
-            public Event peek(long currentSimtime) {
-                return null;
-            }
-
-            @Override
-            public void remove(Event event) {
-            }
-
-            @Override
-            public void offer(Event event) {
-            }
-
-            @Override
-            public void dispatchEvent(Event e) {
-            }
-
-            @Override
-            public void save(Long key) throws StateHistoryException {
-            }
-
-            @Override
-            public void commit(Long key) throws StateHistoryException {
-            }
-
-            @Override
-            public void rollback(Long key) throws StateHistoryException {
-            }
-        }
-
-        Process dummy = new Process();
-        builder.add(dummy);
-
-        verify(process).addEventSource(dummy);
-        verify(process).addEventSink(dummy);
-        verify(process).addEventDispatcher(dummy);
-        verify(service).addStatefulObject(dummy);
-        verifyNoMoreInteractions(process);
-    }
-
-    @SuppressWarnings("unchecked")
     @Test
     public void testAddStatefulProcess() {
         @Stateful
@@ -558,6 +313,8 @@ public class DefaultProcessBuilderTest {
         Process dummy = new Process();
         builder.add(dummy);
 
+        verify(service).register(dummy);
+
         // source
         ArgumentCaptor<EventSource> sourceArgument =
                 ArgumentCaptor.forClass(EventSource.class);
@@ -566,7 +323,7 @@ public class DefaultProcessBuilderTest {
         EventSource addedSource = sourceArgument.getValue();
         assertNotNull(addedSource);
         assertTrue(addedSource instanceof TimewarpEventSourceAdapter);
-        verify(service).addStatefulObject((StateHistory<Long>) addedSource);
+        verify(service).register(addedSource);
 
         // sink
         ArgumentCaptor<EventSink> sinkArgument =
@@ -576,12 +333,12 @@ public class DefaultProcessBuilderTest {
         EventSink addedSink = sinkArgument.getValue();
         assertNotNull(addedSink);
         assertTrue(addedSink instanceof TimewarpEventSinkAdapter);
-        verify(service).addStatefulObject((StateHistory<Long>) addedSink);
-        verify(service).addFlushable((Flushable) addedSink);
+        verify(service).register(addedSink);
 
         // dispatcher
         verify(process).addEventDispatcher(dummy);
 
         verifyNoMoreInteractions(process);
+        verifyNoMoreInteractions(service);
     }
 }

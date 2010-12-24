@@ -12,8 +12,6 @@ import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
 import deism.core.External;
-import deism.core.Flushable;
-import deism.core.Startable;
 import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 import deism.core.StatelessEventGenerator;
@@ -45,27 +43,6 @@ public class DefaultProcessBuilder {
     }
 
     /**
-     * Register secondary interfaces of the given object with the process.
-     * 
-     * @param object
-     */
-    @SuppressWarnings("unchecked")
-    protected void register(Object object) {
-        if (object instanceof Startable) {
-            logger.debug("Register startable " + object);
-            service.addStartable((Startable) object);
-        }
-        if (object instanceof Flushable) {
-            logger.debug("Register flushable " + object);
-            service.addFlushable((Flushable) object);
-        }
-        if (object instanceof StateHistory<?>) {
-            logger.debug("Register state aware " + object);
-            service.addStatefulObject((StateHistory<Long>) object);
-        }
-    }
-
-    /**
      * Adapt the given EventSource according to the properties of the adaptee.
      * If the adaptee does not record the state history itself, wrap it into a
      * TimewarpEventSourceAdapter.
@@ -84,7 +61,7 @@ public class DefaultProcessBuilder {
             logger.debug("Decorate stateful " + adaptee
                     + " with timewarp source adapter");
             result = new TimewarpEventSourceAdapter(result);
-            register(result);
+            service.register(result);
         }
 
         return result;
@@ -96,7 +73,7 @@ public class DefaultProcessBuilder {
     protected EventSource adapt(StatefulEventGenerator generator) {
         logger.debug("Adapt " + generator + " to EventSource");
         EventSource result = new EventSourceStatefulGeneratorAdapter(generator);
-        register(result);
+        service.register(result);
         return result;
     }
 
@@ -110,7 +87,7 @@ public class DefaultProcessBuilder {
         if (adaptee.getClass().isAnnotationPresent(External.class)) {
             logger.debug("Decorate external " + adaptee + " with importer");
             result = new ExternalEventGeneratorAdapter(generator, service);
-            register(result);
+            service.register(result);
         }
 
         return result;
@@ -122,7 +99,7 @@ public class DefaultProcessBuilder {
     protected EventSource adapt(StatelessEventGenerator generator) {
         logger.debug("Adapt " + generator + " to EventSource");
         EventSource result = new EventSourceStatelessGeneratorAdapter(generator);
-        register(result);
+        service.register(result);
         return result;
     }
 
@@ -133,7 +110,7 @@ public class DefaultProcessBuilder {
      * @param source
      */
     public void add(EventSource source) {
-        register(source);
+        service.register(source);
         EventSource result = decorate(source, source);
         logger.debug("Add EventSource " + result);
         process.addEventSource(result);
@@ -146,7 +123,7 @@ public class DefaultProcessBuilder {
      * @param source
      */
     public void add(StatefulEventGenerator generator) {
-        register(generator);
+        service.register(generator);
         EventSource source = adapt(decorate(generator, generator));
         EventSource result = decorate(source, generator);
         logger.debug("Add EventSource " + result);
@@ -160,7 +137,7 @@ public class DefaultProcessBuilder {
      * @param source
      */
     public void add(StatelessEventGenerator generator) {
-        register(generator);
+        service.register(generator);
         EventSource source = adapt(generator);
         EventSource result = decorate(source, generator);
         logger.debug("Add EventSource " + result);
@@ -186,7 +163,7 @@ public class DefaultProcessBuilder {
         if (adaptee.getClass().isAnnotationPresent(External.class)) {
             logger.debug("Decorate external " + adaptee + " with exporter");
             result = new ExternalEventSinkAdapter(result, service);
-            register(result);
+            service.register(result);
         }
 
         if (!(adaptee instanceof StateHistory<?>)
@@ -194,7 +171,7 @@ public class DefaultProcessBuilder {
             logger.debug("Decorate stateful " + adaptee
                     + " with timewarp sink adapter");
             result = new TimewarpEventSinkAdapter(result);
-            register(result);
+            service.register(result);
         }
 
         return result;
@@ -207,7 +184,7 @@ public class DefaultProcessBuilder {
      * @param sink
      */
     public void add(EventSink sink) {
-        register(sink);
+        service.register(sink);
         EventSink result = decorate(sink, sink);
         logger.debug("Add EventSink " + result);
         process.addEventSink(result);
@@ -219,10 +196,10 @@ public class DefaultProcessBuilder {
      * @param sink
      */
     public void add(EventSink sink, EventCondition filter) {
-        register(sink);
+        service.register(sink);
         EventSink result = decorate(sink, sink);
         result = new FilteredEventSink(filter, result);
-        register(result);
+        service.register(result);
         logger.debug("Add EventSink " + result + " with filter " + filter);
         process.addEventSink(result);
     }
@@ -249,7 +226,7 @@ public class DefaultProcessBuilder {
      * @param sink
      */
     public void add(EventDispatcher dispatcher) {
-        register(dispatcher);
+        service.register(dispatcher);
         EventDispatcher result = decorate(dispatcher, dispatcher);
         logger.debug("Add EventDispatcher " + result);
         process.addEventDispatcher(result);
@@ -263,7 +240,7 @@ public class DefaultProcessBuilder {
      *            child process
      */
     public void add(DiscreteEventProcess process) {
-        register(process);
+        service.register(process);
 
         // same as add(EventSource source) without register
         EventSource source = decorate((EventSource) process,
