@@ -30,19 +30,13 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
         }
     };
 
-    private static final LvtListener NULL_LVT_LISTENER = new LvtListener() {
-        @Override
-        public void update(long lvt) {
-        }
-    };
-
     private final List<Startable> startableList = new ArrayList<Startable>();
     private final List<StateHistory<Long>> statefulObjects =
             new ArrayList<StateHistory<Long>>();
     private final List<Flushable> flushables = new ArrayList<Flushable>();
+    private final List<LvtListener> lvtListeners = new ArrayList<LvtListener>();
     private EventImporter eventImporter = NULL_IMPORTER;
     private EventExporter eventExporter = NULL_EXPORTER;
-    private LvtListener lvtListener = NULL_LVT_LISTENER;
     private final static Logger logger = Logger.getLogger(Service.class);
 
     /**
@@ -64,6 +58,10 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
             logger.debug("Register state aware " + object);
             addStatefulObject((StateHistory<Long>) object);
         }
+        if (object instanceof LvtListener) {
+            logger.debug("Set lvt listener " + object);
+            addLvtListener((LvtListener) object);
+        }
         if (object instanceof EventImporter) {
             logger.debug("Set event importer " + object);
             setEventImporter((EventImporter) object);
@@ -71,10 +69,6 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
         if (object instanceof EventExporter) {
             logger.debug("Set event exporter " + object);
             setEventExporter((EventExporter) object);
-        }
-        if (object instanceof LvtListener) {
-            logger.debug("Set lvt listener " + object);
-            setLvtListener((LvtListener) object);
         }
     }
 
@@ -90,16 +84,16 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
         flushables.add(flushable);
     }
 
+    private void addLvtListener(LvtListener lvtListener) {
+        lvtListeners.add(lvtListener);
+    }
+
     private void setEventImporter(EventImporter eventImporter) {
         this.eventImporter = eventImporter;
     }
 
     private void setEventExporter(EventExporter eventExporter) {
         this.eventExporter = eventExporter;
-    }
-
-    private void setLvtListener(LvtListener lvtListener) {
-        this.lvtListener = lvtListener;
     }
 
     @Override
@@ -152,6 +146,13 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
     }
 
     @Override
+    public void update(long lvt) {
+        for (LvtListener lvtListener : lvtListeners) {
+            lvtListener.update(lvt);
+        }
+    }
+
+    @Override
     public Event unpack(Event event) {
         return eventImporter.unpack(event);
     }
@@ -159,10 +160,5 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
     @Override
     public Event pack(Event event) {
         return eventExporter.pack(event);
-    }
-
-    @Override
-    public void update(long lvt) {
-        lvtListener.update(lvt);
     }
 }
