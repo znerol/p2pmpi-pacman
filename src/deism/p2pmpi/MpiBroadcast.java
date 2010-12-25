@@ -16,8 +16,8 @@ public class MpiBroadcast implements Endpoint<Message>, Emitter<Message>,
 
     public MpiBroadcast(IntraComm mpicomm, int mpiroot) {
 
-        MpiBroadcastOperation<Message> operation = new MpiBroadcastOperation<Message>(
-                mpicomm, mpiroot);
+        MpiBroadcastOperation<Message> operation =
+                new MpiBroadcastOperation<Message>(mpicomm, mpiroot);
 
         if (mpicomm.Rank() == mpiroot) {
             sender = new SendThread<Message>(operation);
@@ -45,7 +45,31 @@ public class MpiBroadcast implements Endpoint<Message>, Emitter<Message>,
             sender.terminate();
         }
         else {
-            receiver.start();
+            receiver.terminate();
+        }
+    }
+
+    @Override
+    public void join() {
+        if (sender != null) {
+            while(sender.getState() != Thread.State.TERMINATED) {
+                try {
+                    sender.join();
+                }
+                catch (InterruptedException ex) {
+                    continue;
+                }
+            }
+        }
+        else {
+            while(receiver.getState() != Thread.State.TERMINATED) {
+                try {
+                    receiver.join();
+                }
+                catch (InterruptedException ex) {
+                    continue;
+                }
+            }
         }
     }
 

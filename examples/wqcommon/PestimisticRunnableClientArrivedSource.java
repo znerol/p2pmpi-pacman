@@ -39,6 +39,18 @@ public class PestimisticRunnableClientArrivedSource implements EventSource, Star
     }
 
     @Override
+    public void join() {
+        while(worker.getState() != Thread.State.TERMINATED) {
+            try {
+                worker.join();
+            }
+            catch (InterruptedException ex) {
+                continue;
+            }
+        }
+    }
+
+    @Override
     public synchronized Event peek(long currentSimtime) {
         this.currentSimtime = currentSimtime;
         if (currentEvent == null) {

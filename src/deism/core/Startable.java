@@ -16,4 +16,9 @@ public interface Startable {
      * @param simtime timestamp in simulation time units
      */
     public void stop(long simtime);
+
+    /**
+     * Called after stop in order to give threaded instances a chance to join
+     */
+    public void join();
 }

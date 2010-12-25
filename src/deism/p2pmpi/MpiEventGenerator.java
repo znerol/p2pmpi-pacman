@@ -60,4 +60,16 @@ public class MpiEventGenerator implements StatefulEventGenerator, Startable,
     public void stop(long simtime) {
         receiver.terminate();
     }
+
+    @Override
+    public void join() {
+        while(receiver.getState() != Thread.State.TERMINATED) {
+            try {
+                receiver.join();
+            }
+            catch (InterruptedException ex) {
+                continue;
+            }
+        }
+    }
 }

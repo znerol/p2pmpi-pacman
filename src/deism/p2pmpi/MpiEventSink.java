@@ -36,4 +36,16 @@ public class MpiEventSink implements EventSink, Startable {
     public void stop(long simtime) {
         sender.terminate();
     }
+
+    @Override
+    public void join() {
+        while(sender.getState() != Thread.State.TERMINATED) {
+            try {
+                sender.join();
+            }
+            catch (InterruptedException ex) {
+                continue;
+            }
+        }
+    }
 }

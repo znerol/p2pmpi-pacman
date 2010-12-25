@@ -117,6 +117,13 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
     }
 
     @Override
+    public void join() {
+        for (Startable startable : startableList) {
+            startable.join();
+        }
+    }
+
+    @Override
     public void save(Long key) throws StateHistoryException {
         for (StateHistory<Long> stateObject : statefulObjects) {
             stateObject.save(key);

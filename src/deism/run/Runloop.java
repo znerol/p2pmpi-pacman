@@ -68,6 +68,12 @@ public class Runloop {
             // fetch and handle system messages
             messageCenter.process();
 
+            // reevaluate loop condition, it's possible that we've been requested
+            // to terminate by a message.
+            if (stop) {
+                break;
+            }
+
             // identify simulation event with the smallest timestamp
             Event peekEvent = process.peek(currentSimtime);
             logger.info("Optained peekEvent from event source " + peekEvent);
@@ -155,7 +161,8 @@ public class Runloop {
 
         logger.debug("Stop source, sink, governor");
         service.stop(currentSimtime);
-
+        logger.debug("Join source, sink, governor");
+        service.join();
         logger.info("End runloop");
     }
 

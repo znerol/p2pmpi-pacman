@@ -47,6 +47,18 @@ public class OptimisticRunnableClientArrivedSource implements EventSource, Start
     }
 
     @Override
+    public void join() {
+        while(worker.getState() != Thread.State.TERMINATED) {
+            try {
+                worker.join();
+            }
+            catch (InterruptedException ex) {
+                continue;
+            }
+        }
+    }
+
+    @Override
     public Event peek(long currentSimtime) {
         return events.peek();
     }

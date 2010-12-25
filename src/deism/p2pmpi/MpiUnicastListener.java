@@ -37,4 +37,16 @@ public class MpiUnicastListener implements Startable, Emitter<Message> {
     public void setEndpoint(Endpoint<Message> endpoint) {
         receiver.setEndpoint(endpoint);
     }
+
+    @Override
+    public void join() {
+        while(receiver.getState() != Thread.State.TERMINATED) {
+            try {
+                receiver.join();
+            }
+            catch (InterruptedException ex) {
+                continue;
+            }
+        }
+    }
 }

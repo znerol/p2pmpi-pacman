@@ -31,4 +31,16 @@ public class MpiUnicastEndpoint implements Endpoint<Message>, Startable {
     public void send(Message message) {
         sender.send(message);
     }
+
+    @Override
+    public void join() {
+        while(sender.getState() != Thread.State.TERMINATED) {
+            try {
+                sender.join();
+            }
+            catch (InterruptedException ex) {
+                continue;
+            }
+        }
+    }
 }

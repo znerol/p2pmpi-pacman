@@ -36,6 +36,11 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
         logger.debug("Governor stop");
     }
 
+    @Override
+    public void join() {
+        // intentionally left empty
+    }
+
     /**
      * Delays execution of current thread until something calls resume.
      */
