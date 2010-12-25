@@ -7,9 +7,10 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.PatternLayout;
 
 import p2pmpi.mpi.MPI;
-import util.TerminateAfterDuration;
 import deism.core.Event;
 import deism.core.EventCondition;
+import deism.ipc.base.Handler;
+import deism.ipc.base.Message;
 import deism.p2pmpi.MpiBroadcast;
 import deism.p2pmpi.MpiEventSink;
 import deism.p2pmpi.MpiEventGenerator;
@@ -28,6 +29,7 @@ import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 import deism.run.StateHistoryController;
 import deism.tqgvt.Client;
+import deism.tqgvt.GvtMessage;
 import deism.tqgvt.GvtMessageFilter;
 import deism.tqgvt.Master;
 import deism.tqgvt.ReportMessageFilter;
@@ -85,9 +87,6 @@ public class Pingpong {
                         + PatternLayout.TTCC_CONVERSION_PATTERN);
         Appender appender = new ConsoleAppender(layout);
         BasicConfigurator.configure(appender);
-
-        /* exit simulation after n units of simulation time */
-        EventCondition termCond = new TerminateAfterDuration(1000);
 
         String speedString = System.getProperty("simulationSpeed", "0.1");
         double speed = Double.valueOf(speedString).doubleValue();
@@ -183,9 +182,28 @@ public class Pingpong {
 
         stateController.setStateObject(service);
 
-        Runloop runloop =
+        EventCondition termCond = new EventCondition() {
+            @Override
+            public boolean match(Event e) {
+                return false;
+            }
+        };
+
+        final Runloop runloop =
                 new Runloop(governor, termCond, stateController,
                         snapshotCondition, messageCenter, service);
+
+        Handler<Message> terminateAfterGvt = new Handler<Message>() {
+            @Override
+            public void handle(Message message) {
+                assert(message instanceof GvtMessage);
+                if (((GvtMessage)message).getGvt() >= 1000) {
+                    runloop.stop();
+                }
+            }
+        };
+
+        messageCenter.addHandler(terminateAfterGvt, new GvtMessageFilter());
 
         runloop.run(process);
 
