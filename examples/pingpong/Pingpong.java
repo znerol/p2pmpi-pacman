@@ -19,6 +19,7 @@ import deism.p2pmpi.MpiUnicastEndpoint;
 import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
+import deism.run.LvtListener;
 import deism.run.MessageCenter;
 import deism.run.NoStateController;
 import deism.run.Service;
@@ -40,6 +41,37 @@ public class Pingpong {
     private static int BALL_TAG = 0;
     private static int REPORT_TAG = 1;
 
+    public static class TerminationController implements LvtListener, Handler<Message> {
+        private final long limit;
+        private final Runloop runloop;
+        private long lvt;
+        private long gvt;
+
+        public TerminationController(long limit, Runloop runloop) {
+            this.limit = limit;
+            this.runloop = runloop;
+        }
+
+        private void terminateIfLimitReached() {
+            if (lvt >= limit && gvt >= limit) {
+                runloop.stop();
+            }
+        }
+
+        @Override
+        public void handle(Message message) {
+            assert(message instanceof GvtMessage);
+            this.gvt = ((GvtMessage)message).getGvt();
+            terminateIfLimitReached();
+        }
+
+        @Override
+        public void update(long lvt) {
+            this.lvt = lvt;
+            terminateIfLimitReached();
+        }
+
+    }
     public static class Player {
         public static DiscreteEventProcess build(ExecutionGovernor governor,
                 Service service) {
@@ -193,17 +225,9 @@ public class Pingpong {
                 new Runloop(governor, termCond, stateController,
                         snapshotCondition, messageCenter, service);
 
-        Handler<Message> terminateAfterGvt = new Handler<Message>() {
-            @Override
-            public void handle(Message message) {
-                assert(message instanceof GvtMessage);
-                if (((GvtMessage)message).getGvt() >= 1000) {
-                    runloop.stop();
-                }
-            }
-        };
-
-        messageCenter.addHandler(terminateAfterGvt, new GvtMessageFilter());
+        TerminationController termController = new TerminationController(1000, runloop);
+        messageCenter.addHandler(termController, new GvtMessageFilter());
+        service.register(termController);
 
         runloop.run(process);
 
