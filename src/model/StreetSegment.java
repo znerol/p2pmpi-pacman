@@ -1,95 +1,119 @@
 package model;
 
-import java.awt.Point;
-import java.util.HashMap;
-import java.util.Map;
+import paclib.GamePlay;
 
-public class StreetSegment extends Field {
-    /**
-     * Map with all WayPoint on this field. The key is the relative Point within
-     * this field.
-     */
-    private final Map<Point, WayPoint> wayPoints = new HashMap<Point, WayPoint>();
-    private StreetSegment north;
-    private StreetSegment east;
-    private StreetSegment south;
-    private StreetSegment west;
+public class StreetSegment extends BoardSegment {
+    private static int HALF_SIZE = GamePlay.GUI_FIELD_SIZE / 2;
+    
+    private Waypoint centre;
+    private Waypoint north;
+    private Waypoint east;
+    private Waypoint south;
+    private Waypoint west;
+    
 
-    protected StreetSegment(int x, int y, Board board) {
+    public StreetSegment(int x, int y, Board board) {
         super(x, y, board);
     }
 
-    public void addWayPoint(WayPoint wayPoint) {
-        Point p = new Point(wayPoint.getRelativePoint());
-        if (wayPoints.containsKey(p))
-            // TODO Ruben: Andere Exception wählen.
-            throw new RuntimeException();
-        wayPoints.put(wayPoint.getRelativePoint(), wayPoint);
+    @Override
+    public boolean isStreet() {
+        return true;
     }
-
-    /**
-     * Gets WayPoint in relative position
-     */
-    public WayPoint getWayPoint(int x, int y) {
-        return wayPoints.get(new Point(x, y));
+    
+    @Override
+    public String toString() {
+        return ".";
     }
-
-    /**
-     * Gets WayPoint in relative position
-     */
-    public WayPoint getWayPoint(Point p) {
-        return wayPoints.get(p);
-    }
-
-    public StreetSegment getNorthStreetSegment() {
+    
+    public Waypoint getWaypointNorth() {
         return north;
     }
-
-    @Override
-    protected void setNorth(Field field) {
-        super.setNorth(field);
-        if (field instanceof StreetSegment)
-            this.north = (StreetSegment) field;
-        else
-            this.north = null;
-    }
-
-    public StreetSegment getEastStreetSegment() {
+    
+    public Waypoint getWaypointEast() {
         return east;
     }
-
-    @Override
-    protected void setEast(Field field) {
-        super.setEast(field);
-        if (field instanceof StreetSegment)
-            this.east = (StreetSegment) field;
-        else
-            this.east = null;
-    }
-
-    public StreetSegment getSouthStreetSegment() {
+    
+    public Waypoint getWaypointSouth() {
         return south;
     }
-
-    @Override
-    protected void setSouth(Field field) {
-        super.setSouth(field);
-        if (field instanceof StreetSegment)
-            this.south = (StreetSegment) field;
-        else
-            this.south = null;
-    }
-
-    public StreetSegment getWestStreetSegment() {
+    
+    public Waypoint getWaypointWest() {
         return west;
     }
+    
+    public Waypoint getWaypointCentre() {
+        return centre;
+    }
+    
+    public void populateWaypoints() {
+        if (centre != null)
+            return;
+        
+        this.centre = new Waypoint(this, HALF_SIZE, HALF_SIZE);
+        populateNorth();
+        populateEast();
+        populateSouth();
+        populateWest();
+    }
+    
+    private void populateNorth() {
+        if (!getNorth().isStreet())
+            return;
+        
+        north = centre;
+        for(int i = 0; i < HALF_SIZE; i++) {
+            north.setNorth(new Waypoint(this, north.getRelativeX(), north.getRelativeY() - 1));
+            north = north.getNorth();
+        }
+        
+        StreetSegment street = (StreetSegment)getNorth();
+        north.setNorth(street.getWaypointSouth());
+        street.populateWaypoints();
+    }
+    
+    private void populateEast() {
+        if (!getEast().isStreet())
+            return;
+        
+        east = centre;
+        for(int i = 0; i < HALF_SIZE; i++) {
+            east.setEast(new Waypoint(this, east.getRelativeX() + 1, east.getRelativeY()));
+            east = east.getEast();
+        }
+        
+        StreetSegment street = (StreetSegment)getEast();
+        east.setEast(street.getWaypointWest());
+        street.populateWaypoints();
+    }
+    
+    private void populateSouth() {
+        if (!getSouth().isStreet())
+            return;
+        
+        south = centre;
+        for(int i = 0; i < HALF_SIZE; i++) {
+            south.setSouth(new Waypoint(this, south.getRelativeX(), south.getRelativeY() + 1));
+            south = south.getSouth();
+        }
 
-    @Override
-    protected void setWest(Field field) {
-        super.setWest(field);
-        if (field instanceof StreetSegment)
-            this.west = (StreetSegment) field;
-        else
-            this.west = null;
+        StreetSegment street = (StreetSegment)getSouth();
+        south.setSouth(street.getWaypointNorth());
+        street.populateWaypoints();
+    }
+    
+    private void populateWest() {
+        if (!getWest().isStreet())
+            return;
+        
+        west = centre;
+        for(int i = 0; i < HALF_SIZE; i++) {
+            west.setWest(new Waypoint(this, west.getRelativeX() - 1, west.getRelativeY()));
+            west = west.getWest();
+        }
+        
+        StreetSegment street = (StreetSegment)getWest();
+        west.setWest(street.getWaypointEast());
+        street.populateWaypoints();
     }
 }

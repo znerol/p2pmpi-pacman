@@ -81,9 +81,9 @@ public class GamePlay extends JFrame {
      */
     public static final int GUI_POWERUP_SIZE = 5;
     /**
-     * Feld Groesse
+     * Feld Groesse. Muss immer eine ungerade Zahl sein!
      */
-    public static final int GUI_FIELD_SIZE = 8;
+    public static final int GUI_FIELD_SIZE = 9;
     /**
      * Streckfaktor
      */
@@ -94,7 +94,7 @@ public class GamePlay extends JFrame {
     public static final int SPEED = 16;
 
     /**
-     * Anzahl Felder, die ein Ghost geht, bis ein Skip von einem Frame ausgelöst
+     * Anzahl Felder, die ein Ghost geht, bis ein Skip von einem Frame ausgelï¿½st
      * wird.
      */
     public static final int GHOST_SKIP = GUI_FIELD_SIZE;
@@ -109,7 +109,7 @@ public class GamePlay extends JFrame {
     /**
      * Zeit wo die HappyPill wirkt
      */
-    public static final int SPECIAL_HAPPYPILL_TIME = 500;
+    public static final int SPECIAL_HAPPYPILL_STEPS = 32;
 
     private final String file = "world1";
 

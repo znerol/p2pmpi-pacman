@@ -140,7 +140,7 @@ public class Board {
 	 */
 	public void setHappypill() {
 		happypill = true;
-		happypillTime = GamePlay.SPECIAL_HAPPYPILL_TIME;
+		happypillTime = GamePlay.SPECIAL_HAPPYPILL_STEPS;
 	}
 
 	/**
