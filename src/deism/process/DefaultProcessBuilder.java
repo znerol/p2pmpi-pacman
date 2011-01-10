@@ -1,0 +1,262 @@
+package deism.process;
+
+import org.apache.log4j.Logger;
+
+import deism.adapter.EventSourceStatefulGeneratorAdapter;
+import deism.adapter.EventSourceStatelessGeneratorAdapter;
+import deism.adapter.ExternalEventGeneratorAdapter;
+import deism.adapter.ExternalEventSinkAdapter;
+import deism.adapter.FilteredEventSink;
+import deism.core.EventCondition;
+import deism.core.EventDispatcher;
+import deism.core.EventSink;
+import deism.core.EventSource;
+import deism.core.External;
+import deism.core.Stateful;
+import deism.core.StatefulEventGenerator;
+import deism.core.StatelessEventGenerator;
+import deism.run.Service;
+import deism.stateful.StateHistory;
+import deism.stateful.TimewarpEventSinkAdapter;
+import deism.stateful.TimewarpEventSourceAdapter;
+
+public class DefaultProcessBuilder {
+    private final DefaultDiscreteEventProcess process;
+    private final Service service;
+    private final static Logger logger = Logger
+            .getLogger(DefaultProcessBuilder.class);
+
+    public DefaultProcessBuilder(Service service) {
+        this(new DefaultDiscreteEventProcess(), service);
+    }
+
+    public DefaultProcessBuilder(DefaultDiscreteEventProcess process, Service service) {
+        this.process = process;
+        this.service = service;
+    }
+
+    /**
+     * Return built process
+     */
+    public DiscreteEventProcess getProcess() {
+        return process;
+    }
+
+    /**
+     * Adapt the given EventSource according to the properties of the adaptee.
+     * If the adaptee does not record the state history itself, wrap it into a
+     * TimewarpEventSourceAdapter.
+     * 
+     * @param source
+     *            the event source to decorate if necessary
+     * @param adaptee
+     *            the original object, possibly equal to source
+     * @return
+     */
+    protected EventSource decorate(EventSource source, Object adaptee) {
+        EventSource result = source;
+
+        if (!(adaptee instanceof StateHistory<?>)
+                && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
+            logger.debug("Decorate stateful " + adaptee
+                    + " with timewarp source adapter");
+            result = new TimewarpEventSourceAdapter(result);
+            service.register(result);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return an EventSource wrapping the given generator
+     */
+    protected EventSource adapt(StatefulEventGenerator generator) {
+        logger.debug("Adapt " + generator + " to EventSource");
+        EventSource result = new EventSourceStatefulGeneratorAdapter(generator);
+        service.register(result);
+        return result;
+    }
+
+    /**
+     * Wrap the given generator into an ExternalEventGeneratorAdapter registered
+     * with the builders importer if @External annotation is present on adaptee.
+     */
+    protected StatefulEventGenerator decorate(StatefulEventGenerator generator,
+            Object adaptee) {
+        StatefulEventGenerator result = generator;
+        if (adaptee.getClass().isAnnotationPresent(External.class)) {
+            logger.debug("Decorate external " + adaptee + " with importer");
+            result = new ExternalEventGeneratorAdapter(generator, service);
+            service.register(result);
+        }
+
+        return result;
+    }
+
+    /**
+     * Return an EventSource wrapping the given generator
+     */
+    protected EventSource adapt(StatelessEventGenerator generator) {
+        logger.debug("Adapt " + generator + " to EventSource");
+        EventSource result = new EventSourceStatelessGeneratorAdapter(generator);
+        service.register(result);
+        return result;
+    }
+
+    /**
+     * Add an EventSource to the process, registering supplementary interfaces
+     * and wrapping it with helper sources if necessary
+     * 
+     * @param source
+     */
+    public void add(EventSource source) {
+        service.register(source);
+        EventSource result = decorate(source, source);
+        logger.debug("Add EventSource " + result);
+        process.addEventSource(result);
+    }
+
+    /**
+     * Add a generator to the process, registering supplementary interfaces and
+     * wrapping it with helper sources.
+     * 
+     * @param source
+     */
+    public void add(StatefulEventGenerator generator) {
+        service.register(generator);
+        EventSource source = adapt(decorate(generator, generator));
+        EventSource result = decorate(source, generator);
+        logger.debug("Add EventSource " + result);
+        process.addEventSource(result);
+    }
+
+    /**
+     * Add a generator to the process, registering supplementary interfaces and
+     * wrapping it with helper sources.
+     * 
+     * @param source
+     */
+    public void add(StatelessEventGenerator generator) {
+        service.register(generator);
+        EventSource source = adapt(generator);
+        EventSource result = decorate(source, generator);
+        logger.debug("Add EventSource " + result);
+        process.addEventSource(result);
+    }
+
+    /**
+     * Adapt the given EventSink according to the properties of the adaptee. If
+     * the {@link External} annotation is present on the adaptee parameter, it
+     * gets wrapped into an {@link ExternalEventSinkAdapter}. Further if
+     * the adaptee does not record the state history itself, wrap it into a
+     * TimewarpEventSourceAdapter.
+     * 
+     * @param source
+     *            the event source to decorate if necessary
+     * @param adaptee
+     *            the original object, possibly the same as the source
+     * @return
+     */
+    protected EventSink decorate(EventSink sink, Object adaptee) {
+        EventSink result = sink;
+
+        if (adaptee.getClass().isAnnotationPresent(External.class)) {
+            logger.debug("Decorate external " + adaptee + " with exporter");
+            result = new ExternalEventSinkAdapter(result, service);
+            service.register(result);
+        }
+
+        if (!(adaptee instanceof StateHistory<?>)
+                && (adaptee.getClass().isAnnotationPresent(Stateful.class))) {
+            logger.debug("Decorate stateful " + adaptee
+                    + " with timewarp sink adapter");
+            result = new TimewarpEventSinkAdapter(result);
+            service.register(result);
+        }
+
+        return result;
+    }
+
+    /**
+     * Add an EventSink to the process, registering supplementary interfaces and
+     * decorating it with helper sinks if necessary
+     * 
+     * @param sink
+     */
+    public void add(EventSink sink) {
+        service.register(sink);
+        EventSink result = decorate(sink, sink);
+        logger.debug("Add EventSink " + result);
+        process.addEventSink(result);
+    }
+
+    /**
+     * Add an EventSink to the process with the given filter.
+     * 
+     * @param sink
+     */
+    public void add(EventSink sink, EventCondition filter) {
+        service.register(sink);
+        EventSink result = decorate(sink, sink);
+        result = new FilteredEventSink(filter, result);
+        service.register(result);
+        logger.debug("Add EventSink " + result + " with filter " + filter);
+        process.addEventSink(result);
+    }
+
+    /**
+     * Adapt the given EventDispatcher according to the properties of the
+     * adaptee.
+     * 
+     * @param dispatcher
+     *            the event source to decorate if necessary
+     * @param adaptee
+     *            the original object, possibly equal to source
+     * @return
+     */
+    protected EventDispatcher decorate(EventDispatcher dispatcher,
+            Object adaptee) {
+        return dispatcher;
+    }
+
+    /**
+     * Add an EventDispatcher to the process, registering supplementary
+     * interfaces and decorating it with helper sinks if necessary
+     * 
+     * @param sink
+     */
+    public void add(EventDispatcher dispatcher) {
+        service.register(dispatcher);
+        EventDispatcher result = decorate(dispatcher, dispatcher);
+        logger.debug("Add EventDispatcher " + result);
+        process.addEventDispatcher(result);
+    }
+
+    /**
+     * Add a child process, registering supplementary interfaces and decorating
+     * it if necessary.
+     * 
+     * @param process
+     *            child process
+     */
+    public void add(DiscreteEventProcess process) {
+        service.register(process);
+
+        // same as add(EventSource source) without register
+        EventSource source = decorate((EventSource) process,
+                (EventSource) process);
+        logger.debug("Add EventSource " + source);
+        this.process.addEventSource(source);
+
+        // same as add(EventSink sink) without register
+        EventSink sink = decorate((EventSink) process, (EventSink) process);
+        logger.debug("Add EventSink " + sink);
+        this.process.addEventSink(sink);
+
+        // same as add(EventDispatcher dispatcher) without register
+        EventDispatcher dispatcher = decorate((EventDispatcher) process,
+                (EventDispatcher) process);
+        logger.debug("Add EventDispatcher " + sink);
+        this.process.addEventDispatcher(dispatcher);
+    }
+}

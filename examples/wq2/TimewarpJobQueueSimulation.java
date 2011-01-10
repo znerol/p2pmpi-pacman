@@ -1,45 +1,41 @@
-package wq1;
+package wq2;
 
 import java.util.Random;
-import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.BasicConfigurator;
 
+import util.JitterEventSource;
 import util.TerminateAfterDuration;
-import wqcommon.ClientArrivedEvent;
 import wqcommon.ClientArrivedGenerator;
-import wqcommon.PestimisticRunnableClientArrivedSource;
 
-import deism.adapter.EventSourceStatefulGeneratorAdapter;
 import deism.core.Event;
 import deism.core.EventCondition;
 import deism.process.DefaultProcessBuilder;
 import deism.process.DiscreteEventProcess;
 import deism.run.MessageCenter;
-import deism.run.Service;
-import deism.run.StateController;
 import deism.run.ExecutionGovernor;
-import deism.run.NoStateController;
 import deism.run.Runloop;
 import deism.run.ImmediateExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
+import deism.run.Service;
+import deism.run.StateHistoryController;
 
-public class JobQueueSimulation {
+public class TimewarpJobQueueSimulation {
     /**
      * @param args
      */
     public static void main(String[] args) {
         BasicConfigurator.configure();
         Random rng = new Random(1234);
-        
+
         /* exit simulation after n units of simulation time */
         EventCondition termCond = new TerminateAfterDuration(1000 * 50);
 
         Service service = new Service();
-        
-        String speedString = System.getProperty("simulationSpeed", "0");
+
+        String speedString = System.getProperty("simulationSpeed", "1.0");
         double speed = Double.valueOf(speedString).doubleValue();
-        
+
         ExecutionGovernor governor;
         if (speed > 0) {
             /* run simulation in realtime */
@@ -50,41 +46,42 @@ public class JobQueueSimulation {
             governor = new ImmediateExecutionGovernor();
         }
 
-        service.register(governor);
+        StateHistoryController stateController = new StateHistoryController();
+        stateController.setStateObject(service);
 
         DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
 
-        boolean multithread = Boolean.getBoolean("simulationMultithread");
-        if (multithread) {
-            builder.add(new PestimisticRunnableClientArrivedSource(
-                    rng, governor, 1000, 1600));
-        }
-        else {
-            builder.add(new EventSourceStatefulGeneratorAdapter(
-                new ClientArrivedGenerator(rng, 1000, 1600)));
-        }
-
-        PriorityBlockingQueue<ClientArrivedEvent> jobs =
-            new PriorityBlockingQueue<ClientArrivedEvent>();
-        builder.add(new ClerkSource(jobs));
-        builder.add(new ClerkSource(jobs));
-
-        builder.add(new JobAggregator(jobs));
+        builder.add(new ClientArrivedGenerator(rng, 1000, 1600));
         
-        StateController stateController =
-            new NoStateController();
+        WaitingRoom waitingRoom = new WaitingRoom();
+        builder.add(waitingRoom.source);
+        builder.add(waitingRoom.dispatcher);
 
-        EventCondition noSnapshots = new EventCondition() {
+        Counter counterOne = new Counter();
+        builder.add(counterOne);
+
+        Counter counterTwo = new Counter();
+        builder.add(counterTwo);
+
+        // add jitter
+        builder.add(new JitterEventSource());
+
+        // queue logger
+        builder.add(waitingRoom.statisticsLogger);
+        
+        EventCondition snapshotAll = new EventCondition() {
             @Override
             public boolean match(Event e) {
-                return false;
+                return true;
             }
         };
 
         MessageCenter messageCenter = new MessageCenter(governor);
 
-        Runloop runloop = new Runloop(governor, termCond, stateController,
-                noSnapshots, messageCenter, service);
+        Runloop runloop =
+                new Runloop(governor, termCond, stateController, snapshotAll,
+                        messageCenter, service);
+
         DiscreteEventProcess process = builder.getProcess();
         runloop.run(process);
     }
