@@ -20,6 +20,9 @@ import deism.stateful.StateHistory;
 import deism.stateful.TimewarpEventSinkAdapter;
 import deism.stateful.TimewarpEventSourceAdapter;
 
+/**
+ * Builder class for constructing {@link DiscreteEventProcess} easily.
+ */
 public class DefaultProcessBuilder {
     private final DefaultDiscreteEventProcess process;
     private final Service service;
@@ -157,6 +160,7 @@ public class DefaultProcessBuilder {
      *            the original object, possibly the same as the source
      * @return
      */
+
     protected EventSink decorate(EventSink sink, Object adaptee) {
         EventSink result = sink;
 

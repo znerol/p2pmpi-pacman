@@ -8,6 +8,12 @@ import deism.ipc.base.Emitter;
 import deism.ipc.base.Message;
 import deism.ipc.base.Endpoint;
 
+/**
+ * Broadcast {@link deism.ipc.base.Message} within a p2pmpi communicator. If the
+ * current rank matches the given mpiroot, MpiBroadcast acts as an
+ * {@link deism.ipc.base.Emitter} otherwise it acts as an
+ * {@link deism.ipc.base.Endpoint}.
+ */
 public class MpiBroadcast implements Endpoint<Message>, Emitter<Message>,
         Startable {
 
@@ -52,7 +58,7 @@ public class MpiBroadcast implements Endpoint<Message>, Emitter<Message>,
     @Override
     public void join() {
         if (sender != null) {
-            while(sender.getState() != Thread.State.TERMINATED) {
+            while (sender.getState() != Thread.State.TERMINATED) {
                 try {
                     sender.join();
                 }
@@ -62,7 +68,7 @@ public class MpiBroadcast implements Endpoint<Message>, Emitter<Message>,
             }
         }
         else {
-            while(receiver.getState() != Thread.State.TERMINATED) {
+            while (receiver.getState() != Thread.State.TERMINATED) {
                 try {
                     receiver.join();
                 }

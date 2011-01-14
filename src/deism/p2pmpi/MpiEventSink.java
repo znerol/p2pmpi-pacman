@@ -10,6 +10,10 @@ import deism.core.Stateful;
 import deism.ipc.async.BlockingSendOperation;
 import deism.ipc.async.SendThread;
 
+/**
+ * EventSink for outgoing Events to the specified receiver with a given tag
+ * within an p2pmpi communicator.
+ */
 @Stateful
 @External
 public class MpiEventSink implements EventSink, Startable {

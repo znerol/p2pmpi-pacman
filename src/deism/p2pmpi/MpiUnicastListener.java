@@ -8,6 +8,10 @@ import deism.ipc.base.Emitter;
 import deism.ipc.base.Endpoint;
 import deism.ipc.base.Message;
 
+/**
+ * Unicast {@link deism.ipc.base.Message} {@link deism.ipc.base.Emitter} for
+ * receiving realtime messages from other simulation islands via p2pmpi.
+ */
 public class MpiUnicastListener implements Startable, Emitter<Message> {
 
     private final ReceiveThread<Message> receiver;

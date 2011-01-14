@@ -15,6 +15,10 @@ import deism.ipc.async.ReceiveThread;
 import deism.ipc.base.Endpoint;
 import deism.run.ExecutionGovernor;
 
+/**
+ * EventSource for incoming Events from the specified sender with a given tag
+ * within an p2pmpi communicator.
+ */
 @Stateful
 @External
 public class MpiEventGenerator implements StatefulEventGenerator, Startable,
@@ -26,8 +30,8 @@ public class MpiEventGenerator implements StatefulEventGenerator, Startable,
 
     public MpiEventGenerator(IntraComm comm, int mpisender, int mpitag,
             ExecutionGovernor governor) {
-        BlockingReceiveOperation<Event> operation = new MpiReceiveOperation<Event>(
-                comm, mpisender, mpitag);
+        BlockingReceiveOperation<Event> operation =
+                new MpiReceiveOperation<Event>(comm, mpisender, mpitag);
         this.governor = governor;
         this.receiver = new ReceiveThread<Event>(operation);
         this.receiver.setEndpoint(this);
@@ -63,7 +67,7 @@ public class MpiEventGenerator implements StatefulEventGenerator, Startable,
 
     @Override
     public void join() {
-        while(receiver.getState() != Thread.State.TERMINATED) {
+        while (receiver.getState() != Thread.State.TERMINATED) {
             try {
                 receiver.join();
             }

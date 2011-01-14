@@ -4,6 +4,11 @@ import deism.core.Event;
 import deism.core.EventSink;
 import deism.ipc.base.EventExporter;
 
+/**
+ * Adapter class which lets an {@link deism.ipc.base.EventExporter} intercept
+ * and modify messages leaving in direction of another simulation island thru
+ * the adapted {@link deism.core.EventSink}.
+ */
 public class ExternalEventSinkAdapter implements EventSink {
     private final EventSink sink;
     private final EventExporter exporter;

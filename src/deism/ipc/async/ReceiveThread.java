@@ -5,31 +5,27 @@ import org.apache.log4j.Logger;
 import deism.ipc.base.Emitter;
 import deism.ipc.base.Endpoint;
 
+/**
+ * Thread which constantly polls the given
+ * {@link deism.ipc.async.BlockingReceiveOperation} sending incoming messages to
+ * the specified {@link deism.ipc.base.Endpoint}
+ * 
+ * @param <T> Type of message
+ */
 public class ReceiveThread<T> extends Thread implements Emitter<T> {
     private Endpoint<T> endpoint;
     private final BlockingReceiveOperation<T> receiveOperation;
-    private final ThreadListener threadListener;
     private boolean done = false;
 
-    private final static Logger logger = Logger
-            .getLogger(ReceiveThread.class);
+    private final static Logger logger = Logger.getLogger(ReceiveThread.class);
 
     public ReceiveThread(BlockingReceiveOperation<T> receiveOperation) {
-        this(receiveOperation, null);
-    }
-
-    public ReceiveThread(BlockingReceiveOperation<T> receiveOperation,
-            ThreadListener threadListener) {
         this.receiveOperation = receiveOperation;
-        this.threadListener = threadListener;
     }
 
     @Override
     public void run() {
         logger.debug("Start worker thread");
-        if (threadListener != null) {
-            threadListener.started();
-        }
 
         while (true) {
             synchronized (this) {
@@ -52,9 +48,6 @@ public class ReceiveThread<T> extends Thread implements Emitter<T> {
             }
         }
 
-        if (threadListener != null) {
-            threadListener.stopped();
-        }
         logger.debug("Terminated worker thread");
     }
 

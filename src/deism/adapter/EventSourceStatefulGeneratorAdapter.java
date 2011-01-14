@@ -6,7 +6,8 @@ import deism.core.Stateful;
 import deism.core.StatefulEventGenerator;
 
 /**
- * Adapter class which turns a StatefulEventGenerator into an EventSource
+ * Adapter class which turns a {@link deism.core.StatefulEventGenerator} into an
+ * {@link deism.core.EventSource}.
  */
 @Stateful
 public class EventSourceStatefulGeneratorAdapter implements EventSource {
