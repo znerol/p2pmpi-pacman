@@ -165,11 +165,11 @@ public class Pingpong {
                     new MpiUnicastListener(MPI.COMM_WORLD, MPI.ANY_SOURCE,
                             REPORT_TAG);
             service.register(gvtReportFromClients);
-            gvtReportFromClients.setEndpoint(messageCenter);
+            messageCenter.addEmitter(gvtReportFromClients);
 
             final Master tqmaster = new Master(2);
             service.register(tqmaster);
-            tqmaster.setEndpoint(messageCenter);
+            messageCenter.addEmitter(tqmaster);
             messageCenter.addHandler(tqmaster, new ReportMessageFilter());
 
             // build process
@@ -192,7 +192,7 @@ public class Pingpong {
             final MpiBroadcast gvtMessageFromMaster =
                     new MpiBroadcast(MPI.COMM_WORLD, MASTER_RANK);
             service.register(gvtMessageFromMaster);
-            gvtMessageFromMaster.setEndpoint(messageCenter);
+            messageCenter.addEmitter(gvtMessageFromMaster);
 
             final MpiUnicastEndpoint gvtReportToMaster =
                     new MpiUnicastEndpoint(MPI.COMM_WORLD, MASTER_RANK,
@@ -204,7 +204,7 @@ public class Pingpong {
             Client tqclient =
                     new Client(MPI.COMM_WORLD.Rank(), 100, stateController);
             service.register(tqclient);
-            tqclient.setEndpoint(messageCenter);
+            messageCenter.addEmitter(tqclient);
             messageCenter.addHandler(tqclient, new GvtMessageFilter());
 
             // build process

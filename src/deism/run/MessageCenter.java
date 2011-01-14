@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Queue;
 
 import deism.ipc.base.Condition;
+import deism.ipc.base.Emitter;
 import deism.ipc.base.Endpoint;
 import deism.ipc.base.FilteredEndpoint;
 import deism.ipc.base.FilteredHandler;
@@ -61,6 +62,10 @@ public class MessageCenter implements Endpoint<Message> {
     public void addEndpoint(Endpoint<Message> endpoint,
             Condition<Message> condition) {
         endpoints.add(new FilteredEndpoint<Message>(endpoint, condition));
+    }
+
+    public void addEmitter(Emitter<Message> emitter) {
+        emitter.setEndpoint(this);
     }
 
     @Override
