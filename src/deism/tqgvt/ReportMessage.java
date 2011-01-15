@@ -4,6 +4,11 @@ import java.util.Map;
 
 import deism.ipc.base.Message;
 
+/**
+ * TQ-GVT report message sent from {@link Client} to {@link Master} periodically
+ * providing information about local virtual time and message counters for a
+ * given time quantum.
+ */
 public class ReportMessage implements Message {
     private static final long serialVersionUID = 4825754443295424225L;
 

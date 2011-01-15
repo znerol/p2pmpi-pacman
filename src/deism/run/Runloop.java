@@ -38,16 +38,11 @@ public class Runloop {
     }
 
     /**
-     * Wait for Event timestamp
+     * Loop thru all events provided by the event source, suspend and dispatch
+     * them as well as process realtime messages.
      * 
-     * Suspend execution until the events timestamp has been reached. if the
-     * events timestamp lies in the past, the method returns immediately.
-     * Suspend indefinitely if event is null.
-     * 
-     * Use wakeup to resume before the timeout is reached.
-     * 
-     * @param e
-     * @throws InterruptedException
+     * @param process
+     *            The discrete event process to execeute
      */
     public void run(DiscreteEventProcess process) {
         logger.debug("Start runloop at simulation time: " + currentSimtime);
@@ -68,7 +63,8 @@ public class Runloop {
             // fetch and handle system messages
             messageCenter.process();
 
-            // reevaluate loop condition, it's possible that we've been requested
+            // reevaluate loop condition, it's possible that we've been
+            // requested
             // to terminate by a message.
             if (stop) {
                 break;

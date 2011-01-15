@@ -3,6 +3,9 @@ package deism.run;
 import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
+/**
+ * Record, restore and release state history in a simulation
+ */
 public interface StateController {
     /**
      * Take a snapshot of the current state of the simulation for the given

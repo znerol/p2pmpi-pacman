@@ -85,8 +85,8 @@ public class MessageCenter implements Endpoint<Message> {
      * @param endpoint
      *            message endpoint
      */
-    public void addEndpoint(Endpoint<Message> Endpoint) {
-        endpoints.add(Endpoint);
+    public void addEndpoint(Endpoint<Message> endpoint) {
+        endpoints.add(endpoint);
     }
 
     /**

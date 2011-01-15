@@ -7,9 +7,19 @@ import java.util.Queue;
 import deism.core.Event;
 import deism.core.EventSource;
 
-public class TimewarpEventSourceAdapter
-        extends AbstractStateHistory<Long, Event>
-        implements EventSource {
+/**
+ * Adapter class for simple {@link deism.core.Stateful} {@link EventSource}
+ * classes which do not implement {@link StateHistory} on their own.
+ * 
+ * TimewarpEventSourceAdapter specifically is responsible for:
+ * <ul>
+ * <li>annihilating pending events and matching anti-events</li>
+ * <li>ensuring that events delivered to the runloop via {@link #peek(long)} get
+ * delivered again after a rollback and the following replay of the simulation</li>
+ * </ul>
+ */
+public class TimewarpEventSourceAdapter extends
+        AbstractStateHistory<Long, Event> implements EventSource {
 
     private final Queue<Event> pending = new PriorityQueue<Event>();
     private final Queue<Event> pendingAnti = new PriorityQueue<Event>();
@@ -35,7 +45,7 @@ public class TimewarpEventSourceAdapter
                 }
                 source.remove(event);
             }
-            else if(pendingAnti.remove(inverseEvent)) {
+            else if (pendingAnti.remove(inverseEvent)) {
                 // Just silently absorb the event if we have a matching
                 // antimessage pending.
                 source.remove(event);
@@ -59,14 +69,15 @@ public class TimewarpEventSourceAdapter
         }
 
         Event pendingPeek = pending.peek();
-        assert(pendingPeek == null || pendingPeek.isAntimessage() == false);
+        assert (pendingPeek == null || pendingPeek.isAntimessage() == false);
         Event pendingAntiPeek = pendingAnti.peek();
-        assert(pendingAntiPeek == null || pendingAntiPeek.isAntimessage() == true);
+        assert (pendingAntiPeek == null || pendingAntiPeek.isAntimessage() == true);
         Event result = null;
 
         if (pendingPeek != null && pendingAntiPeek != null) {
-            result = pendingPeek.compareTo(pendingAntiPeek) >= 0 ?
-                    pendingAntiPeek : pendingPeek;
+            result =
+                    pendingPeek.compareTo(pendingAntiPeek) >= 0 ? pendingAntiPeek
+                            : pendingPeek;
         }
         else if (pendingPeek != null) {
             result = pendingPeek;
@@ -83,11 +94,11 @@ public class TimewarpEventSourceAdapter
         boolean result;
         if (event.isAntimessage()) {
             result = pendingAnti.remove(event);
-            assert(result);
+            assert (result);
         }
         else {
             result = pending.remove(event);
-            assert(result);
+            assert (result);
         }
         pushHistory(event);
     }

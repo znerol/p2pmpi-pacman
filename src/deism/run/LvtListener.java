@@ -3,8 +3,8 @@ package deism.run;
 /**
  * Registered lvt listeners will get notified whenever the local virtual time
  * changes.
- * 
- * @see {@link Service}
+ *
+ * @see Service
  */
 public interface LvtListener {
     /**
