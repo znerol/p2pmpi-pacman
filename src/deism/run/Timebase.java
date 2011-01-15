@@ -1,7 +1,8 @@
 package deism.run;
 
 /**
- * Convert between different time bases
+ * Provide scalable and convertible time system. Reference time units are
+ * milliseconds.
  */
 public class Timebase {
     private long base;
@@ -24,34 +25,45 @@ public class Timebase {
         this(0, 1.0);
     }
 
+    /**
+     * Return time scale factor. Reference time units are milliseconds.
+     * 
+     * @return time scale factor
+     */
     public double getScale() {
         return scale;
     }
 
+    /**
+     * Set time scale factor. Reference time units are milliseconds.
+     */
     public void setScale(double scale) {
         this.scale = scale;
     }
 
     /**
-     * Set simulation time baseline to given timestamp
+     * Set start time to given timestamp
      */
     public void setTimebase(long base) {
         this.base = base;
     }
 
     /**
-     * Return time base
+     * Return start time
      */
     public long getTimebase() {
         return base;
     }
 
     /**
-     * Return simulation time represented by the given walltime
+     * Convert timestamp in units of this timebase to a timestamp in units of
+     * the target timebase.
      * 
-     * @param currentTimeMillis
-     *            walltime
-     * @return walltime converted to simtime
+     * @param timestamp
+     *            in units of this timebase
+     * @param target
+     *            other timebase
+     * @return timestamp in units of the target timebase
      */
     public long convert(long timestamp, Timebase target) {
         long dt = (long) (target.scale / this.scale * (timestamp - this.base));

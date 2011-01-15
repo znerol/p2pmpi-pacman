@@ -6,6 +6,9 @@ import java.util.TreeSet;
 import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
+/**
+ * A {@link StateController} implementation controlling {@link StateHistory}
+ */
 public class StateHistoryController implements StateController {
 
     private SortedSet<Long> snapshots = new TreeSet<Long>();
@@ -53,7 +56,7 @@ public class StateHistoryController implements StateController {
         snapshots.headSet(timestamp).clear();
         if (snapshots.size() == 0) {
             throw new StateHistoryException(
-                    "Attempt to rollback to a timestamp which was never recorded");
+                    "Attempt to commit a timestamp which was never recorded");
         }
 
         Long snapshotKey = snapshots.first();
