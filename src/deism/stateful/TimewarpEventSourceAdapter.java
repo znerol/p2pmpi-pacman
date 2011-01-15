@@ -9,7 +9,7 @@ import deism.core.EventSource;
 
 public class TimewarpEventSourceAdapter
         extends AbstractStateHistory<Long, Event>
-        implements TimewarpEventSource {
+        implements EventSource {
 
     private final Queue<Event> pending = new PriorityQueue<Event>();
     private final Queue<Event> pendingAnti = new PriorityQueue<Event>();

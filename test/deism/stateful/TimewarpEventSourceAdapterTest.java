@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import deism.core.Event;
 import deism.core.EventSource;
-import deism.stateful.TimewarpEventSource;
 import deism.stateful.TimewarpEventSourceAdapter;
 
 public class TimewarpEventSourceAdapterTest {
@@ -25,7 +24,7 @@ public class TimewarpEventSourceAdapterTest {
             events.remove(event);
         }
     };
-    private final TimewarpEventSource source =
+    private final TimewarpEventSourceAdapter source =
         new TimewarpEventSourceAdapter(simpleSource);
 
     @Test
