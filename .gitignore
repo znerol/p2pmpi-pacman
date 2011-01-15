@@ -1,1 +1,5 @@
-doc/javadoc
+*~
+lib/p2pmpi/tmp
+lib/ext
+pacman-p2pmpi.jar
+bin

@@ -2,7 +2,7 @@
 <project name="deism-build-javadoc" default="javadoc" basedir=".">
     <target name="javadoc">
         <mkdir dir="doc/javadoc/"/>
-        <javadoc sourcepath="src" overview="src/overview.html" destdir="doc/javadoc/">
+        <javadoc sourcepath="src" linksource="true" destdir="bin/javadoc/">
         </javadoc>
     </target>
     <target name="clean">
