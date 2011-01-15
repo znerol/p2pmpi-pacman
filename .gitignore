@@ -1,5 +1,6 @@
 *~
-lib/p2pmpi/tmp
+doc/ext
 lib/ext
+lib/p2pmpi/tmp
 pacman-p2pmpi.jar
 bin
