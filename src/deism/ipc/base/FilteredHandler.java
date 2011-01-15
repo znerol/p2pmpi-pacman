@@ -2,7 +2,7 @@ package deism.ipc.base;
 
 /**
  * Adapter class which passes only the messages matching a given {@link
- * deism.ipc.base.Condition} to the adapted {@link deism.core.Handler}.
+ * deism.ipc.base.Condition} to the adapted {@link deism.ipc.base.Handler}.
  *
  * @param <T> Type of message
  */

@@ -11,7 +11,6 @@ public interface EventSink {
      * to it before.
      * 
      * @param event
-     * @return true if EventSink took notice of the event, false otherwise
      */
     void offer(Event event);
 }
