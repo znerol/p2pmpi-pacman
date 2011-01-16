@@ -3,13 +3,16 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+import deism.core.Event;
+import deism.process.DiscreteEventProcess;
+
 import model.sprites.Ghost;
 import model.sprites.GhostState;
 import model.sprites.Pacman;
 import model.sprites.PacmanState;
 import model.sprites.Sprite;
 
-public class Model {
+public class Model implements DiscreteEventProcess {
     private final Board board;
     private final List<Sprite> sprites = new ArrayList<Sprite>();
     private int pacmanCount;
@@ -65,5 +68,29 @@ public class Model {
     
     public void rewind(int time) {
         // TODO
+    }
+
+    @Override
+    public Event peek(long currentSimtime) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void remove(Event event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void offer(Event event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void dispatchEvent(Event e) {
+        // TODO Auto-generated method stub
+        
     }
 }
