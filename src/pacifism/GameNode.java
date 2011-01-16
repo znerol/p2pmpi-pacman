@@ -53,7 +53,7 @@ public class GameNode implements Runnable {
 
         // Setup GVT Client
         final MpiBroadcast gvtMessageFromMaster =
-                new MpiBroadcast(mpiCommWorld, mpiRank);
+                new MpiBroadcast(mpiCommWorld, mpiGvtMasterRank);
         service.register(gvtMessageFromMaster);
         messageCenter.addEmitter(gvtMessageFromMaster);
 
