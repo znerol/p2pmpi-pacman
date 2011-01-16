@@ -5,7 +5,8 @@ import deism.core.EventSource;
 import deism.core.StatelessEventGenerator;
 
 /**
- * Adapter class which turns a StatelessEventGenerator into an EventSource.
+ * Adapter class which turns a {@link deism.core.StatelessEventGenerator} into
+ * an {@link deism.core.EventSource}.
  */
 public class EventSourceStatelessGeneratorAdapter implements EventSource {
     private final StatelessEventGenerator generator;

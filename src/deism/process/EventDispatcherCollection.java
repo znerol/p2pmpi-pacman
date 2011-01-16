@@ -5,6 +5,9 @@ import java.util.Arrays;
 import deism.core.Event;
 import deism.core.EventDispatcher;
 
+/**
+ * Dispatch events to multiple EventDispatchers
+ */
 public class EventDispatcherCollection implements EventDispatcher {
     private final Iterable<EventDispatcher> dispatchers;
     

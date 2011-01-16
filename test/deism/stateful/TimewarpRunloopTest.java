@@ -21,7 +21,6 @@ import deism.run.Runloop;
 import deism.run.Service;
 import deism.run.StateController;
 import deism.run.StateHistoryController;
-import deism.stateful.TimewarpEventSource;
 import deism.stateful.TimewarpEventSourceAdapter;
 
 import static org.mockito.Mockito.*;
@@ -47,7 +46,7 @@ public class TimewarpRunloopTest {
     
     ArrayDeque<Event> eventQueue;
     EventSource simpleEventSource;
-    TimewarpEventSource eventSource;
+    EventSource eventSource;
     DefaultDiscreteEventProcess process;
     
     @Before

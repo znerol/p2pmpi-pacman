@@ -8,18 +8,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ * Abstract base class implementing StateHistory to relieve subclasses from
+ * handling the somewhat complicated state handling.
+ *
+ * Subclasses just have to {@link #pushHistory(Object)} whenever their internal
+ * state changes. If the simulation needs to rollback to a previous state, the
+ * {@link #revertHistory(List)} method is called a list of states which get
+ * discarded.
+ *
+ * @param <K>
+ *            State key (normally Long)
+ * @param <V>
+ *            Type of state objects
+ */
 public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
-    private final LinkedHashMap<K,Integer> snapshots =
-        new LinkedHashMap<K,Integer>();
+    private final LinkedHashMap<K, Integer> snapshots =
+            new LinkedHashMap<K, Integer>();
     private final List<V> history = new ArrayList<V>();
-    
+
     @Override
     public void save(K key) throws StateHistoryException {
         if (snapshots.containsKey(key)) {
             throw new StateHistoryException("Key exists");
         }
-        
+
         Integer nextIndex = history.size();
         snapshots.put(key, nextIndex);
     }
@@ -29,12 +42,12 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
         if (!snapshots.containsKey(key)) {
             throw new StateHistoryException("Key does not exist");
         }
-        
+
         Integer nextIndex = snapshots.get(key);
         List<V> head = history.subList(0, nextIndex);
         int headSize = head.size();
         head.clear();
-        
+
         // loop thru snapshots and rewrite index-values
         Set<K> expiredSnapshots = new HashSet<K>();
         for (Map.Entry<K, Integer> e : snapshots.entrySet()) {
@@ -54,15 +67,15 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
         if (!snapshots.containsKey(key)) {
             throw new StateHistoryException("Key does not exist");
         }
-        
+
         Integer nextIndex = snapshots.get(key);
         List<V> tail = history.subList(nextIndex, history.size());
         revertHistory(tail);
         tail.clear();
-        
+
         // loop thru snapshots and remove the ones beyond key
         boolean beyond = false;
-        for (Iterator<K> it = snapshots.keySet().iterator(); it.hasNext(); ) {
+        for (Iterator<K> it = snapshots.keySet().iterator(); it.hasNext();) {
             K currentKey = it.next();
             if (beyond) {
                 it.remove();
@@ -72,10 +85,10 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
             }
         }
     }
-    
+
     /**
-     * During a rollback AbstractStateHistory splits off the items following
-     * the rollback key in the history stack and calls revertHistory giving the
+     * During a rollback AbstractStateHistory splits off the items following the
+     * rollback key in the history stack and calls revertHistory giving the
      * subclass a chance to restore state.
      * 
      * The first element of tail represents the state for rollback key
@@ -83,14 +96,14 @@ public abstract class AbstractStateHistory<K, V> implements StateHistory<K> {
      * @param tail
      */
     public abstract void revertHistory(List<V> tail);
-    
+
     /**
      * Push one item onto the history stack
      * 
      * @param item
      */
     public void pushHistory(V item) {
-        assert(item != null);
+        assert (item != null);
         history.add(item);
     }
 }

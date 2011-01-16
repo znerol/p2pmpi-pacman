@@ -2,6 +2,11 @@ package deism.tqgvt;
 
 import deism.core.Event;
 
+/**
+ * Event passed between simulation nodes with TQ-GVT controller. In order to
+ * attach the required time quantum value to every message, the {@link Client}
+ * just wraps the original events.
+ */
 public class WrappedEvent extends Event {
     private static final long serialVersionUID = -3282152432695603591L;
     private final Event event;

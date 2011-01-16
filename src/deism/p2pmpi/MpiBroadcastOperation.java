@@ -7,8 +7,15 @@ import p2pmpi.mpi.MPI;
 import deism.ipc.async.BlockingReceiveOperation;
 import deism.ipc.async.BlockingSendOperation;
 
+/**
+ * Implementation of an p2pmpi bcast either as
+ * {@link deism.ipc.async.BlockingSendOperation} if the current rank is mpiroot
+ * or {@link deism.ipc.async.BlockingReceiveOperation} otherwise.
+ * 
+ * @param <T> Type of message
+ */
 public class MpiBroadcastOperation<T> implements BlockingReceiveOperation<T>,
-        BlockingSendOperation<T>{
+        BlockingSendOperation<T> {
     private final int mpiroot;
     private final IntraComm mpicomm;
     private final static Logger logger = Logger

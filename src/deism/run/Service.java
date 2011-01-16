@@ -13,6 +13,9 @@ import deism.ipc.base.EventImporter;
 import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
+/**
+ * Supporting services for the runloop.
+ */
 public class Service implements Startable, StateHistory<Long>, Flushable,
         EventImporter, EventExporter, LvtListener {
 
@@ -40,7 +43,8 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
     private final static Logger logger = Logger.getLogger(Service.class);
 
     /**
-     * Register secondary interfaces of the given object with the process.
+     * Add the given object as an observer to every possible subject known to
+     * the service class
      * 
      * @param object
      */
@@ -48,52 +52,28 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
     public void register(Object object) {
         if (object instanceof Startable) {
             logger.debug("Register startable " + object);
-            addStartable((Startable) object);
+            startableList.add((Startable) object);
         }
         if (object instanceof Flushable) {
             logger.debug("Register flushable " + object);
-            addFlushable((Flushable) object);
+            flushables.add((Flushable) object);
         }
         if (object instanceof StateHistory<?>) {
             logger.debug("Register state aware " + object);
-            addStatefulObject((StateHistory<Long>) object);
+            statefulObjects.add((StateHistory<Long>) object);
         }
         if (object instanceof LvtListener) {
-            logger.debug("Set lvt listener " + object);
-            addLvtListener((LvtListener) object);
+            logger.debug("Register lvt listener " + object);
+            lvtListeners.add((LvtListener) object);
         }
         if (object instanceof EventImporter) {
             logger.debug("Set event importer " + object);
-            setEventImporter((EventImporter) object);
+            this.eventImporter = (EventImporter) eventImporter;
         }
         if (object instanceof EventExporter) {
             logger.debug("Set event exporter " + object);
-            setEventExporter((EventExporter) object);
+            this.eventExporter = (EventExporter) eventExporter;
         }
-    }
-
-    private void addStartable(Startable startable) {
-        startableList.add(startable);
-    }
-
-    private void addStatefulObject(StateHistory<Long> statefulObject) {
-        statefulObjects.add(statefulObject);
-    }
-
-    private void addFlushable(Flushable flushable) {
-        flushables.add(flushable);
-    }
-
-    private void addLvtListener(LvtListener lvtListener) {
-        lvtListeners.add(lvtListener);
-    }
-
-    private void setEventImporter(EventImporter eventImporter) {
-        this.eventImporter = eventImporter;
-    }
-
-    private void setEventExporter(EventExporter eventExporter) {
-        this.eventExporter = eventExporter;
     }
 
     @Override

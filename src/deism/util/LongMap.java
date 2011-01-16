@@ -4,6 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * Helper class for a map of counters.
+ * 
+ * @param <K>
+ *            Type of key
+ * @see <a
+ *      href="http://stackoverflow.com/questions/81346/most-efficient-way-to-increment-a-map-value-in-java">Stackoverflow.com:
+ *      Most efficient way to increment a Map value in Java</a>
+ */
 public class LongMap<K> extends HashMap<K, MutableLong> {
     private static final long serialVersionUID = -3512436972868685812L;
 
@@ -13,7 +22,7 @@ public class LongMap<K> extends HashMap<K, MutableLong> {
      * 
      * @param key
      * @param defaultValue
-     * @return
+     * @return MutableLong element for the given key
      */
     public MutableLong get(K key, long defaultValue) {
         MutableLong element = get(key);
@@ -29,7 +38,8 @@ public class LongMap<K> extends HashMap<K, MutableLong> {
     /**
      * Return a HashMap containing all the keys and the long values.
      * 
-     * @return
+     * @return HashMap with keys and values of the contained MutableLong
+     *         elements
      */
     public Map<K, Long> valueMap() {
         Map<K, Long> result = new HashMap<K, Long>(this.size());

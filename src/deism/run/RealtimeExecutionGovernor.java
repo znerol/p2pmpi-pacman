@@ -2,7 +2,6 @@ package deism.run;
 
 import org.apache.log4j.Logger;
 
-
 /**
  * ExecutionGovernor implementation using the RealtimeClock
  * 
@@ -14,7 +13,8 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     private Timebase systemTimebase;
     private SystemTimeProxy systemTime;
     private long wakeupTime;
-    private final static Logger logger = Logger.getLogger(RealtimeExecutionGovernor.class);
+    private final static Logger logger = Logger
+            .getLogger(RealtimeExecutionGovernor.class);
 
     public RealtimeExecutionGovernor(double scale) {
         simulationTimebase = new Timebase(scale);
@@ -47,7 +47,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     @Override
     public synchronized long suspend() {
         wakeupTime = Long.MAX_VALUE;
-        
+
         try {
             logger.debug("Wait indefinitely");
             this.wait();
@@ -56,7 +56,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
             logger.debug(ex);
             // ignored intentionally
         }
-        
+
         return wakeupTime;
     }
 
@@ -66,15 +66,20 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
      * the timestamp of the event lies in the past, this method returns
      * immediately.
      * 
-     * @result true if the timeout was reached, false if the method was
-     *         interrupted by a call to resume.
+     * Pleaso note: the timestamp returned by this method does not necessarily
+     * lie in the future. It is fairly possible that some EventSource woke up
+     * the governor using {@link #resume(long wakeupTime)} with a timestamp
+     * which is smaller than the one we're waiting for here.
+     * 
+     * @return the timestamp reached representing the new local virtual time
      */
     @Override
     public synchronized long suspendUntil(long simtime) {
         wakeupTime = simtime;
-        
-        long delay = simulationTimebase.convert(wakeupTime, systemTimebase) -
-                systemTime.get();
+
+        long delay =
+                simulationTimebase.convert(wakeupTime, systemTimebase)
+                        - systemTime.get();
         try {
             if (delay > 0) {
                 logger.debug("Wait for " + delay + " milliseconds");
@@ -91,18 +96,21 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
 
     @Override
     public synchronized void resume() {
-        this.wakeupTime = Math.min(this.wakeupTime,
-                systemTimebase.convert(systemTime.get(), simulationTimebase));
+        this.wakeupTime =
+                Math.min(this.wakeupTime, systemTimebase.convert(
+                        systemTime.get(), simulationTimebase));
         logger.debug("Resume at " + this.wakeupTime);
         this.notify();
     }
-    
+
     @Override
     public synchronized void resume(long wakeupTime) {
         this.wakeupTime = Math.min(this.wakeupTime, wakeupTime);
-        this.wakeupTime = Math.min(this.wakeupTime,
-                systemTimebase.convert(systemTime.get(), simulationTimebase));
-        logger.debug("Resume at " + this.wakeupTime + " with given maximum wakeup time " + wakeupTime);
+        this.wakeupTime =
+                Math.min(this.wakeupTime, systemTimebase.convert(
+                        systemTime.get(), simulationTimebase));
+        logger.debug("Resume at " + this.wakeupTime
+                + " with given maximum wakeup time " + wakeupTime);
         this.notify();
     }
 }

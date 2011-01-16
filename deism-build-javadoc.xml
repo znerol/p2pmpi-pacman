@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="deism-build-javadoc" default="javadoc" basedir=".">
+    <target name="javadoc">
+        <mkdir dir="bin/javadoc/"/>
+        <javadoc sourcepath="src" linksource="true" destdir="bin/javadoc/">
+        </javadoc>
+    </target>
+    <target name="clean">
+        <delete dir="doc/javadoc"/>
+    </target>
+</project> 

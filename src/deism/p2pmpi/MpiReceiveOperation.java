@@ -6,6 +6,11 @@ import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 import deism.ipc.async.BlockingReceiveOperation;
 
+/**
+ * Implementation of {@link deism.ipc.async.BlockingReceiveOperation} for p2pmpi
+ * 
+ * @param <T> Type of message
+ */
 public class MpiReceiveOperation<T> implements BlockingReceiveOperation<T> {
     private final int mpisender;
     private final int mpitag;

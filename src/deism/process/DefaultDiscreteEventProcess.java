@@ -8,6 +8,10 @@ import deism.core.EventDispatcher;
 import deism.core.EventSink;
 import deism.core.EventSource;
 
+/**
+ * A basic {@link DiscreteEventProcess} supporting multiple sources, dispatchers
+ * and sinks.
+ */
 public class DefaultDiscreteEventProcess implements DiscreteEventProcess {
     private final List<EventSource> sourceList = new ArrayList<EventSource>();
     private final List<EventSink> sinkList = new ArrayList<EventSink>();

@@ -7,6 +7,10 @@ import deism.ipc.async.SendThread;
 import deism.ipc.base.Message;
 import deism.ipc.base.Endpoint;
 
+/**
+ * Unicast {@link deism.ipc.base.Message} {@link deism.ipc.base.Endpoint} for
+ * sending realtime messages to other simulation islands via p2pmpi.
+ */
 public class MpiUnicastEndpoint implements Endpoint<Message>, Startable {
 
     private final SendThread<Message> sender;

@@ -5,6 +5,9 @@ import java.util.Arrays;
 import deism.core.Event;
 import deism.core.EventSink;
 
+/**
+ * Offer events to multiple event sinks.
+ */
 public class EventSinkCollection implements EventSink {
     private Iterable<EventSink> eventSinks;
 

@@ -5,29 +5,27 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Thread which sends buffered messages asynchronously using the given 
+ * {@link deism.ipc.async.BlockingSendOperation}
+ * 
+ * @param <T> Type of message
+ */
 public class SendThread<T> extends Thread {
 
     private final Queue<T> buffer;
     private final BlockingSendOperation<T> sendOperation;
-    private final ThreadListener workerListener;
     private boolean done = false;
     private final static Logger logger = Logger.getLogger(SendThread.class);
 
     public SendThread(BlockingSendOperation<T> sendOperation) {
-        this(new ArrayDeque<T>(), sendOperation, null);
+        this(new ArrayDeque<T>(), sendOperation);
     }
 
     public SendThread(Queue<T> buffer,
             BlockingSendOperation<T> sendOperation) {
-        this(buffer, sendOperation, null);
-    }
-
-    public SendThread(Queue<T> buffer,
-            BlockingSendOperation<T> sendOperation,
-            ThreadListener workerListener) {
         this.buffer = buffer;
         this.sendOperation = sendOperation;
-        this.workerListener = workerListener;
     }
 
     public synchronized void send(T item) {
@@ -38,9 +36,6 @@ public class SendThread<T> extends Thread {
     @Override
     public void run() {
         logger.debug("Start worker thread");
-        if (workerListener != null) {
-            workerListener.started();
-        }
 
         while (true) {
             T item = null;
@@ -71,9 +66,6 @@ public class SendThread<T> extends Thread {
             }
         }
 
-        if (workerListener != null) {
-            workerListener.stopped();
-        }
         logger.debug("Terminated worker thread");
     }
 
