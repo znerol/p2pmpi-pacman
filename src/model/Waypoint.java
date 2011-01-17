@@ -1,19 +1,19 @@
 package model;
 
+import model.items.Item;
 import paclib.GamePlay;
-import model.sprites.Sprite;
 
 public class Waypoint {
     private Waypoint north;
     private Waypoint east;
     private Waypoint south;
     private Waypoint west;
-    private int x;
-    private int y;
-    private int absoluteX;
-    private int absoluteY;
-    private Sprite sprite;
-    private StreetSegment owner;
+    private final int x;
+    private final int y;
+    private final int absoluteX;
+    private final int absoluteY;
+    private final StreetSegment owner;
+    private Item item;
     
     public Waypoint(StreetSegment owner, int x, int y) {
         this.x = x;
@@ -98,16 +98,15 @@ public class Waypoint {
             west.east = this;
     }
 
-    public Sprite getSprite() {
-        return this.sprite;
-    }
-    
-    public void setSprite(Sprite sprite) {
-        this.sprite = sprite;
-    }
-
     public StreetSegment getOwner() {
         return owner;
     }
-
+    
+    public Item getItem() {
+        return this.item;
+    }
+    
+    public void setItem(Item item) {
+        this.item = item;
+    }
 }

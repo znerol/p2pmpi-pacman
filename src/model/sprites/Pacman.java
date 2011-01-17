@@ -2,15 +2,11 @@ package model.sprites;
 
 public class Pacman implements Sprite {
     private PacmanState state;
-    private int rank;
+    private int id;
     
-    public Pacman(PacmanState initState, int rank) {
+    public Pacman(PacmanState initState, int id) {
         this.state = initState;
-        this.rank = rank;
-    }
-    
-    public int getRank() {
-        return this.rank;
+        this.id = id;
     }
 
     @Override
@@ -21,5 +17,10 @@ public class Pacman implements Sprite {
     @Override
     public State getState(int time) {
         return this.state.getState(time);
+    }
+
+    @Override
+    public int getId() {
+        return this.id;
     }
 }

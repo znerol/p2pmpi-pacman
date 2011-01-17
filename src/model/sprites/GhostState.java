@@ -3,7 +3,7 @@ package model.sprites;
 import model.Direction;
 import model.Waypoint;
 
-public class GhostState extends AbstractState {
+public class GhostState extends AbstractSpriteState {
 
     public GhostState(Direction currentDir, Direction nextDir,
             Waypoint waypoint) {

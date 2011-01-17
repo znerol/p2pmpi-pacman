@@ -1,20 +1,24 @@
 package model;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import deism.core.Event;
-import deism.process.DiscreteEventProcess;
-
+import model.items.HappyPill;
+import model.items.Point;
 import model.sprites.Ghost;
 import model.sprites.GhostState;
 import model.sprites.Pacman;
 import model.sprites.PacmanState;
 import model.sprites.Sprite;
+import deism.core.Event;
+import deism.process.DiscreteEventProcess;
+import deism.stateful.AbstractStateHistory;
 
-public class Model implements DiscreteEventProcess {
+public class Model extends AbstractStateHistory<Long, GameState> implements DiscreteEventProcess {
     private final Board board;
-    private final List<Sprite> sprites = new ArrayList<Sprite>();
+    private final Map<Integer, Sprite> sprites = new HashMap<Integer, Sprite>();
+    private final Map<Integer, Sprite> points = new HashMap<Integer, Sprite>();
     private int pacmanCount;
     
     public Model(char[][] boardDef, int pacmanCount) {
@@ -23,41 +27,61 @@ public class Model implements DiscreteEventProcess {
     } 
     
     private void populateSpites(char[][] boardDef, int maxPacmanCount) {
+        int id = 0;
         for (int y = 0; y < boardDef.length; y++) {
             for (int x = 0; x < boardDef[y].length; x++) {
                 if (this.pacmanCount < maxPacmanCount && boardDef[y][x] >= '0' && boardDef[y][x] <= '9')
-                    populatePacman(x, y);
+                    createPacman(x, y, id++);
                 else if (boardDef[y][x] >= 'a' && boardDef[y][x] <= 'g')
-                    populateGhost(x, y);
+                    createGhost(x, y, id++);
+                else if (boardDef[y][x] == 's')
+                    createHappyPill(x, y);
+                else
+                    createPoint(x, y);
             }
         }
     }
     
-    private void populatePacman(int x, int y) {
+    private void createPacman(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
         PacmanState state = new PacmanState(Direction.East, Direction.East, centre);
-        Pacman pac = new Pacman(state, this.pacmanCount);
-        this.sprites.add(pac);
+        Pacman pac = new Pacman(state, id);
+        this.sprites.put(id, pac);
         this.pacmanCount++;
     }
     
-    private void populateGhost(int x, int y) {
+    private void createGhost(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
         GhostState state = new GhostState(Direction.East, Direction.East, centre);
-        Ghost ghost = new Ghost(state);
-        this.sprites.add(ghost);        
+        Ghost ghost = new Ghost(state, id);
+        this.sprites.put(id, ghost);
+        createPoint(x, y);
+    }
+    
+    private void createPoint(int x, int y) {
+        Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
+        Point point = new Point();
+        centre.setItem(point);
+        this.points.put(point.getId(), point);
+    }
+    
+    private void createHappyPill(int x, int y) {
+        Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
+        HappyPill pill = new HappyPill();
+        centre.setItem(pill);
+        this.points.put(pill.getId(), pill);
     }
     
     public Board getBoard() {
         return this.board;
     }
     
-    public List<Sprite> getSprites() { 
+    public Map<Integer, Sprite> getSprites() { 
         return this.sprites;
     }
     
     public void gotoTime(int time) {
-        for (Sprite s : this.sprites) {
+        for (Sprite s : this.sprites.values()) {
             s.getState(time);
         }
     }
@@ -92,5 +116,10 @@ public class Model implements DiscreteEventProcess {
     public void dispatchEvent(Event e) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public void revertHistory(List<GameState> tail) {
+        // TODO Auto-generated method stub
     }
 }

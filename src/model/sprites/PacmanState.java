@@ -1,27 +1,20 @@
 package model.sprites;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import model.Direction;
 import model.Waypoint;
-import model.items.Item;
 
-public class PacmanState extends AbstractState {
+public class PacmanState extends AbstractSpriteState {
     private int points;
-    private final Set<Item> items;
 
     public PacmanState(Direction currentDir, Direction nextDir,
             Waypoint waypoint) {
         super(currentDir, nextDir, waypoint, 0);
         
-        this.items = new HashSet<Item>();
     }
 
     public PacmanState(PacmanState state) {
         super(state);
         
-        this.items = new HashSet<Item>(state.items);
         this.points = state.points;
     }
     
@@ -33,6 +26,5 @@ public class PacmanState extends AbstractState {
     @Override
     protected boolean isMovingAllowed() {
         return true;
-    }  
-    
+    }   
 }

@@ -1,28 +1,38 @@
 package model.events;
 
-import model.items.HappyPill;
-import model.items.Point;
-import model.sprites.Pacman;
 import deism.core.Event;
 
 @SuppressWarnings("serial")
 public class HappyPillEatenEvent extends Event {
 
-    private final Pacman pac;
-    private final HappyPill pill;
+    private final int pac;
+    private final int pill;
+    private final int points;
     
-    public HappyPillEatenEvent(Pacman pac, HappyPill pill, long simtime) {
+    public HappyPillEatenEvent(int pac, int pill, int points, long simtime) {
         super(simtime);
         
         this.pac = pac;
         this.pill = pill;
+        this.points = points;
     }
     
-    public Pacman getPacman() {
+    public int getPacman() {
         return this.pac;
     }
     
-    public HappyPill getHappyPill() {
+    public int getHappyPill() {
         return this.pill;
+    }
+    
+    public int getPoints() {
+        return this.points;
+    }
+
+    @Override
+    public String toString() {
+        return (isAntimessage() ? "-" : "+") + "HappyPillEatenEvent [simtime = "
+                + getSimtime() + " Pacman = " + pac + " pill = "
+                + pill + " points = " + points + "]";
     }
 }

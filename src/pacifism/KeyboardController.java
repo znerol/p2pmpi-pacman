@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import model.Direction;
+import model.events.DirectionEvent;
 
 import deism.core.Event;
 import deism.core.EventSource;

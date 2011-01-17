@@ -6,22 +6,29 @@ import deism.core.Event;
 
 @SuppressWarnings("serial")
 public class GhostEatenEvent extends Event {
-    private final Pacman pac;
-    private final Ghost ghost;
+    private final int pac;
+    private final int ghost;
 
     public GhostEatenEvent(Pacman pac, Ghost ghost, long simtime) {
         super(simtime);
         
-        this.pac = pac;
-        this.ghost = ghost;
+        this.pac = pac.getId();
+        this.ghost = ghost.getId();
     }
     
-    public Pacman getPacman() {
+    public int getPacman() {
         return this.pac;
     }
     
-    public Ghost getGhost() {
+    public int getGhost() {
         return this.ghost;
+    }
+
+    @Override
+    public String toString() {
+        return (isAntimessage() ? "-" : "+") + "GhostEatenEvent [simtime = "
+                + getSimtime() + " Pacman = " + pac + " ghost = "
+                + ghost + "]";
     }
 
 }
