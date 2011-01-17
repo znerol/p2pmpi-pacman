@@ -1,34 +1,56 @@
 package model.sprites;
 
 import model.Direction;
+import model.Model;
 import model.Waypoint;
+import model.events.EventVisitor;
+import model.events.VisitableEvent;
+import deism.core.Event;
 
-public abstract class AbstractSpriteState implements SpriteState {
-    private final Direction currentDirection;
-    private final Direction nextDirection;
-    private final int x;
-    private final int y;
-    private final int ownerId;
+@SuppressWarnings("serial")
+public abstract class AbstractSpriteState implements MoveableSprite, EventVisitor {
+    private Direction currentDirection;
+    private Direction nextDirection;
+    private int x;
+    private int y;
     private final Long timestamp;
     
-    protected AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, Long time, int ownerId) {
+    protected AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, Long time) {
         this.currentDirection = currentDir;
         this.nextDirection = nextDir;
         this.x = waypoint.getAbsoluteX();
         this.y = waypoint.getAbsoluteY();
         this.timestamp = time;
-        this.ownerId = ownerId;
     }
     
-    protected AbstractSpriteState(AbstractSpriteState state, Direction nextDirection, Waypoint currentWaypoint) {
+    protected AbstractSpriteState(AbstractSpriteState state, Event event) {
+        this.currentDirection = state.currentDirection;
+        this.nextDirection = state.nextDirection;
+        this.x = state.x;
+        this.y = state.y;
+        this.timestamp = event.getSimtime();
+        
+        if (event instanceof VisitableEvent) {
+            VisitableEvent vEvent = (VisitableEvent) event;
+            vEvent.accept(this);
+        }
+    }
+    
+    protected AbstractSpriteState(AbstractSpriteState state) {
+        this.currentDirection = state.currentDirection;
+        this.nextDirection = state.nextDirection;
+        this.x = state.x;
+        this.y = state.y;
+        this.timestamp = state.timestamp + 1;
+    }
+    
+    public void move() {
+        Waypoint currentWaypoint = Model.getModel().getBoard().getWaypoint(this.x, this.y);
+        
         // Updating directions if it is possible at the current waypoint -> Junction
         if (currentWaypoint.isDirectionAvailable(nextDirection)) {
             this.currentDirection = nextDirection;
-            this.nextDirection = nextDirection;
-        } else {
-            this.currentDirection = state.currentDirection;
-            this.nextDirection = nextDirection;
-        }
+        } 
         
         // Enters next waypoint if available
         if (currentWaypoint.isDirectionAvailable(this.currentDirection)) {
@@ -38,12 +60,7 @@ public abstract class AbstractSpriteState implements SpriteState {
         // Stores only absolute positions for easier serialisation.
         this.x = currentWaypoint.getAbsoluteX();
         this.y = currentWaypoint.getAbsoluteY();
-        
-        this.timestamp = state.timestamp + 1;
-        this.ownerId = state.ownerId;
     }
-    
-    public abstract State transaction(Direction nextDirection, Waypoint currentWaypoint);
 
     @Override
     public Direction getCurrentDirection() {
@@ -69,7 +86,5 @@ public abstract class AbstractSpriteState implements SpriteState {
     }
     
     @Override
-    public int getId() {
-        return this.ownerId;
-    }
+    public abstract Object clone() throws CloneNotSupportedException;
 }

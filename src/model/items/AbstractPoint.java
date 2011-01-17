@@ -1,5 +1,6 @@
 package model.items;
 
+import model.Pair;
 import model.events.DirectionEvent;
 import model.events.EventVisitor;
 import model.events.GhostEatenEvent;
@@ -10,22 +11,31 @@ import model.events.PointEatenEvent;
 import model.events.SpriteStoppedEvent;
 import paclib.GamePlay;
 
+@SuppressWarnings("serial")
 public abstract class AbstractPoint implements Item, EventVisitor {
-    private final int owner;
-    private final Long time;
-    private final int id;
+    private int owner;
+    private Long time;
+    private int id;
     private static int ID_OFFSET = Integer.MIN_VALUE;
+    private Pair<Integer, Integer> position;
     
-    protected AbstractPoint() {
+    protected AbstractPoint(int x, int y) {
         this.time = 0L;
         this.owner = Integer.MIN_VALUE;
         id = ID_OFFSET++;
+        position = new Pair<Integer, Integer>(x, y);
     }
     
     protected AbstractPoint(AbstractPoint point, int ownerId, Long time) {
         this.owner = ownerId;
         this.time = time;
         this.id = point.id;
+        this.position = point.position;
+    }
+    
+    @Override
+    public Pair<Integer, Integer> getPosition() {
+        return this.position;
     }
     
     @Override
@@ -86,5 +96,15 @@ public abstract class AbstractPoint implements Item, EventVisitor {
     @Override
     public void visit(PointEatenEvent event) {
         
+    }
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        AbstractPoint p = (AbstractPoint)super.clone();
+        p.owner = owner;
+        p.time = time;
+        p.id = id;
+        p.position = position;
+        return p;
     }
 }

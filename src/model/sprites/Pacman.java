@@ -1,8 +1,7 @@
 package model.sprites;
 
-import java.util.List;
-
-import model.Model;
+import model.Direction;
+import model.Waypoint;
 import model.events.DirectionEvent;
 import model.events.EventVisitor;
 import model.events.GhostEatenEvent;
@@ -11,21 +10,34 @@ import model.events.HappyPillTimeOutEvent;
 import model.events.PacmanEatenEvent;
 import model.events.PointEatenEvent;
 import model.events.SpriteStoppedEvent;
-import model.events.VisitableEvent;
 import deism.core.Event;
-import deism.core.EventDispatcher;
-import deism.stateful.AbstractStateHistory;
 
-public class Pacman extends AbstractStateHistory<Long, PacmanState> implements Sprite, EventDispatcher, EventVisitor {
+@SuppressWarnings("serial")
+public class Pacman extends AbstractSpriteState implements EventVisitor {
     private int id;
-    private PacmanState currentState;
-    private final Model model;
+    private int points;
     
-    public Pacman(PacmanState initState, Model model) {
-        this.pushHistory(initState);
-        this.currentState = initState;
-        this.id = initState.getId();
-        this.model = model;
+    public Pacman(Direction currentDir, Direction nextDir, Waypoint waypoint, int id) {
+        super(currentDir, nextDir, waypoint, 0L);
+        this.id = id;
+        this.points = 0;
+    }
+    
+    public Pacman(Pacman pacman, Event event) {
+        super(pacman, event);
+        this.points += pacman.points;
+        this.id = pacman.id;
+    }
+    
+    public Pacman(Pacman pacman, boolean move) {
+        super(pacman);
+
+        if (move) {
+            this.points += pacman.points;
+            move();
+        } else 
+            this.points = pacman.points;
+        this.id = pacman.id;
     }
 
     @Override
@@ -39,25 +51,9 @@ public class Pacman extends AbstractStateHistory<Long, PacmanState> implements S
     }
 
     @Override
-    public void revertHistory(List<PacmanState> tail) {
-        if (tail.size() > 0)
-            currentState = tail.get(0);
-    }
-    
-    @Override
-    public void dispatchEvent(Event e) {
-        if (e instanceof VisitableEvent) {
-            VisitableEvent event = (VisitableEvent) e;
-            event.accept(this);
-        }
-    }
-
-    @Override
     public void visit(DirectionEvent event) {
         if (event.getSprite() != this.getId())
             return;
-        
-        currentState = new PacmanState(currentState, event.getDirection(), model.)
     }
 
     @Override
@@ -88,5 +84,10 @@ public class Pacman extends AbstractStateHistory<Long, PacmanState> implements S
     @Override
     public void visit(PointEatenEvent event) {
         
+    }
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return new Pacman(this, false);
     }
 }
