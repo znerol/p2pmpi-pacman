@@ -121,6 +121,7 @@ public class RunloopTest {
 
         /* call r.stop() when process.dispatchEvent(two) is called */
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) {
                 r.stop();
                 return null;

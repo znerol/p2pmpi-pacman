@@ -3,6 +3,6 @@ package model.sprites;
 
 
 public interface State extends Cloneable {
-    public State getState(int time);
-    public int getTimestamp();
+    public Long getTimestamp();
+    public int getId();
 }

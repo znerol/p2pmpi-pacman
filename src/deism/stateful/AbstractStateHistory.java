@@ -12,9 +12,9 @@ import java.util.Set;
  * Abstract base class implementing StateHistory to relieve subclasses from
  * handling the somewhat complicated state handling.
  *
- * Subclasses just have to {@link #pushHistory(Object)} whenever their internal
+ * Subclasses just have to {@link #pushHistory(V)} whenever their internal
  * state changes. If the simulation needs to rollback to a previous state, the
- * {@link #revertHistory(List)} method is called a list of states which get
+ * {@link #revertHistory(List<V>)} method is called a list of states which get
  * discarded.
  *
  * @param <K>

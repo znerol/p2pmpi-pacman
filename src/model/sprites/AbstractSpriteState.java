@@ -1,116 +1,75 @@
 package model.sprites;
 
-import paclib.GamePlay;
 import model.Direction;
 import model.Waypoint;
 
 public abstract class AbstractSpriteState implements SpriteState {
-    private Direction currentDirection;
-    private Direction nextDirection;
-    private Waypoint currentWaypoint;
-    private int timestamp;
-    private State prev;
-    private State next;
-    private int happyPillSteps = 0;
+    private final Direction currentDirection;
+    private final Direction nextDirection;
+    private final int x;
+    private final int y;
+    private final int ownerId;
+    private final Long timestamp;
     
-    public AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, int time) {
+    protected AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, Long time, int ownerId) {
         this.currentDirection = currentDir;
         this.nextDirection = nextDir;
-        this.currentWaypoint = waypoint;
+        this.x = waypoint.getAbsoluteX();
+        this.y = waypoint.getAbsoluteY();
         this.timestamp = time;
+        this.ownerId = ownerId;
     }
     
-    protected AbstractSpriteState(AbstractSpriteState state) {
-        if (isMovingAllowed() && state.currentWaypoint.isDirectionAvailable(state.nextDirection)) {
-            this.currentDirection = state.nextDirection;
-            this.nextDirection = state.nextDirection;
+    protected AbstractSpriteState(AbstractSpriteState state, Direction nextDirection, Waypoint currentWaypoint) {
+        // Updating directions if it is possible at the current waypoint -> Junction
+        if (currentWaypoint.isDirectionAvailable(nextDirection)) {
+            this.currentDirection = nextDirection;
+            this.nextDirection = nextDirection;
         } else {
             this.currentDirection = state.currentDirection;
-            this.nextDirection = state.nextDirection;
+            this.nextDirection = nextDirection;
         }
         
-        this.currentWaypoint = state.currentWaypoint.getNextWaypoint(this.currentDirection);
+        // Enters next waypoint if available
+        if (currentWaypoint.isDirectionAvailable(this.currentDirection)) {
+            currentWaypoint = currentWaypoint.getNextWaypoint(this.currentDirection);
+        }
+        
+        // Stores only absolute positions for easier serialisation.
+        this.x = currentWaypoint.getAbsoluteX();
+        this.y = currentWaypoint.getAbsoluteY();
+        
         this.timestamp = state.timestamp + 1;
-        this.happyPillSteps = state.happyPillSteps - 1;
-        this.prev = state;
-        state.next = this;
+        this.ownerId = state.ownerId;
     }
     
-    protected abstract boolean isMovingAllowed();
-    
-    public void happyPillEaten() {
-        this.happyPillSteps = GamePlay.SPECIAL_HAPPYPILL_STEPS;
-    }
-    
-    public boolean isOnHappyPill() {
-        return this.happyPillSteps > 0;
-    }
-    
-    public int getHappyPillSteps() {
-        return this.happyPillSteps;
-    }
-    
-    public State getState(int time) {
-        if (time == timestamp) 
-            return this;
-        else if (time > timestamp)
-            return getNextState().getState(time);
-        else if (time < timestamp) 
-            return prev.getState(time);
-        return null;
-    }
-    
-    public State getPreviousState() {
-        if (this.prev == null)
-            throw new RuntimeException();
-        return this.prev;
-    }
-    
-    public State getNextState() {
-        if (this.next == null)
-            generateNextState();
-        return this.next;
-    }
-    
-    protected abstract void generateNextState();
-    
-    protected void setNextState(State state) {
-        this.next = state;
-    }
-    
-    protected void setPriviousState(State state) {
-        this.prev = state;
-    }
-    
-    public void setCurrentDirection(Direction dir) {
-        this.currentDirection = dir;
-    }
+    public abstract State transaction(Direction nextDirection, Waypoint currentWaypoint);
 
+    @Override
     public Direction getCurrentDirection() {
         return currentDirection;
     }
     
-    public void setNextDirection(Direction nextDir) {
-        this.nextDirection = nextDir;
-    }
-    
+    @Override
     public Direction getNextDirection() {
         return nextDirection;
     }
     
-    public void setCurrentWaypoint(Waypoint waypoint) {
-        this.currentWaypoint = waypoint;
+    public int getX() {
+        return this.x;
     }
     
-    public Waypoint getCurrentWaypoint() {
-        return currentWaypoint;
+    public int getY() {
+        return this.y;
     }
     
-    public void setTimestamp(int time) {
-        this.timestamp = time;
-    }
-    
-    public int getTimestamp() {
+    @Override
+    public Long getTimestamp() {
         return timestamp;
+    }
+    
+    @Override
+    public int getId() {
+        return this.ownerId;
     }
 }

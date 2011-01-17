@@ -1,10 +1,10 @@
 package model.items;
 
 import model.sprites.Sprite;
+import model.sprites.State;
 
-public interface Item extends Sprite {
-    public int getOwner(int time);
-    public void setOwner(int pac, int time);
-    public boolean isEaten(int time);
+public interface Item extends Sprite, State {
+    public boolean isEaten(Long time);
     public int getPoints();
+    public int getOwnerId();
 }

@@ -1,10 +1,9 @@
 package model.events;
 
-import deism.core.Event;
 @SuppressWarnings("serial")
-public class HappyPillTimeEndedEvent extends Event {
+public class HappyPillTimeOutEvent extends VisitableEvent {
     
-    public HappyPillTimeEndedEvent(long simtime) {
+    public HappyPillTimeOutEvent(long simtime) {
         super(simtime);
     }
 
@@ -12,5 +11,10 @@ public class HappyPillTimeEndedEvent extends Event {
     public String toString() {
         return (isAntimessage() ? "-" : "+") + "HappyPillTimeEndedEvent [simtime = "
                 + getSimtime() + "]";
+    }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
     }
 }

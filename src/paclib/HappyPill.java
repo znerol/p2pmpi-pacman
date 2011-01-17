@@ -27,6 +27,7 @@ public class HappyPill implements Special{
 		this.b = b;
 	}
 
+	@Override
 	public boolean intersects(Coord c) {
 		if(Math.pow(this.c.getPointX()-c.getPointX(),2) + Math.pow(this.c.getPointY()-c.getPointY(),2) <= Math.pow((GamePlay.GUI_PAC_SIZE+GamePlay.GUI_POWERUP_SIZE)/2,2)) {
 			return true;
@@ -34,6 +35,7 @@ public class HappyPill implements Special{
 		return false;
 	}
 
+	@Override
 	public void paint(Graphics2D g2) {
 		int size = GamePlay.GUI_POWERUP_SIZE*GamePlay.GUI_SIZE_MULTIPLIER;
 		int posX = (c.getPointX())*GamePlay.GUI_SIZE_MULTIPLIER - size/2;
@@ -48,10 +50,12 @@ public class HappyPill implements Special{
 
 	}
 
+	@Override
 	public Coord getCoord() {
 		return c;
 	}
 
+	@Override
 	public void act() {
 		b.setHappypill();
 	}

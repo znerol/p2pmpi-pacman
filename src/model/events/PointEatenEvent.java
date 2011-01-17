@@ -1,9 +1,8 @@
 package model.events;
 
-import deism.core.Event;
 
 @SuppressWarnings("serial")
-public class PointEatenEvent extends Event {
+public class PointEatenEvent extends VisitableEvent {
 
     private final int pac;
     private final int point;
@@ -34,6 +33,11 @@ public class PointEatenEvent extends Event {
         return (isAntimessage() ? "-" : "+") + "PointEatenEvent [simtime = "
                 + getSimtime() + " pacman = " + pac + " point = "
                 + point + " points = " + points + "]";
+    }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

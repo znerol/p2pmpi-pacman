@@ -264,6 +264,7 @@ public class DefaultProcessBuilderTest {
             public void dispatchEvent(Event e) {
             }
 
+            @Override
             public void offer(Event event) {
             }
 
@@ -272,6 +273,7 @@ public class DefaultProcessBuilderTest {
                 return null;
             }
 
+            @Override
             public void remove(Event event) {
             }
         }

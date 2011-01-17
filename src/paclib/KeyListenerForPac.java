@@ -19,15 +19,18 @@ public class KeyListenerForPac implements KeyListener{
 		this.pac = pac;
 	}
 
+	@Override
 	public void keyPressed(KeyEvent arg0) {
 		pac.setKey(arg0.getKeyCode());
 	}
 
+	@Override
 	public void keyReleased(KeyEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void keyTyped(KeyEvent arg0) {
 		// TODO Auto-generated method stub
 

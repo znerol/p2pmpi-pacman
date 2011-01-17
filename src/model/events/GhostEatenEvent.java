@@ -2,10 +2,9 @@ package model.events;
 
 import model.sprites.Ghost;
 import model.sprites.Pacman;
-import deism.core.Event;
 
 @SuppressWarnings("serial")
-public class GhostEatenEvent extends Event {
+public class GhostEatenEvent extends VisitableEvent {
     private final int pac;
     private final int ghost;
 
@@ -29,6 +28,11 @@ public class GhostEatenEvent extends Event {
         return (isAntimessage() ? "-" : "+") + "GhostEatenEvent [simtime = "
                 + getSimtime() + " Pacman = " + pac + " ghost = "
                 + ghost + "]";
+    }
+
+    @Override
+    public void accept(EventVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

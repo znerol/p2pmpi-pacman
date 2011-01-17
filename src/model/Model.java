@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.items.HappyPill;
+import model.items.Item;
 import model.items.Point;
 import model.sprites.Ghost;
 import model.sprites.GhostState;
@@ -18,13 +19,13 @@ import deism.stateful.AbstractStateHistory;
 public class Model extends AbstractStateHistory<Long, GameState> implements DiscreteEventProcess {
     private final Board board;
     private final Map<Integer, Sprite> sprites = new HashMap<Integer, Sprite>();
-    private final Map<Integer, Sprite> points = new HashMap<Integer, Sprite>();
+    private final Map<Waypoint, Item> items = new HashMap<Waypoint, Item>();
     private int pacmanCount;
     
     public Model(char[][] boardDef, int pacmanCount) {
         this.board = new Board(boardDef);
         populateSpites(boardDef, pacmanCount);
-    } 
+    }
     
     private void populateSpites(char[][] boardDef, int maxPacmanCount) {
         int id = 0;
@@ -44,16 +45,16 @@ public class Model extends AbstractStateHistory<Long, GameState> implements Disc
     
     private void createPacman(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
-        PacmanState state = new PacmanState(Direction.East, Direction.East, centre);
-        Pacman pac = new Pacman(state, id);
+        PacmanState state = new PacmanState(Direction.East, Direction.East, centre, id);
+        Pacman pac = new Pacman(state, this);
         this.sprites.put(id, pac);
         this.pacmanCount++;
     }
     
     private void createGhost(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
-        GhostState state = new GhostState(Direction.East, Direction.East, centre);
-        Ghost ghost = new Ghost(state, id);
+        GhostState state = new GhostState(Direction.East, Direction.East, centre, id);
+        Ghost ghost = new Ghost(state, this);
         this.sprites.put(id, ghost);
         createPoint(x, y);
     }
@@ -61,15 +62,13 @@ public class Model extends AbstractStateHistory<Long, GameState> implements Disc
     private void createPoint(int x, int y) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
         Point point = new Point();
-        centre.setItem(point);
-        this.points.put(point.getId(), point);
+        this.items.put(centre, point);
     }
     
     private void createHappyPill(int x, int y) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
         HappyPill pill = new HappyPill();
-        centre.setItem(pill);
-        this.points.put(pill.getId(), pill);
+        this.items.put(centre, pill);
     }
     
     public Board getBoard() {
@@ -78,12 +77,6 @@ public class Model extends AbstractStateHistory<Long, GameState> implements Disc
     
     public Map<Integer, Sprite> getSprites() { 
         return this.sprites;
-    }
-    
-    public void gotoTime(int time) {
-        for (Sprite s : this.sprites.values()) {
-            s.getState(time);
-        }
     }
     
     public void setNextDirection(Sprite sprite, Direction direction, int time) {
@@ -108,7 +101,7 @@ public class Model extends AbstractStateHistory<Long, GameState> implements Disc
 
     @Override
     public void offer(Event event) {
-        // TODO Auto-generated method stub
+        // not used
         
     }
 

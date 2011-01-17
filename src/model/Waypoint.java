@@ -1,6 +1,5 @@
 package model;
 
-import model.items.Item;
 import paclib.GamePlay;
 
 public class Waypoint {
@@ -13,7 +12,6 @@ public class Waypoint {
     private final int absoluteX;
     private final int absoluteY;
     private final StreetSegment owner;
-    private Item item;
     
     public Waypoint(StreetSegment owner, int x, int y) {
         this.x = x;
@@ -100,13 +98,5 @@ public class Waypoint {
 
     public StreetSegment getOwner() {
         return owner;
-    }
-    
-    public Item getItem() {
-        return this.item;
-    }
-    
-    public void setItem(Item item) {
-        this.item = item;
     }
 }
