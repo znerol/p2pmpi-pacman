@@ -25,6 +25,50 @@ public class Waypoint {
         return getNextWaypoint(dir) != null;
     }
     
+    public boolean directConnected(Waypoint other) {
+        return getDistance(other) != null;
+    }
+    
+    protected Pair<Direction, Integer> getDistance(Waypoint other, int distance, Direction dir) {
+        if (other == null)
+            return null;
+        if (other == this) 
+            return new Pair<Direction, Integer>(dir, distance);
+        
+        switch (dir) {
+        case North:
+            return getDistance(other.south, distance + 1, dir);
+        case East:
+            return getDistance(other.west, distance + 1, dir);
+        case South:
+            return getDistance(other.north, distance + 1, dir);
+        case West:
+            return getDistance(other.east, distance + 1, dir);
+        default:
+            return null;
+        }
+    }
+    
+    public Pair<Direction, Integer> getDistance(Waypoint other) {
+
+        Pair<Direction, Integer> result = null;
+        if (other.absoluteX == this.absoluteX) {
+            result = getDistance(other, 0, Direction.North);
+            result = result != null ? result : getDistance(other, 0, Direction.South);
+        } else if (other.absoluteY == this.absoluteY) {
+            result = getDistance(other, 0, Direction.East);
+            result = result != null ? result : getDistance(other, 0, Direction.West);
+        } 
+        return result;
+    }
+    
+    public Integer getDistanceToWall(Direction dir) {
+        Waypoint next = getNextWaypoint(dir);
+        if (next == null) 
+            return 0;
+        return next.getDistanceToWall(dir) + 1;
+    }
+    
     public Waypoint getNextWaypoint(Direction dir) {
         switch(dir) {
         case North:
@@ -36,7 +80,7 @@ public class Waypoint {
         case West:
             return west;
         default:
-            return this;
+            return null;
         }
     }
     

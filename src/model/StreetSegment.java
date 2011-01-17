@@ -17,6 +17,37 @@ public class StreetSegment extends BoardSegment {
     public StreetSegment(int x, int y, Board board) {
         super(x, y, board);
     }
+    
+    public boolean directConnected(StreetSegment other) {
+        if (other == this)
+            return true;
+        else if (other.getX() == this.getX())
+            return verticalDirectConnected(this, other) || verticalDirectConnected(other, this);
+        else if (other.getY() == this.getY())
+                return horizontalDirectConnected(this, other) || horizontalDirectConnected(other, this);
+        else
+            return false;
+    }
+    
+    protected boolean verticalDirectConnected(StreetSegment hight, StreetSegment low) {
+        do {
+            if (low.getNorth() instanceof StreetSegment)
+                low = (StreetSegment)low.getNorth();
+            else 
+                return false;
+        } while (low != null && low != hight);
+        return low != null;
+    }
+    
+    protected boolean horizontalDirectConnected(StreetSegment left, StreetSegment right) {
+        do {
+            if (left.getEast() instanceof StreetSegment)
+                left = (StreetSegment)left.getEast();
+            else 
+                return false;
+        } while (left != null && left != right);
+        return left != null;
+    }
 
     @Override
     public boolean isStreet() {
