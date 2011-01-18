@@ -68,11 +68,11 @@ public class Service implements Startable, StateHistory<Long>, Flushable,
         }
         if (object instanceof EventImporter) {
             logger.debug("Set event importer " + object);
-            this.eventImporter = (EventImporter) eventImporter;
+            this.eventImporter = (EventImporter) object;
         }
         if (object instanceof EventExporter) {
             logger.debug("Set event exporter " + object);
-            this.eventExporter = (EventExporter) eventExporter;
+            this.eventExporter = (EventExporter) object;
         }
     }
 
