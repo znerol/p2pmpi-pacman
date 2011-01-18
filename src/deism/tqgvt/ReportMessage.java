@@ -79,6 +79,7 @@ public class ReportMessage implements Message {
         return recv;
     }
 
+    @Override
     public String toString() {
         return "[ReportMessage p=" + process + " tq=" + tq + " lvt=" + lvt
                 + " mvt=" + mvt + " send=" + send + " recv=" + recv + "]";

@@ -10,6 +10,7 @@ public class VerboseRandom extends Random {
         super(l);
     }
 
+    @Override
     public double nextDouble() {
         double d = super.nextDouble();
         doubleCalls++;

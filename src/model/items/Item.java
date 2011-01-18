@@ -1,10 +1,11 @@
 package model.items;
 
-import model.sprites.Pacman;
+import model.Pair;
+import model.sprites.Sprite;
 
-public interface Item {
-    public Pacman getOwner(int time);
-    public void setOwner(Pacman pac, int time);
-    public boolean isEaten(int time);
+public interface Item extends Sprite {
+    public boolean isEaten(Long time);
     public int getPoints();
+    public int getOwnerId();
+    public Pair<Integer, Integer> getPosition();
 }

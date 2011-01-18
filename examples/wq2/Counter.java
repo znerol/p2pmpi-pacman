@@ -30,50 +30,50 @@ public class Counter extends AbstractStateHistory<Long, Counter.CounterState>
         }
     }
 
-        @Override
-        public Event peek(long currentSimtime) {
-            if (currentState.dispatching == false) {
-                return currentState.event;
-            }
-            else {
-                return null;
-            }
+    @Override
+    public Event peek(long currentSimtime) {
+        if (currentState.dispatching == false) {
+            return currentState.event;
         }
+        else {
+            return null;
+        }
+    }
 
-        @Override
-        public void remove(Event event) {
-            currentState = new CounterState(currentState.event, true);
-            pushHistory(currentState);
-        }
+    @Override
+    public void remove(Event event) {
+        currentState = new CounterState(currentState.event, true);
+        pushHistory(currentState);
+    }
 
-        @Override
-        public void dispatchEvent(Event event) {
-            if (event instanceof CounterServiceEvent) {
-                CounterServiceEvent cse = (CounterServiceEvent) event;
-                if (cse.counterAvailableEvent.counter == Counter.this
-                        && currentState.dispatching == true) {
-                    assert (currentState.event == cse.counterAvailableEvent);
-                    currentState = new CounterState(
-                            createCounterAvailableEvent(cse), false);
-                    pushHistory(currentState);
-                }
+    @Override
+    public void dispatchEvent(Event event) {
+        if (event instanceof CounterServiceEvent) {
+            CounterServiceEvent cse = (CounterServiceEvent) event;
+            if (cse.counterAvailableEvent.counter == Counter.this
+                    && currentState.dispatching == true) {
+                assert (currentState.event == cse.counterAvailableEvent);
+                currentState = new CounterState(
+                        createCounterAvailableEvent(cse), false);
+                pushHistory(currentState);
             }
         }
+    }
 
-        private CounterAvailableEvent createCounterAvailableEvent(
-                CounterServiceEvent cse) {
-            if (cse == null) {
-                return null;
-            }
-            else {
-                long endTime = cse.getSimtime()
-                        + cse.clientArrivedEvent.getServiceTime();
-                return new CounterAvailableEvent(endTime, Counter.this);
-            }
+    private CounterAvailableEvent createCounterAvailableEvent(
+            CounterServiceEvent cse) {
+        if (cse == null) {
+            return null;
         }
+        else {
+            long endTime = cse.getSimtime()
+                    + cse.clientArrivedEvent.getServiceTime();
+            return new CounterAvailableEvent(endTime, Counter.this);
+        }
+    }
 
-        @Override
-        public void offer(Event event) {
-            // not used
-        }
+    @Override
+    public void offer(Event event) {
+        // not used
+    }
 }

@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Map;
+
 import paclib.GamePlay;
 
 public class StreetSegment extends BoardSegment {
@@ -14,6 +16,37 @@ public class StreetSegment extends BoardSegment {
 
     public StreetSegment(int x, int y, Board board) {
         super(x, y, board);
+    }
+    
+    public boolean directConnected(StreetSegment other) {
+        if (other == this)
+            return true;
+        else if (other.getX() == this.getX())
+            return verticalDirectConnected(this, other) || verticalDirectConnected(other, this);
+        else if (other.getY() == this.getY())
+                return horizontalDirectConnected(this, other) || horizontalDirectConnected(other, this);
+        else
+            return false;
+    }
+    
+    protected boolean verticalDirectConnected(StreetSegment hight, StreetSegment low) {
+        do {
+            if (low.getNorth() instanceof StreetSegment)
+                low = (StreetSegment)low.getNorth();
+            else 
+                return false;
+        } while (low != null && low != hight);
+        return low != null;
+    }
+    
+    protected boolean horizontalDirectConnected(StreetSegment left, StreetSegment right) {
+        do {
+            if (left.getEast() instanceof StreetSegment)
+                left = (StreetSegment)left.getEast();
+            else 
+                return false;
+        } while (left != null && left != right);
+        return left != null;
     }
 
     @Override
@@ -46,74 +79,83 @@ public class StreetSegment extends BoardSegment {
         return centre;
     }
     
-    public void populateWaypoints() {
+    public void populateWaypoints(Map<Pair<Integer, Integer>, Waypoint> waypoints) {
         if (centre != null)
             return;
         
         this.centre = new Waypoint(this, HALF_SIZE, HALF_SIZE);
-        populateNorth();
-        populateEast();
-        populateSouth();
-        populateWest();
+        waypoints.put(new Pair<Integer, Integer>(centre.getAbsoluteX(), centre.getAbsoluteY()), centre);
+        populateNorth(waypoints);
+        populateEast(waypoints);
+        populateSouth(waypoints);
+        populateWest(waypoints);
     }
     
-    private void populateNorth() {
+    private void populateNorth(Map<Pair<Integer, Integer>, Waypoint> waypoints) {
         if (!getNorth().isStreet())
             return;
         
         north = centre;
         for(int i = 0; i < HALF_SIZE; i++) {
-            north.setNorth(new Waypoint(this, north.getRelativeX(), north.getRelativeY() - 1));
+            Waypoint newWaypoint = new Waypoint(this, north.getRelativeX(), north.getRelativeY() - 1);
+            waypoints.put(new Pair<Integer, Integer>(newWaypoint.getAbsoluteX(), newWaypoint.getAbsoluteY()), newWaypoint);
+            north.setNorth(newWaypoint);
             north = north.getNorth();
         }
         
         StreetSegment street = (StreetSegment)getNorth();
         north.setNorth(street.getWaypointSouth());
-        street.populateWaypoints();
+        street.populateWaypoints(waypoints);
     }
     
-    private void populateEast() {
+    private void populateEast(Map<Pair<Integer, Integer>, Waypoint> waypoints) {
         if (!getEast().isStreet())
             return;
         
         east = centre;
         for(int i = 0; i < HALF_SIZE; i++) {
-            east.setEast(new Waypoint(this, east.getRelativeX() + 1, east.getRelativeY()));
+            Waypoint newWaypoint = new Waypoint(this, east.getRelativeX() + 1, east.getRelativeY());
+            waypoints.put(new Pair<Integer, Integer>(newWaypoint.getAbsoluteX(), newWaypoint.getAbsoluteY()), newWaypoint);
+            east.setEast(newWaypoint);
             east = east.getEast();
         }
         
         StreetSegment street = (StreetSegment)getEast();
         east.setEast(street.getWaypointWest());
-        street.populateWaypoints();
+        street.populateWaypoints(waypoints);
     }
     
-    private void populateSouth() {
+    private void populateSouth(Map<Pair<Integer, Integer>, Waypoint> waypoints) {
         if (!getSouth().isStreet())
             return;
         
         south = centre;
         for(int i = 0; i < HALF_SIZE; i++) {
-            south.setSouth(new Waypoint(this, south.getRelativeX(), south.getRelativeY() + 1));
+            Waypoint newWaypoint = new Waypoint(this, south.getRelativeX(), south.getRelativeY() + 1);
+            waypoints.put(new Pair<Integer, Integer>(newWaypoint.getAbsoluteX(), newWaypoint.getAbsoluteY()), newWaypoint);
+            south.setSouth(newWaypoint);
             south = south.getSouth();
         }
 
         StreetSegment street = (StreetSegment)getSouth();
         south.setSouth(street.getWaypointNorth());
-        street.populateWaypoints();
+        street.populateWaypoints(waypoints);
     }
     
-    private void populateWest() {
+    private void populateWest(Map<Pair<Integer, Integer>, Waypoint> waypoints) {
         if (!getWest().isStreet())
             return;
         
         west = centre;
         for(int i = 0; i < HALF_SIZE; i++) {
-            west.setWest(new Waypoint(this, west.getRelativeX() - 1, west.getRelativeY()));
+            Waypoint newWaypoint = new Waypoint(this, west.getRelativeX() - 1, west.getRelativeY());
+            waypoints.put(new Pair<Integer, Integer>(newWaypoint.getAbsoluteX(), newWaypoint.getAbsoluteY()), newWaypoint);
+            west.setWest(newWaypoint);
             west = west.getWest();
         }
         
         StreetSegment street = (StreetSegment)getWest();
         west.setWest(street.getWaypointEast());
-        street.populateWaypoints();
+        street.populateWaypoints(waypoints);
     }
 }

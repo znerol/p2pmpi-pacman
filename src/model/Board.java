@@ -1,19 +1,24 @@
 package model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Board {
-    private Segment[][] segments;
-    private int width;
-    private int height;
+    private final Segment[][] segments;
+    private final Map<Pair<Integer, Integer>, Waypoint> waypoints = new HashMap<Pair<Integer, Integer>, Waypoint>();
+    private final int width;
+    private final int height;
 
     public Board(char[][] boardDef) {
-        populateSegements(boardDef);
-    }
-    
-    protected void populateSegements(char[][] boardDef) {
         height = boardDef.length;
         width = boardDef[0].length;
         
         segments = new Segment[height][width];
+        
+        populateSegements(boardDef);
+    }
+    
+    protected void populateSegements(char[][] boardDef) {
 
         for (int h = 0; h < height; h++) {
             for (int w = 0; w < width; w++) {
@@ -42,7 +47,11 @@ public class Board {
         if (firstStreetSegment == null) 
             throw new IllegalStateException();
         
-        firstStreetSegment.populateWaypoints();
+        firstStreetSegment.populateWaypoints(waypoints);
+    }
+    
+    public Waypoint getWaypoint(int x, int y) {
+        return this.waypoints.get(new Pair<Integer, Integer>(x, y));
     }
     
 

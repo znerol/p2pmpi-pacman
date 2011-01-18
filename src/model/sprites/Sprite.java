@@ -1,6 +1,10 @@
 package model.sprites;
 
+import java.io.Serializable;
 
-public interface Sprite {
-    public State getState(int time);
+
+public interface Sprite extends Cloneable, Serializable {    
+    public int getId();
+    public Object clone() throws CloneNotSupportedException;
+    public Long getTimestamp();
 }

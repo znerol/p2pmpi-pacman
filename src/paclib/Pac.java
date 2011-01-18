@@ -119,6 +119,8 @@ public class Pac extends MovingObject {
 	public int getPoints() {
 		return points;
 	}
+	
+	@Override
 	public void paint(Graphics2D g2) {
 		g2.setColor(color);
 		g2.fill(s);

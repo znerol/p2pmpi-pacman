@@ -17,6 +17,7 @@ public class BallEvent extends Event {
         this.receiver = receiver;
     }
 
+    @Override
     public String toString() {
         return (isAntimessage() ? "-" : "+") + "[BallEvent timestamp="
                 + getSimtime() + " from=" + sender + " to=" + receiver;

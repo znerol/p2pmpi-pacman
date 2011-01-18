@@ -41,12 +41,6 @@ public class ModelTest {
         Model m = new Model(strArr, 2);
         
         i = 0;
-        m.gotoTime(i++);
-        m.gotoTime(i++);
-        m.gotoTime(i++);
-        m.gotoTime(i++);
-        m.gotoTime(i++);
-        m.gotoTime(i++);
         
     }
 }
