@@ -80,5 +80,10 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
             pushHistory(currentState);
             currentEvent = currentState.getEvent();
         }
+            
+    }
+
+    public MoveableSpriteState getCurrentState() {
+        return currentState;
     }
 }
