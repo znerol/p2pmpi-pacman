@@ -20,8 +20,11 @@ import model.Direction;
 import model.Model;
 import model.Segment;
 import model.StreetSegment;
+import model.Triple;
+import model.sprites.GhostState;
 import model.sprites.PacmanState;
 import model.sprites.Sprite;
+import model.sprites.SpriteState;
 
 /**
  * AWT component for game board
@@ -30,6 +33,7 @@ public class GameBoardComponent extends JComponent {
     public static int TILE_SIZE = 27;
     public static int STREET_MARGIN = 3;
     public static int PAC_SIZE = 23;
+    public static int GHOST_SIZE = 23;
 
     private static final long serialVersionUID = -7028947825699430811L;
     private final Model model;
@@ -44,7 +48,8 @@ public class GameBoardComponent extends JComponent {
         // build the wall map by subtracting all the streets from the a
         // rectangular area
         Board board = model.getBoard();
-        walls = new Area(new Rectangle(0, 0, board.getWidth() * TILE_SIZE,
+        walls =
+                new Area(new Rectangle(0, 0, board.getWidth() * TILE_SIZE,
                         board.getHeight() * TILE_SIZE));
 
         for (int row = 0; row < board.getHeight(); row++) {
@@ -74,15 +79,26 @@ public class GameBoardComponent extends JComponent {
         g2d.fill(walls);
 
         long simtime = governor.getCurrentSimtime();
-        
+
         // FIXME: draw sprites
         for (Sprite sprite : model.getSprites()) {
-        }
+            SpriteState state = sprite.getCurrentState();
+            Triple<Direction, Integer, Integer> movement =
+                state.nextPosition(simtime);
 
-        Shape pac = pacShape(simtime, Direction.East);
-        g2d.translate(TILE_SIZE, TILE_SIZE);
-        g2d.setColor(Color.yellow);
-        g2d.fill(pac);
+            if (state instanceof PacmanState) {
+                Shape pac = pacShape(simtime, movement.a);
+                g2d.translate(movement.b, movement.c);
+                g2d.setColor(Color.yellow);
+                g2d.fill(pac);
+            }
+            else if (state instanceof GhostState) {
+                Rectangle ghost = new Rectangle(GHOST_SIZE, GHOST_SIZE);
+                g2d.translate(movement.b, movement.c);                
+                g2d.setColor(Color.red);
+                g2d.fill(ghost);
+            }
+        }
     }
 
     @Override
@@ -101,14 +117,14 @@ public class GameBoardComponent extends JComponent {
     }
 
     private Shape pacShape(long simtime, Direction direction) {
-        //  0 30 60 30 (angle)
-        // -1  0  1  0 (alter)
+        // 0 30 60 30 (angle)
+        // -1 0 1 0 (alter)
         // => bit zero: value, bit one signfactor
 
         Arc2D pac = new Arc2D.Float();
 
-        int signfact = 1 - (((int)simtime >> 2) & 0x2);
-        int alter = signfact * (((int)simtime >> 2) & 0x1);
+        int signfact = 1 - (((int) simtime >> 2) & 0x2);
+        int alter = signfact * (((int) simtime >> 2) & 0x1);
         int angle = 30 + 30 * alter;
 
         pac.setArcType(Arc2D.PIE);
@@ -124,7 +140,7 @@ public class GameBoardComponent extends JComponent {
 
         // rotate according to direction
         int quadrant = 0;
-        switch(direction) {
+        switch (direction) {
         case North:
             quadrant++;
         case West:
