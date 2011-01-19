@@ -1,5 +1,6 @@
 package pacifism;
 
+import model.Board;
 import p2pmpi.mpi.IntraComm;
 import p2pmpi.mpi.MPI;
 import deism.core.Event;
@@ -42,9 +43,11 @@ public class GameNode implements Runnable {
 
     private final DiscreteEventProcess process;
 
+    private final GameGui gui;
+
     public GameNode(IntraComm mpiCommWorld, int mpiGvtMasterRank,
             int mpiReportTag, int mpiRank, long gvtTimeQuantumSize,
-            double timeScale) {
+            double timeScale, Board board) {
         // Setup environment
         governor = new RealtimeExecutionGovernor(timeScale);
         messageCenter = new MessageCenter(governor);
@@ -72,13 +75,22 @@ public class GameNode implements Runnable {
 
         // Setup pacman process
         DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
+        KeyboardController keyboardController =
+                new KeyboardController(governor, mpiRank); // FIXME: mpirank?
+
+        // Add own keyboard controller event source
+        builder.add(keyboardController);        
 
         // FIXME: Add pacman process here
         process = builder.getProcess();
+
+        // Setup GUI
+        gui = new GameGui(governor, keyboardController, board);
     }
 
     @Override
     public void run() {
+        gui.setVisible(true);
         final Runloop runloop =
                 new Runloop(governor, termCond, stateController,
                         snapshotCondition, messageCenter, service);
