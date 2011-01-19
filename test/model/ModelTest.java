@@ -2,7 +2,7 @@ package model;
 
 import java.util.Scanner;
 
-import model.sprites.Pacman;
+import model.sprites.PacmanState;
 
 import org.junit.Test;
 
@@ -38,6 +38,6 @@ public class ModelTest {
             strArr[i] = in.nextLine().trim().toCharArray();
             i++;
         }
-        Model m = new Model(strArr, 2);
+        //Model m = new Model(strArr, 2);
     }
 }

@@ -10,24 +10,18 @@ import model.events.EventVisitor;
 import deism.core.Event;
 
 @SuppressWarnings("serial")
-public class Ghost extends AbstractSpriteState implements EventVisitor {
-    private int id;
+public class GhostState extends AbstractSpriteState implements EventVisitor {
     
-    public Ghost(Direction currentDir, Direction nextDir, Waypoint waypoint, int id) {
-        super(currentDir, nextDir, waypoint, 0L);
-        this.id = id;
+    public GhostState(Direction currentDir, Direction nextDir, Waypoint waypoint, int id) {
+        super(currentDir, nextDir, waypoint, 0L, id);
     }
     
-    public Ghost(Ghost Ghost, Event event) {
+    public GhostState(GhostState Ghost, Event event) {
         super(Ghost, event);
-        this.id = Ghost.id;
     }
     
-    public Ghost(Ghost Ghost, boolean move) {
+    public GhostState(GhostState Ghost) {
         super(Ghost);
-        this.id = Ghost.id;
-        if (move) 
-            move();
     }
 
     @Override
@@ -36,25 +30,17 @@ public class Ghost extends AbstractSpriteState implements EventVisitor {
     }
 
     @Override
-    public int getId() {
-        return this.id;
-    }
-
-    @Override
     public void visit(DirectionEvent event) {
-        if (event.getSprite() != this.getId())
-            return;
+
     }
 
     @Override
     public void visit(CollisionEvent event) {
-        
+        // do nothing, pac thing
     }
 
     @Override
     public void visit(ChangeViewEvent event) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
@@ -65,6 +51,18 @@ public class Ghost extends AbstractSpriteState implements EventVisitor {
     
     @Override
     public Object clone() {
-        return new Ghost(this, false);
+        return new GhostState(this);
+    }
+
+    @Override
+    public Event getEvent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void updateTo(Long simTime) {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -1,11 +1,72 @@
 package model.sprites;
 
-import java.io.Serializable;
+import java.util.List;
 
+import model.DispatchedListener;
+import model.EventDispatchedEvent;
+import model.Model;
+import model.events.VisitableEvent;
+import deism.core.Event;
+import deism.process.DiscreteEventProcess;
+import deism.stateful.AbstractStateHistory;
 
-public interface Sprite extends Cloneable, Serializable {    
-    public int getId();
-    public Object clone();
-    public Long getTimestamp();
-    public Sprite nextPosition(Long simTime);
+public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> implements DiscreteEventProcess, DispatchedListener {
+    private MoveableSpriteState currentState;
+    private Event currentEvent;
+    
+    public Sprite(MoveableSpriteState initState) {
+        this.currentState = initState;
+        this.currentEvent = initState.getEvent();
+        pushHistory(currentState);
+    }
+    
+    @Override
+    public void revertHistory(List<MoveableSpriteState> tail) {
+        if (tail.size() > 0) {
+            currentState = tail.get(0);
+            currentEvent = currentState.getEvent();
+        }
+    }
+
+    @Override
+    public Event peek(long currentSimtime) {
+        return this.currentEvent;
+    }
+
+    @Override
+    public void remove(Event event) {
+        this.currentEvent = null;
+        
+    }
+
+    @Override
+    public void offer(Event event) {
+        // not used        
+    }
+
+    @Override
+    public void dispatchEvent(Event e) {
+        if (e instanceof VisitableEvent) {
+            VisitableEvent ve = (VisitableEvent)e;
+            currentState = (MoveableSpriteState)currentState.clone();
+            ve.accept(currentState);
+            pushHistory(currentState);
+            currentEvent = currentState.getEvent();
+            Model.getModel().eventDispatched(this, e);
+        }
+    }
+
+    @Override
+    public void eventDispatched(EventDispatchedEvent event) {
+        if (event.getSource() == this || this.currentEvent == null)
+            return;
+        if (this.currentEvent.getSimtime() > event.getEvent().getSimtime()) {
+            currentState = (MoveableSpriteState)currentState.clone();
+            currentState.updateTo(event.getEvent().getSimtime());
+            pushHistory(currentState);
+            currentEvent = currentState.getEvent();
+        }
+            
+    }
+
 }
