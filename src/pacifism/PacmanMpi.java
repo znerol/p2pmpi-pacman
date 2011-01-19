@@ -74,10 +74,11 @@ public class PacmanMpi {
             Board board = new Board(strArr);
             System.out.print(board);
 
+            final int spriteId = rank;
             GameNode node =
                     new GameNode(MPI.COMM_WORLD, GVT_MASTER_RANK,
-                            GVT_REPORT_TAG, rank, GVT_TQ_SIZE, TIME_SCALE,
-                            board);
+                            GVT_REPORT_TAG, rank, GVT_TQ_SIZE, PAC_EVENT_TAG,
+                            spriteId, TIME_SCALE, board);
             node.run();
         }
 
