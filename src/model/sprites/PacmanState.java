@@ -34,7 +34,8 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
         if (event.getSprite() != this.getId())
             return;
         
-        // TODO
+        this.nextDirection = event.getDirection();
+        this.timestamp = event.getSimtime();
     }
 
     @Override
@@ -44,14 +45,22 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public void visit(ChangeViewEvent event) {
-        // TODO Auto-generated method stub
-        
+        // has to do nothing.
+        // On event dispatching, all other sprites will get informed
+        // and they will all update their behaviour if necessary
     }
 
     @Override
     public void visit(EnterJunctionEvent event) {
-        // TODO Auto-generated method stub
+        if (event.getSprite() != this.getId())
+            return;
         
+        this.x = event.getX();
+        this.y = event.getY();
+        
+        this.timestamp = event.getSimtime();
+        
+        this.currentDirection = this.nextDirection;
     }
     
     @Override
@@ -62,6 +71,7 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
     @Override
     public Event getEvent() {
         // TODO Auto-generated method stub
+        // Nächstes Event berechnen
         return null;
     }
 }

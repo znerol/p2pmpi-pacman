@@ -12,12 +12,26 @@ import deism.stateful.AbstractStateHistory;
 
 public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> implements DiscreteEventProcess, DispatchedListener {
     private MoveableSpriteState currentState;
+    private final MoveableSpriteState initState;
     private Event currentEvent;
     
     public Sprite(MoveableSpriteState initState) {
         this.currentState = initState;
+        this.initState = initState;
         this.currentEvent = initState.getEvent();
         pushHistory(currentState);
+    }
+    
+    public MoveableSpriteState getInitState() {
+        return this.initState;
+    }
+    
+    public boolean isPacman() {
+        return (currentState instanceof PacmanState);
+    }
+    
+    public boolean isGhost() {
+        return (currentState instanceof GhostState);
     }
     
     @Override
@@ -41,7 +55,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
 
     @Override
     public void offer(Event event) {
-        // not used        
+        // not used
     }
 
     @Override
@@ -66,7 +80,5 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
             pushHistory(currentState);
             currentEvent = currentState.getEvent();
         }
-            
     }
-
 }

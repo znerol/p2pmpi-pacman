@@ -31,6 +31,32 @@ public class Waypoint {
             this.isJunction = false;
     }
     
+    public Waypoint getNextPointOfInterest(Direction dir) {
+        Waypoint next = null;
+        switch(dir) {
+        case North:
+            next = north;
+            break;
+        case East:
+            next = east;
+            break;
+        case South:
+            next = south;
+            break;
+        case West:
+            next = west;
+            break;
+        default:
+            return null;
+        }
+        
+        if (next == null)
+            return null;
+        if (next.isJunction() || next.isChangingView(dir))
+            return next;
+        return next.getNextPointOfInterest(dir);
+    }
+    
     public List<Direction> getPossibleDirections() {
         if (this.directions != null) 
             return this.directions;

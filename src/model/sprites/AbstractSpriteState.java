@@ -59,7 +59,12 @@ public abstract class AbstractSpriteState implements MoveableSpriteState {
     public Triple<Direction, Integer, Integer> nextPosition(Long simTime) {
         assert(simTime > timestamp);
         
+        // Distance equals to the elapsed time since v = 1s/t
         int distance = (int)(simTime - this.timestamp);
+        
+        // Max distance is the wall distance. There is no brick missing in the wall... ;-)
+        // Wall distance is sufficient. If this distance will be disturbed, an other event
+        // would break this.
         distance = distance > wallDistance ? wallDistance : distance;
         switch(currentDirection) {
         case North:
