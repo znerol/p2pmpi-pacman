@@ -49,6 +49,11 @@ public abstract class AbstractSpriteState implements MoveableSpriteState {
         this.timestamp = state.timestamp;
         this.id = state.id;
     }
+    
+    @Override
+    public Pair<Integer, Integer> getOrigin() {
+        return new Pair<Integer, Integer>(this.x, this.y);
+    }
 
     @Override
     public int getId() {

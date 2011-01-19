@@ -1,6 +1,8 @@
 package model.sprites;
 
+import model.Board;
 import model.Direction;
+import model.Model;
 import model.Waypoint;
 import model.events.ChangeViewEvent;
 import model.events.CollisionEvent;
@@ -31,22 +33,36 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public void visit(DirectionEvent event) {
-
+        // Will never happen for a ghost
     }
 
     @Override
     public void visit(CollisionEvent event) {
-        // do nothing, pac thing
+        // do nothing, pac's thing
     }
 
     @Override
     public void visit(ChangeViewEvent event) {
+        // Ghosts can not walk through walls but see...
+        if (event.getSimtime() != getId())
+            return;
+        
+        updateToTime(event.getSimtime());
     }
 
     @Override
     public void visit(EnterJunctionEvent event) {
-        // TODO Auto-generated method stub
+        if (event.getSimtime() != getId())
+            return;
         
+        updateToTime(event.getSimtime());
+        
+        if (nextDirection != Direction.None) {
+            currentDirection = nextDirection;
+        } else {
+            currentDirection = Model.getModel().getRandomDirection(x, y);
+        }
+        nextDirection = Direction.None;
     }
     
     @Override
@@ -56,7 +72,15 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public Event getEvent() {
-        // TODO Auto-generated method stub
-        return null;
+        Waypoint next = null;
+        Waypoint current = Board.getBoard().getWaypoint(x, y);
+        
+        do {
+            next = current.getNextPointOfInterest(currentDirection);
+        } while (!next.isJunction());
+        
+        int distance = current.getDistance(next).b;
+        
+        return new EnterJunctionEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
     }
 }

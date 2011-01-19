@@ -1,6 +1,8 @@
 package model.sprites;
 
+import model.Board;
 import model.Direction;
+import model.Model;
 import model.Waypoint;
 import model.events.ChangeViewEvent;
 import model.events.CollisionEvent;
@@ -34,17 +36,43 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
         if (event.getSprite() != this.getId())
             return;
         
+        updateToTime(event.getSimtime());
+        
         this.nextDirection = event.getDirection();
+        if (currentDirection == Direction.None)
+            this.currentDirection = nextDirection;
         this.timestamp = event.getSimtime();
     }
 
     @Override
     public void visit(CollisionEvent event) {
-        // TODO
+//        if (event.getSprite1() != this.getId() && event.getSprite2() != this.getId())
+//            return;
+//        
+//        updateToTime(event.getSimtime());
+//        
+//        Sprite other = null;
+//        Sprite me = Model.getModel().getSprite(getId());
+//        
+//        if (event.getSprite1() != this.getId()) 
+//            other = Model.getModel().getSprite(event.getSprite1());
+//        if (other == null)
+//            other = Model.getModel().getSprite(event.getSprite2());
+//
+//        if (other.isGhost()) {
+//            this.x = me.getInitState().getOrigin().a;
+//            this.y = me.getInitState().getOrigin().b;
+//        }
+//            
+//        this.currentDirection = Direction.None;
     }
 
     @Override
     public void visit(ChangeViewEvent event) {
+//        if (event.getSprite() != getId())
+//            return;
+//        
+//        updateToTime(event.getSimtime());
         // has to do nothing.
         // On event dispatching, all other sprites will get informed
         // and they will all update their behaviour if necessary
@@ -55,12 +83,13 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
         if (event.getSprite() != this.getId())
             return;
         
-        this.x = event.getX();
-        this.y = event.getY();
+        updateToTime(event.getSimtime());
         
-        this.timestamp = event.getSimtime();
-        
-        this.currentDirection = this.nextDirection;
+        if (this.nextDirection != Direction.None && Board.getBoard().getWaypoint(x, y).isDirectionAvailable(this.nextDirection)) {
+            this.currentDirection = this.nextDirection;
+        } else if (!Board.getBoard().getWaypoint(x, y).isDirectionAvailable(this.currentDirection))
+            this.currentDirection = Direction.None;
+        this.nextDirection = Direction.None;
     }
     
     @Override
@@ -70,8 +99,15 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public Event getEvent() {
-        // TODO Auto-generated method stub
-        // Nächstes Event berechnen
-        return null;
+        Waypoint next = null;
+        Waypoint current = Board.getBoard().getWaypoint(x, y);
+        
+        do {
+            next = current.getNextPointOfInterest(currentDirection);
+        } while (!next.isJunction());
+        
+        int distance = current.getDistance(next).b;
+        
+        return new EnterJunctionEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
     }
 }
