@@ -84,19 +84,23 @@ public class GameBoardComponent extends JComponent {
         for (Sprite sprite : model.getSprites()) {
             SpriteState state = sprite.getCurrentState();
             Triple<Direction, Integer, Integer> movement =
-                state.nextPosition(simtime);
+                    state.nextPosition(simtime);
 
             if (state instanceof PacmanState) {
                 Shape pac = pacShape(simtime, movement.a);
-                g2d.translate(movement.b, movement.c);
+                g2d.translate(movement.b * 3, movement.c * 3);
                 g2d.setColor(Color.yellow);
                 g2d.fill(pac);
+                g2d.setTransform(new AffineTransform());
             }
             else if (state instanceof GhostState) {
-                Rectangle ghost = new Rectangle(GHOST_SIZE, GHOST_SIZE);
-                g2d.translate(movement.b, movement.c);                
+                Rectangle ghost =
+                        new Rectangle(-GHOST_SIZE / 2, -GHOST_SIZE / 2,
+                                GHOST_SIZE, GHOST_SIZE);
+                g2d.translate(movement.b * 3, movement.c * 3);
                 g2d.setColor(Color.red);
                 g2d.fill(ghost);
+                g2d.setTransform(new AffineTransform());
             }
         }
     }
@@ -133,10 +137,6 @@ public class GameBoardComponent extends JComponent {
         pac.setAngleExtent(360 - 2 * angle);
 
         AffineTransform tx = new AffineTransform();
-
-        // Set origin to 0, 0
-        // FIXME: perhaps we can remove this one
-        tx.translate(TILE_SIZE / 2, TILE_SIZE / 2);
 
         // rotate according to direction
         int quadrant = 0;
