@@ -2,7 +2,7 @@ package model;
 
 import java.util.Scanner;
 
-import model.sprites.Sprite;
+import model.sprites.Pacman;
 
 import org.junit.Test;
 
@@ -39,8 +39,5 @@ public class ModelTest {
             i++;
         }
         Model m = new Model(strArr, 2);
-        
-        i = 0;
-        
     }
 }

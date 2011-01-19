@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 public interface Sprite extends Cloneable, Serializable {    
     public int getId();
-    public Object clone() throws CloneNotSupportedException;
+    public Object clone();
     public Long getTimestamp();
+    public Sprite nextPosition(Long simTime);
 }

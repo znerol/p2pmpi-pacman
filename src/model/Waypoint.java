@@ -12,6 +12,7 @@ public class Waypoint {
     private final int absoluteX;
     private final int absoluteY;
     private final StreetSegment owner;
+    private final boolean isJunction;
     
     public Waypoint(StreetSegment owner, int x, int y) {
         this.x = x;
@@ -19,6 +20,30 @@ public class Waypoint {
         this.absoluteX = owner.getX() * GamePlay.GUI_FIELD_SIZE + x;
         this.absoluteY = owner.getY() * GamePlay.GUI_FIELD_SIZE + y;
         this.owner = owner;
+        
+        if (owner.isJunction() && owner.getWaypointCentre() == this)
+            this.isJunction = true;
+        else
+            this.isJunction = false;
+    }
+    
+    public boolean isJunction() {
+        return this.isJunction;
+    }
+    
+    public boolean isChangingView(Direction currentDir) {
+        switch(currentDir) {
+        case North:
+            return south.owner != owner && (south.owner.isJunction() || owner.isJunction());
+        case East:
+            return west.owner != owner && (west.owner.isJunction() || owner.isJunction());
+        case South:
+            return north.owner != owner && (north.owner.isJunction() || owner.isJunction());
+        case West:
+            return west.owner != owner && (west.owner.isJunction() || owner.isJunction());
+        default:
+            return false;
+        }
     }
     
     public boolean isDirectionAvailable(Direction dir) {

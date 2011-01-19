@@ -2,14 +2,11 @@ package model.sprites;
 
 import model.Direction;
 import model.Waypoint;
+import model.events.ChangeViewEvent;
+import model.events.CollisionEvent;
 import model.events.DirectionEvent;
+import model.events.EnterJunctionEvent;
 import model.events.EventVisitor;
-import model.events.GhostEatenEvent;
-import model.events.HappyPillEatenEvent;
-import model.events.HappyPillTimeOutEvent;
-import model.events.PacmanEatenEvent;
-import model.events.PointEatenEvent;
-import model.events.SpriteStoppedEvent;
 import deism.core.Event;
 
 @SuppressWarnings("serial")
@@ -57,37 +54,24 @@ public class Pacman extends AbstractSpriteState implements EventVisitor {
     }
 
     @Override
-    public void visit(GhostEatenEvent event) {
+    public void visit(CollisionEvent event) {
         
     }
 
     @Override
-    public void visit(HappyPillEatenEvent event) {
+    public void visit(ChangeViewEvent event) {
+        // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void visit(HappyPillTimeOutEvent event) {
-        
-    }
-
-    @Override
-    public void visit(PacmanEatenEvent event) {
-        
-    }
-
-    @Override
-    public void visit(SpriteStoppedEvent event) {
-        
-    }
-
-    @Override
-    public void visit(PointEatenEvent event) {
+    public void visit(EnterJunctionEvent event) {
+        // TODO Auto-generated method stub
         
     }
     
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Object clone() {
         return new Pacman(this, false);
     }
 }
