@@ -64,10 +64,4 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
         // TODO Auto-generated method stub
         return null;
     }
-
-    @Override
-    public void updateTo(Long simTime) {
-        // TODO Auto-generated method stub
-        
-    }
 }

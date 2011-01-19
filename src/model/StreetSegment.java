@@ -19,7 +19,15 @@ public class StreetSegment extends BoardSegment {
     }
     
     public boolean isJunction() {
-        return (getSouth().isStreet() || getNorth().isStreet()) && (getEast().isStreet() || getWest().isStreet()); 
+        return ((getSouth().isStreet() || getNorth().isStreet()) && (getEast().isStreet() || getWest().isStreet())) || isDeadEnd(); 
+    }
+    
+    public boolean isDeadEnd() {
+        int count = getSouth().isStreet() ? 1 : 0;
+        count += getWest().isStreet() ? 1 : 0;
+        count += getEast().isStreet() ? 1 : 0;
+        count += getNorth().isStreet() ? 1 : 0;
+        return count == 1;
     }
     
     public boolean directConnected(StreetSegment other) {

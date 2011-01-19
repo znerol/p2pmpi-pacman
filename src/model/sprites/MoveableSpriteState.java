@@ -7,6 +7,6 @@ public interface MoveableSpriteState extends SpriteState {
     public Direction getCurrentDirection();
     public Direction getNextDirection();
     public Event getEvent();
-    public void updateTo(Long simTime);
+    public void updateToTime(Long simTime);
 
 }

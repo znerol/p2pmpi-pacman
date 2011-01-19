@@ -62,7 +62,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
             return;
         if (this.currentEvent.getSimtime() > event.getEvent().getSimtime()) {
             currentState = (MoveableSpriteState)currentState.clone();
-            currentState.updateTo(event.getEvent().getSimtime());
+            currentState.updateToTime(event.getEvent().getSimtime());
             pushHistory(currentState);
             currentEvent = currentState.getEvent();
         }
