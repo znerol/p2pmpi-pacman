@@ -1,32 +1,27 @@
 package model;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
-import model.items.AbstractPoint;
+import model.events.ChangeViewEvent;
+import model.events.CollisionEvent;
+import model.events.DirectionEvent;
+import model.events.EnterJunctionEvent;
+import model.events.EventVisitor;
+import model.events.VisitableEvent;
 import model.sprites.Ghost;
 import model.sprites.Pacman;
+import model.sprites.Sprite;
 
 @SuppressWarnings("serial")
-public class GameState implements Serializable {
-    private final Map<Integer, Pacman> pacmans = new HashMap<Integer, Pacman>();
-    private final Map<Integer, Ghost> ghosts = new HashMap<Integer, Ghost>();
-    private final Map<Pair<Integer, Integer>, AbstractPoint> points = new HashMap<Pair<Integer, Integer>, AbstractPoint>();
-    private final int happyPillSteps;
+public class GameState implements EventVisitor, Serializable {
+    private final Sprite[] sprites;
+    //private final VisitableEvent event;
     
-    public GameState(Collection<Pacman> pacmans, Collection<Ghost> ghosts, Collection<AbstractPoint> points, int happyPillSteps) {
-        for (Pacman state : pacmans) 
-            this.pacmans.put(state.getId(), state);
-        
-        for (Ghost state : ghosts) 
-            this.ghosts.put(state.getId(), state);
-        
-        for (AbstractPoint state : points) 
-            this.points.put(state.getPosition(), state);
-        
-        this.happyPillSteps = happyPillSteps;
+    public GameState(Sprite[] sprites) {
+        if (sprites == null)
+            this.sprites = new Sprite[0];
+        else
+            this.sprites = cloneSprites(sprites);
     }
     
     /**
@@ -34,57 +29,65 @@ public class GameState implements Serializable {
      * @param state
      */
     public GameState(GameState state) {
-        for (Map.Entry<Integer, Pacman> pac : state.pacmans.entrySet())
-            pacmans.put(pac.getKey(), new Pacman(pac.getValue(), true));
-
-        for (Map.Entry<Integer, Ghost> ghost : state.ghosts.entrySet())
-            ghosts.put(ghost.getKey(), new Ghost(ghost.getValue(), true));
-        
-        for (Map.Entry<Pair<Integer, Integer>, AbstractPoint> point : state.points.entrySet())
-            try {
-                points.put(point.getKey(), (AbstractPoint)(point.getValue().clone()));
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-        
-        this.happyPillSteps = state.happyPillSteps == 0 ? 0 : state.happyPillSteps - 1;
+        this.sprites = cloneSprites(state.sprites);
     }
-
-    /**
-     * @return the Pacmans
-     */
-    public Collection<Pacman> getPacmans() {
-        return pacmans.values();
+    
+    private Sprite[] cloneSprites(Sprite[] sprites) {
+        Sprite[] result = new Sprite[sprites.length];
+        for (int i = 0; i < sprites.length; i++) {
+            result[i] = (Sprite)sprites[i].clone();
+        }
+        
+        return result;
     }
     
     public Pacman getPacman(int id) {
-        return pacmans.get(id);
+        Sprite sprite = this.sprites[id];
+        if (sprite instanceof Pacman)
+            return (Pacman) sprite;
+        return null;
     }
     
     public Ghost getGhost(int id) {
-        return ghosts.get(id);
+        Sprite sprite = this.sprites[id];
+        if (sprite instanceof Ghost)
+            return (Ghost) sprite;
+        return null;
     }
     
-    public AbstractPoint getPoint(int id) {
-        return points.get(id);
-    }
-
-    /**
-     * @return the Ghosts
-     */
-    public Collection<Ghost> getGhosts() {
-        return ghosts.values();
-    }
-
-    /**
-     * @return the points
-     */
-    public Collection<AbstractPoint> getPoints() {
-        return points.values();
+    public Sprite getSprite(int id) {
+        if (id < 0 || this.sprites.length <= id)
+            throw new IndexOutOfBoundsException("sprites");
+        
+        return this.sprites[id];
     }
     
     @Override
     public Object clone() {
-        return new GameState(this.pacmans.values(), this.ghosts.values(), this.points.values(), happyPillSteps);
+        return new GameState(this);
+    }
+
+    @Override
+    public void visit(DirectionEvent event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(CollisionEvent event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(ChangeViewEvent event) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void visit(EnterJunctionEvent event) {
+        // TODO Auto-generated method stub
+        
     }
 }

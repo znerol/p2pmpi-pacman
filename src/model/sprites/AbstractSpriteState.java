@@ -2,7 +2,12 @@ package model.sprites;
 
 import model.Direction;
 import model.Model;
+import model.Pair;
 import model.Waypoint;
+import model.events.ChangeViewEvent;
+import model.events.CollisionEvent;
+import model.events.DirectionEvent;
+import model.events.EnterJunctionEvent;
 import model.events.EventVisitor;
 import model.events.VisitableEvent;
 import deism.core.Event;
@@ -13,7 +18,7 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
     private Direction nextDirection;
     private int x;
     private int y;
-    private final Long timestamp;
+    private Long timestamp;
     
     protected AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, Long time) {
         this.currentDirection = currentDir;
@@ -41,7 +46,20 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
         this.nextDirection = state.nextDirection;
         this.x = state.x;
         this.y = state.y;
-        this.timestamp = state.timestamp + 1;
+        this.timestamp = state.timestamp;
+    }
+
+    @Override
+    public Sprite nextPosition(Long simTime) {
+        assert(simTime > timestamp);
+        
+        Sprite newSprite = (Sprite)this.clone();
+        
+        while(newSprite.getTimestamp() < simTime) {
+            move();
+        }
+        
+        return newSprite;
     }
     
     public void move() {
@@ -60,6 +78,7 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
         // Stores only absolute positions for easier serialisation.
         this.x = currentWaypoint.getAbsoluteX();
         this.y = currentWaypoint.getAbsoluteY();
+        this.timestamp++;
     }
 
     @Override
@@ -80,11 +99,21 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
         return this.y;
     }
     
+    public Pair<Integer, Integer> getPosition() {
+        return new Pair<Integer, Integer>(x, y);
+    }
+    
     @Override
     public Long getTimestamp() {
         return timestamp;
     }
     
     @Override
-    public abstract Object clone() throws CloneNotSupportedException;
+    public abstract Object clone();
+
+    @Override
+    public int getId() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }

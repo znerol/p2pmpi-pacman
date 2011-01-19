@@ -18,6 +18,10 @@ public class StreetSegment extends BoardSegment {
         super(x, y, board);
     }
     
+    public boolean isJunction() {
+        return (getSouth().isStreet() || getNorth().isStreet()) && (getEast().isStreet() || getWest().isStreet()); 
+    }
+    
     public boolean directConnected(StreetSegment other) {
         if (other == this)
             return true;

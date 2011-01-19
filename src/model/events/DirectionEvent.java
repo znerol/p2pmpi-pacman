@@ -35,4 +35,35 @@ public class DirectionEvent extends VisitableEvent {
     public void accept(EventVisitor visitor) {
         visitor.visit(this);
     }
+    
+    @Override
+    public Object clone() {
+        return new DirectionEvent(this.getSimtime(), this.sprite, this.direction);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result
+                + ((direction == null) ? 0 : direction.hashCode());
+        result = prime * result + sprite;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof DirectionEvent))
+            return false;
+        DirectionEvent other = (DirectionEvent) obj;
+        if (direction != other.direction)
+            return false;
+        if (sprite != other.sprite)
+            return false;
+        return true;
+    }
 }
