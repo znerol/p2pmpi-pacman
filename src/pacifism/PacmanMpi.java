@@ -17,7 +17,7 @@ public class PacmanMpi {
     private static int GVT_MASTER_RANK = 2;
     private static int GVT_REPORT_TAG = 1;
     private static int PAC_EVENT_TAG = 2;
-    private static double TIME_SCALE = 1000 / 60;
+    private static double TIME_SCALE = 60 / 1000;
 
     public static void main(String[] args) {
         args = MPI.Init(args);
@@ -72,7 +72,7 @@ public class PacmanMpi {
                 i++;
             }
 
-            Model model = new Model(strArr, 2);
+            Model model = new Model(strArr, 2, 0);
 
             final int spriteId = rank;
             GameNode node =

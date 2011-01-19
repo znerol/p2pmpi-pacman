@@ -4,10 +4,20 @@ import java.util.Scanner;
 
 import org.apache.log4j.BasicConfigurator;
 
+import deism.core.Event;
+import deism.core.EventCondition;
+import deism.process.DefaultDiscreteEventProcess;
+import deism.process.DefaultProcessBuilder;
 import deism.run.ExecutionGovernor;
+import deism.run.MessageCenter;
+import deism.run.NoStateController;
 import deism.run.RealtimeExecutionGovernor;
+import deism.run.Runloop;
+import deism.run.Service;
+import deism.run.StateController;
 
 import model.Model;
+import model.sprites.Sprite;
 
 public class PacmanSingleUser {
     public static void main(String args[]) {
@@ -43,12 +53,38 @@ public class PacmanSingleUser {
             strArr[i] = in.nextLine().trim().toCharArray();
             i++;
         }
-        Model model = new Model(strArr, 1);
         
-        ExecutionGovernor governor = new RealtimeExecutionGovernor(1000./60.);
+        EventCondition terminationCondition = new EventCondition() {
+            @Override
+            public boolean match(Event e) {
+                return false;
+            }
+        };
+        EventCondition snapshotCondition = new EventCondition() {
+            public boolean match(Event e) {
+                return false;
+            }
+        };
+
+        Service service = new Service();
+        ExecutionGovernor governor = new RealtimeExecutionGovernor(60./1000.);
+        service.register(governor);
+        MessageCenter messageCenter = new MessageCenter(governor);
+        StateController stateController = new NoStateController();
+
+        DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
         KeyboardController keyboardController = new KeyboardController(governor, 0);
+        builder.add(keyboardController);
+
+        Model model = new Model(strArr, 1, 0);
+        for (Sprite sprite : model.getSprites()) {
+            builder.add(sprite);            
+        }
+
         GameGui gui = new GameGui(governor, keyboardController, model);
         gui.setVisible(true);
-        System.out.println("bye");
+
+        Runloop runloop = new Runloop(governor, terminationCondition, stateController, snapshotCondition, messageCenter, service);
+        runloop.run(builder.getProcess());
     }
 }

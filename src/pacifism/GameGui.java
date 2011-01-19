@@ -2,11 +2,14 @@ package pacifism;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import deism.run.ExecutionGovernor;
 
@@ -21,8 +24,9 @@ public class GameGui extends JFrame {
      */
     private static final long serialVersionUID = 6359668977567197864L;
 
-    private JLabel labelPoints;
-    private JLabel labelLives;
+    private final JLabel labelPoints;
+    private final JLabel labelLives;
+    private final Timer refreshTimer;
 
     /**
      * Standart Konstruktor
@@ -51,6 +55,14 @@ public class GameGui extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.addKeyListener(keyboardController);
+
+        refreshTimer = new Timer(1000/60, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                repaint();
+            }
+        });
+        refreshTimer.start();
     }
 
     public void printPoints(int points) {
