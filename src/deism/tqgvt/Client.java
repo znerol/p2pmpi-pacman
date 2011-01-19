@@ -1,6 +1,7 @@
 package deism.tqgvt;
 
 import deism.core.Event;
+import deism.core.Startable;
 import deism.ipc.base.Emitter;
 import deism.ipc.base.EventExporter;
 import deism.ipc.base.EventImporter;
@@ -21,8 +22,8 @@ import deism.util.LongMap;
  *      SZYMANSKI, Scalable Computing: Practice and Experience, vol. 8, no. 4,
  *      2008, pp. 423-435"
  */
-public class Client implements EventExporter, EventImporter, LvtListener,
-        Handler<Message>, Emitter<Message> {
+public class Client implements Startable, EventExporter, EventImporter,
+        LvtListener, Handler<Message>, Emitter<Message> {
     private SystemTimeProxy systime;
 
     /**
@@ -85,9 +86,7 @@ public class Client implements EventExporter, EventImporter, LvtListener,
         this.recv = new LongMap<Long>();
 
         this.lvt = 0;
-        this.tq = -1;
-
-        advanceTq(getCurrentTq());
+        this.tq = 0;
     }
 
     @Override
@@ -183,5 +182,18 @@ public class Client implements EventExporter, EventImporter, LvtListener,
     @Override
     public void setEndpoint(Endpoint<Message> endpoint) {
         this.master = endpoint;
+    }
+
+    @Override
+    public void start(long simtime) {
+        advanceTq(getCurrentTq());
+    }
+
+    @Override
+    public void stop(long simtime) {
+    }
+
+    @Override
+    public void join() {
     }
 }
