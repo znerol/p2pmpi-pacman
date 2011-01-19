@@ -12,7 +12,6 @@ import deism.ipc.base.Endpoint;
 import deism.ipc.base.Handler;
 import deism.ipc.base.Message;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
