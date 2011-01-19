@@ -8,6 +8,8 @@ package deism.run;
  * recorded event streams.
  */
 public class ImmediateExecutionGovernor implements ExecutionGovernor {
+    private long currentSimtime;
+
     @Override
     public void start(long timestamp) {
     }
@@ -18,12 +20,14 @@ public class ImmediateExecutionGovernor implements ExecutionGovernor {
 
     @Override
     public long suspend() {
-        return Long.MAX_VALUE;
+        currentSimtime = Long.MAX_VALUE;
+        return getCurrentSimtime();
     }
     
     @Override
     public long suspendUntil(long simtime) {
-        return simtime;
+        currentSimtime = simtime;
+        return getCurrentSimtime();
     }
 
     @Override
@@ -39,5 +43,10 @@ public class ImmediateExecutionGovernor implements ExecutionGovernor {
     @Override
     public void join() {
         // intentionally left empty
+    }
+
+    @Override
+    public long getCurrentSimtime() {
+        return currentSimtime;
     }
 }

@@ -96,9 +96,7 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
 
     @Override
     public synchronized void resume() {
-        this.wakeupTime =
-                Math.min(this.wakeupTime, systemTimebase.convert(
-                        systemTime.get(), simulationTimebase));
+        this.wakeupTime = Math.min(this.wakeupTime, getCurrentSimtime());
         logger.debug("Resume at " + this.wakeupTime);
         this.notify();
     }
@@ -106,11 +104,14 @@ public class RealtimeExecutionGovernor implements ExecutionGovernor {
     @Override
     public synchronized void resume(long wakeupTime) {
         this.wakeupTime = Math.min(this.wakeupTime, wakeupTime);
-        this.wakeupTime =
-                Math.min(this.wakeupTime, systemTimebase.convert(
-                        systemTime.get(), simulationTimebase));
+        this.wakeupTime = Math.min(this.wakeupTime, getCurrentSimtime());
         logger.debug("Resume at " + this.wakeupTime
                 + " with given maximum wakeup time " + wakeupTime);
         this.notify();
+    }
+
+    @Override
+    public synchronized long getCurrentSimtime() {
+        return systemTimebase.convert(systemTime.get(), simulationTimebase);
     }
 }

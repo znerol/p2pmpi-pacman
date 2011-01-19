@@ -34,4 +34,11 @@ public interface ExecutionGovernor extends Startable {
      * suspendUntil.
      */
     public void resume(long wakeupTime);
+
+    /**
+     * Return current simulation time without resuming execution
+     *
+     * @return timestamp in simulation time units
+     */
+    public long getCurrentSimtime();
 }
