@@ -23,7 +23,7 @@ public class Board {
         populateSegements(boardDef);
     }
     
-    public Board getBoard() {
+    public static Board getBoard() {
         return Board.board;
     }
     

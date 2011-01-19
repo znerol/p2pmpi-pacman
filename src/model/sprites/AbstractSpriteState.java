@@ -1,7 +1,7 @@
 package model.sprites;
 
+import model.Board;
 import model.Direction;
-import model.Model;
 import model.Pair;
 import model.Triple;
 import model.Waypoint;
@@ -16,6 +16,7 @@ public abstract class AbstractSpriteState implements MoveableSpriteState {
     protected int y;
     protected Long timestamp;
     protected final int id;
+    protected int wallDistance;
     
     protected AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, Long time, int id) {
         this.currentDirection = currentDir;
@@ -58,38 +59,34 @@ public abstract class AbstractSpriteState implements MoveableSpriteState {
     public Triple<Direction, Integer, Integer> nextPosition(Long simTime) {
         assert(simTime > timestamp);
         
-        SpriteState newSprite = (SpriteState)this.clone();
-        
-        while(newSprite.getTimestamp() < simTime) {
-            move();
+        int distance = (int)(simTime - this.timestamp);
+        distance = distance > wallDistance ? wallDistance : distance;
+        switch(currentDirection) {
+        case North:
+            return new Triple<Direction, Integer, Integer>(currentDirection, x, y - distance);
+        case East:
+            return new Triple<Direction, Integer, Integer>(currentDirection, x + distance, y);
+        case South:
+            return new Triple<Direction, Integer, Integer>(currentDirection, x, y + distance);
+        case West:
+            return new Triple<Direction, Integer, Integer>(currentDirection, x - distance, y);
+            default:
+        return new Triple<Direction, Integer, Integer>(currentDirection, x, y);
         }
-        
-        return null;
     }
     
-    protected void gotoNextPosition(Long simTime) {
+    @Override
+    public void updateToTime(Long simTime) {
         assert(simTime > timestamp);
         
+        Triple<Direction, Integer, Integer> nextPos = nextPosition(simTime);
+        this.x = nextPos.b;
+        this.y = nextPos.c;
         
-    }
-    
-    public void move() {
-        Waypoint currentWaypoint = Model.getModel().getBoard().getWaypoint(this.x, this.y);
+        Waypoint currentWaypoint = Board.getBoard().getWaypoint(this.x, this.y);
+        this.wallDistance = currentWaypoint.getDistanceToWall(this.currentDirection);
         
-        // Updating directions if it is possible at the current waypoint -> Junction
-        if (currentWaypoint.isDirectionAvailable(nextDirection)) {
-            this.currentDirection = nextDirection;
-        } 
-        
-        // Enters next waypoint if available
-        if (currentWaypoint.isDirectionAvailable(this.currentDirection)) {
-            currentWaypoint = currentWaypoint.getNextWaypoint(this.currentDirection);
-        }
-        
-        // Stores only absolute positions for easier serialisation.
-        this.x = currentWaypoint.getAbsoluteX();
-        this.y = currentWaypoint.getAbsoluteY();
-        this.timestamp++;
+        this.timestamp = simTime;
     }
 
     @Override
