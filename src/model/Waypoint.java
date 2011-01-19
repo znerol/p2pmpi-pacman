@@ -1,5 +1,8 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import paclib.GamePlay;
 
 public class Waypoint {
@@ -13,6 +16,7 @@ public class Waypoint {
     private final int absoluteY;
     private final StreetSegment owner;
     private final boolean isJunction;
+    private List<Direction> directions = null;
     
     public Waypoint(StreetSegment owner, int x, int y) {
         this.x = x;
@@ -25,6 +29,23 @@ public class Waypoint {
             this.isJunction = true;
         else
             this.isJunction = false;
+    }
+    
+    public List<Direction> getPossibleDirections() {
+        if (this.directions != null) 
+            return this.directions;
+        
+        this.directions = new ArrayList<Direction>();
+        if (north != null) 
+            this.directions.add(Direction.North);
+        if (east != null) 
+            this.directions.add(Direction.East);
+        if (south != null) 
+            this.directions.add(Direction.South);
+        if (west != null) 
+            this.directions.add(Direction.West);
+        return this.directions;
+            
     }
     
     public boolean isJunction() {

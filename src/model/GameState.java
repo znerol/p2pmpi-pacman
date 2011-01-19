@@ -15,13 +15,15 @@ import model.sprites.Sprite;
 @SuppressWarnings("serial")
 public class GameState implements EventVisitor, Serializable {
     private final Sprite[] sprites;
-    //private final VisitableEvent event;
+    private VisitableEvent event;
+    private boolean eventAccepted = false;
     
     public GameState(Sprite[] sprites) {
         if (sprites == null)
             this.sprites = new Sprite[0];
         else
             this.sprites = cloneSprites(sprites);
+        event = null;
     }
     
     /**
@@ -30,6 +32,7 @@ public class GameState implements EventVisitor, Serializable {
      */
     public GameState(GameState state) {
         this.sprites = cloneSprites(state.sprites);
+        this.event = state.event;
     }
     
     private Sprite[] cloneSprites(Sprite[] sprites) {
@@ -39,6 +42,10 @@ public class GameState implements EventVisitor, Serializable {
         }
         
         return result;
+    }
+    
+    public VisitableEvent getEvent() {
+        return eventAccepted ? null : event;
     }
     
     public Pacman getPacman(int id) {
@@ -62,6 +69,10 @@ public class GameState implements EventVisitor, Serializable {
         return this.sprites[id];
     }
     
+    public Sprite[] getSprites() {
+        return this.sprites.clone();
+    }
+    
     @Override
     public Object clone() {
         return new GameState(this);
@@ -69,25 +80,39 @@ public class GameState implements EventVisitor, Serializable {
 
     @Override
     public void visit(DirectionEvent event) {
-        // TODO Auto-generated method stub
-        
+        for (Sprite sprite : this.sprites) {
+            event.accept(sprite);
+        }
+        findNextEvent();
     }
 
     @Override
     public void visit(CollisionEvent event) {
-        // TODO Auto-generated method stub
-        
+        for (Sprite sprite : this.sprites) {
+            event.accept(sprite);
+        }
+        findNextEvent();
     }
 
     @Override
     public void visit(ChangeViewEvent event) {
-        // TODO Auto-generated method stub
-        
+        for (Sprite sprite : this.sprites) {
+            event.accept(sprite);
+        }
+        findNextEvent();
     }
 
     @Override
     public void visit(EnterJunctionEvent event) {
-        // TODO Auto-generated method stub
-        
+        for (Sprite sprite : this.sprites) {
+            event.accept(sprite);
+        }
+        findNextEvent();
+    }
+    
+    protected VisitableEvent findNextEvent() {
+        // TODO
+        this.event = null;
+        return null;
     }
 }

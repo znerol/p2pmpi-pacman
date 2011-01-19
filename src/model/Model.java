@@ -1,16 +1,11 @@
 package model;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.Random;
 
-import model.events.ChangeViewEvent;
-import model.events.CollisionEvent;
-import model.events.DirectionEvent;
-import model.events.EnterJunctionEvent;
-import model.events.EventVisitor;
+import model.events.VisitableEvent;
 import model.sprites.Ghost;
 import model.sprites.Pacman;
 import model.sprites.Sprite;
@@ -20,72 +15,89 @@ import deism.stateful.AbstractStateHistory;
 
 public class Model extends AbstractStateHistory<Long, GameState> implements DiscreteEventProcess {
     private final Board board;
-    private final Map<Integer, Sprite> sprites = new HashMap<Integer, Sprite>();
-    private final Map<Integer, Pacman> pacs = new HashMap<Integer, Pacman>();
-    private final Map<Integer, Ghost> ghosts = new HashMap<Integer, Ghost>();
     private GameState currentState;
+    private Event currentEvent;
     private int pacmanCount;
+    private final Random random;
     private static Model model;
     
     public static Model getModel() {
         return model;
     }
     
-    public Model(char[][] boardDef, int pacmanCount) {
+    public Model(char[][] boardDef, int pacmanCount, long randomSeed) {
+        assert (Model.model != null);
+        
+        this.random = new Random(randomSeed);
         Model.model = this;
         this.board = new Board(boardDef);
-        populateSpites(boardDef, pacmanCount);
+        Collection<Sprite> sprites = populateSpites(boardDef, pacmanCount);
         
-        currentState = new GameState(sprites.values().toArray(new Sprite[0]));
+        currentState = new GameState(sprites.toArray(new Sprite[0]));
     }
     
-    private void populateSpites(char[][] boardDef, int maxPacmanCount) {
+    public Direction getRandomDirection(int x, int y) {
+        List<Direction> dirs = getBoard().getWaypoint(x, y).getPossibleDirections();
+        int index = this.random.nextInt(dirs.size());
+        return dirs.get(index);
+    }
+    
+    private Collection<Sprite> populateSpites(char[][] boardDef, int maxPacmanCount) {
         int id = 0;
+        Collection<Sprite> sprites = new ArrayList<Sprite>();
+        
         for (int y = 0; y < boardDef.length; y++) {
             for (int x = 0; x < boardDef[y].length; x++) {
                 if (this.pacmanCount < maxPacmanCount && boardDef[y][x] >= '0' && boardDef[y][x] <= '9')
-                    createPacman(x, y, id++);
+                    sprites.add(createPacman(x, y, id++));
                 else if (boardDef[y][x] >= 'a' && boardDef[y][x] <= 'g')
-                    createGhost(x, y, id++);
+                    sprites.add(createGhost(x, y, id++));
                 else if (boardDef[y][x] == 's')
                     continue; // Happy Pill
                 else
                     continue; // Points
             }
         }
+        
+        return sprites;
     }
     
-    private void createPacman(int x, int y, int id) {
+    private Pacman createPacman(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
-        Pacman pac = new Pacman(Direction.East, Direction.East, centre, id);
-        this.pacs.put(id, pac);
-        this.sprites.put(id, pac);
-        this.pacmanCount++;
+        return new Pacman(Direction.East, Direction.East, centre, id);
     }
     
-    private void createGhost(int x, int y, int id) {
+    private Ghost createGhost(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
-        Ghost ghost = new Ghost(Direction.East, Direction.East, centre, id);
-        this.ghosts.put(id, ghost);
-        this.sprites.put(id, ghost);
+        return  new Ghost(Direction.East, Direction.East, centre, id);
     }
     
     public Board getBoard() {
         return this.board;
     }
     
-    public Map<Integer, Sprite> getSprites() {
-        return this.sprites;
+    public Sprite[] getSprites() {
+        return this.currentState.getSprites();
+    }
+    
+    public Sprite getSprite(int id) {
+        return this.currentState.getSprite(id);
+    }
+    
+    public GameState getCurrentState() {
+        return this.currentState;
     }
 
     @Override
     public Event peek(long currentSimtime) {
-        return null;//this.nextCriticalState.getEvent();
+        if (currentEvent != null)
+            return currentEvent;
+        return null;
     }
 
     @Override
     public void remove(Event event) {
-        // TODO Auto-generated method stub
+        currentEvent = null;
     }
 
     @Override
@@ -95,38 +107,20 @@ public class Model extends AbstractStateHistory<Long, GameState> implements Disc
 
     @Override
     public void dispatchEvent(Event e) {
-        // TODO Auto-generated method stub
+        if (e instanceof VisitableEvent) {
+            VisitableEvent ve = (VisitableEvent)e;
+            currentState = new GameState(currentState);
+            ve.accept(currentState);
+            pushHistory(currentState);
+            currentEvent = currentState.getEvent();
+        }
     }
 
     @Override
     public void revertHistory(List<GameState> tail) {
         if (tail.size() > 0) {
             currentState = tail.get(0);
-            //fillStateQueue();
+            currentEvent = currentState.getEvent();
         }
     }
-//    
-//    public GameState poll() {
-//        if (this.stateQueue.size() == 0)
-//            fillStateQueue();
-//        
-//        return this.stateQueue.poll();
-//    }
-//    
-//    private void fillStateQueue() {
-//        this.stateQueue.clear();
-//        
-//        GameState lastState = currentState;
-//        List<Event> events = null;
-//        do {
-//            lastState = new GameState(lastState);
-//            this.stateQueue.offer(lastState);
-//            events = generateEvents(lastState);
-//        } while (events != null);
-//        nextCriticalState = lastState;
-//    }
-    
-    //private List<Event> generateEvents(GameState state) {
-    //    return null;
-    //}
 }

@@ -3,29 +3,27 @@ package model.sprites;
 import model.Direction;
 import model.Model;
 import model.Pair;
+import model.Triple;
 import model.Waypoint;
-import model.events.ChangeViewEvent;
-import model.events.CollisionEvent;
-import model.events.DirectionEvent;
-import model.events.EnterJunctionEvent;
-import model.events.EventVisitor;
 import model.events.VisitableEvent;
 import deism.core.Event;
 
 @SuppressWarnings("serial")
-public abstract class AbstractSpriteState implements MoveableSprite, EventVisitor {
-    private Direction currentDirection;
-    private Direction nextDirection;
-    private int x;
-    private int y;
-    private Long timestamp;
+public abstract class AbstractSpriteState implements MoveableSprite {
+    protected Direction currentDirection;
+    protected Direction nextDirection;
+    protected int x;
+    protected int y;
+    protected Long timestamp;
+    protected final int id;
     
-    protected AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, Long time) {
+    protected AbstractSpriteState(Direction currentDir, Direction nextDir, Waypoint waypoint, Long time, int id) {
         this.currentDirection = currentDir;
         this.nextDirection = nextDir;
         this.x = waypoint.getAbsoluteX();
         this.y = waypoint.getAbsoluteY();
         this.timestamp = time;
+        this.id = id;
     }
     
     protected AbstractSpriteState(AbstractSpriteState state, Event event) {
@@ -34,6 +32,7 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
         this.x = state.x;
         this.y = state.y;
         this.timestamp = event.getSimtime();
+        this.id = state.id;
         
         if (event instanceof VisitableEvent) {
             VisitableEvent vEvent = (VisitableEvent) event;
@@ -47,10 +46,16 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
         this.x = state.x;
         this.y = state.y;
         this.timestamp = state.timestamp;
+        this.id = state.id;
     }
 
     @Override
-    public Sprite nextPosition(Long simTime) {
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public Triple<Direction, Integer, Integer> nextPosition(Long simTime) {
         assert(simTime > timestamp);
         
         Sprite newSprite = (Sprite)this.clone();
@@ -59,7 +64,13 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
             move();
         }
         
-        return newSprite;
+        return null;
+    }
+    
+    protected void gotoNextPosition(Long simTime) {
+        assert(simTime > timestamp);
+        
+        
     }
     
     public void move() {
@@ -110,10 +121,4 @@ public abstract class AbstractSpriteState implements MoveableSprite, EventVisito
     
     @Override
     public abstract Object clone();
-
-    @Override
-    public int getId() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
 }

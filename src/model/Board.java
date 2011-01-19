@@ -8,14 +8,23 @@ public class Board {
     private final Map<Pair<Integer, Integer>, Waypoint> waypoints = new HashMap<Pair<Integer, Integer>, Waypoint>();
     private final int width;
     private final int height;
+    private static Board board;
 
     public Board(char[][] boardDef) {
+        assert (Board.board != null);
+        
+        Board.board = this;
+        
         height = boardDef.length;
         width = boardDef[0].length;
         
         segments = new Segment[height][width];
         
         populateSegements(boardDef);
+    }
+    
+    public Board getBoard() {
+        return Board.board;
     }
     
     protected void populateSegements(char[][] boardDef) {
