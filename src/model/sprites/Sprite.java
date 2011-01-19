@@ -69,4 +69,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
             
     }
 
+    public MoveableSpriteState getCurrentState() {
+        return currentState;
+    }
 }
