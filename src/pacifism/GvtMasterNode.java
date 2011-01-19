@@ -47,9 +47,10 @@ public class GvtMasterNode {
     public GvtMasterNode(IntraComm mpiCommWorld, int mpiGvtMasterRank,
             int mpiGvtReportTag, int gvtClientCount, double timeScale) {
         // Setup environment
-        governor = new RealtimeExecutionGovernor(timeScale);
-        messageCenter = new MessageCenter(governor);
         service = new Service();
+        governor = new RealtimeExecutionGovernor(timeScale);
+        service.register(governor);
+        messageCenter = new MessageCenter(governor);
         stateController.setStateObject(service);
 
         // Setup GVT Master
