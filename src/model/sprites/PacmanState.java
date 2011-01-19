@@ -1,7 +1,6 @@
 package model.sprites;
 
 import model.Direction;
-import model.Model;
 import model.Waypoint;
 import model.events.ChangeViewEvent;
 import model.events.CollisionEvent;
@@ -11,18 +10,18 @@ import model.events.EventVisitor;
 import deism.core.Event;
 
 @SuppressWarnings("serial")
-public class Ghost extends AbstractSpriteState implements EventVisitor {
+public class PacmanState extends AbstractSpriteState implements EventVisitor {
     
-    public Ghost(Direction currentDir, Direction nextDir, Waypoint waypoint, int id) {
+    public PacmanState(Direction currentDir, Direction nextDir, Waypoint waypoint, int id) {
         super(currentDir, nextDir, waypoint, 0L, id);
     }
     
-    public Ghost(Ghost Ghost, Event event) {
-        super(Ghost, event);
+    public PacmanState(PacmanState pacman, Event event) {
+        super(pacman, event);
     }
     
-    public Ghost(Ghost Ghost) {
-        super(Ghost);
+    public PacmanState(PacmanState pacman) {
+        super(pacman);
     }
 
     @Override
@@ -32,16 +31,21 @@ public class Ghost extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public void visit(DirectionEvent event) {
-
+        if (event.getSprite() != this.getId())
+            return;
+        
+        // TODO
     }
 
     @Override
     public void visit(CollisionEvent event) {
-        // do nothing, pac thing
+        // TODO
     }
 
     @Override
     public void visit(ChangeViewEvent event) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -52,6 +56,18 @@ public class Ghost extends AbstractSpriteState implements EventVisitor {
     
     @Override
     public Object clone() {
-        return new Ghost(this);
+        return new PacmanState(this);
+    }
+
+    @Override
+    public Event getEvent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void updateTo(Long simTime) {
+        // TODO Auto-generated method stub
+        
     }
 }

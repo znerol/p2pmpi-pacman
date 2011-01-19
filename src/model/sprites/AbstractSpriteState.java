@@ -9,7 +9,7 @@ import model.events.VisitableEvent;
 import deism.core.Event;
 
 @SuppressWarnings("serial")
-public abstract class AbstractSpriteState implements MoveableSprite {
+public abstract class AbstractSpriteState implements MoveableSpriteState {
     protected Direction currentDirection;
     protected Direction nextDirection;
     protected int x;
@@ -58,7 +58,7 @@ public abstract class AbstractSpriteState implements MoveableSprite {
     public Triple<Direction, Integer, Integer> nextPosition(Long simTime) {
         assert(simTime > timestamp);
         
-        Sprite newSprite = (Sprite)this.clone();
+        SpriteState newSprite = (SpriteState)this.clone();
         
         while(newSprite.getTimestamp() < simTime) {
             move();

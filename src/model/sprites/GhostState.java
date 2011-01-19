@@ -10,18 +10,18 @@ import model.events.EventVisitor;
 import deism.core.Event;
 
 @SuppressWarnings("serial")
-public class Pacman extends AbstractSpriteState implements EventVisitor {
+public class GhostState extends AbstractSpriteState implements EventVisitor {
     
-    public Pacman(Direction currentDir, Direction nextDir, Waypoint waypoint, int id) {
+    public GhostState(Direction currentDir, Direction nextDir, Waypoint waypoint, int id) {
         super(currentDir, nextDir, waypoint, 0L, id);
     }
     
-    public Pacman(Pacman pacman, Event event) {
-        super(pacman, event);
+    public GhostState(GhostState Ghost, Event event) {
+        super(Ghost, event);
     }
     
-    public Pacman(Pacman pacman) {
-        super(pacman);
+    public GhostState(GhostState Ghost) {
+        super(Ghost);
     }
 
     @Override
@@ -31,21 +31,16 @@ public class Pacman extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public void visit(DirectionEvent event) {
-        if (event.getSprite() != this.getId())
-            return;
-        
-        // TODO
+
     }
 
     @Override
     public void visit(CollisionEvent event) {
-        // TODO
+        // do nothing, pac thing
     }
 
     @Override
     public void visit(ChangeViewEvent event) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
@@ -56,6 +51,18 @@ public class Pacman extends AbstractSpriteState implements EventVisitor {
     
     @Override
     public Object clone() {
-        return new Pacman(this);
+        return new GhostState(this);
+    }
+
+    @Override
+    public Event getEvent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void updateTo(Long simTime) {
+        // TODO Auto-generated method stub
+        
     }
 }
