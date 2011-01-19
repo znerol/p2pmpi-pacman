@@ -7,9 +7,9 @@ import org.apache.log4j.BasicConfigurator;
 import deism.run.ExecutionGovernor;
 import deism.run.RealtimeExecutionGovernor;
 
-import model.Board;
+import model.Model;
 
-public class PacmanTest {
+public class PacmanSingleUser {
     public static void main(String args[]) {
         // log4j
         BasicConfigurator.configure();
@@ -43,11 +43,11 @@ public class PacmanTest {
             strArr[i] = in.nextLine().trim().toCharArray();
             i++;
         }
-        Board board = new Board(strArr);
+        Model model = new Model(strArr, 1);
         
         ExecutionGovernor governor = new RealtimeExecutionGovernor(1000./60.);
         KeyboardController keyboardController = new KeyboardController(governor, 0);
-        GameGui gui = new GameGui(governor, keyboardController, board);
+        GameGui gui = new GameGui(governor, keyboardController, model);
         gui.setVisible(true);
         System.out.println("bye");
     }

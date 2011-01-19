@@ -2,7 +2,7 @@ package pacifism;
 
 import java.util.Scanner;
 
-import model.Board;
+import model.Model;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
@@ -71,14 +71,14 @@ public class PacmanMpi {
                 strArr[i] = in.nextLine().trim().toCharArray();
                 i++;
             }
-            Board board = new Board(strArr);
-            System.out.print(board);
+
+            Model model = new Model(strArr, 2);
 
             final int spriteId = rank;
             GameNode node =
                     new GameNode(MPI.COMM_WORLD, GVT_MASTER_RANK,
                             GVT_REPORT_TAG, rank, GVT_TQ_SIZE, PAC_EVENT_TAG,
-                            spriteId, TIME_SCALE, board);
+                            spriteId, TIME_SCALE, model);
             node.run();
         }
 

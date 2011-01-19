@@ -11,6 +11,7 @@ import javax.swing.JComponent;
 import deism.run.ExecutionGovernor;
 
 import model.Board;
+import model.Model;
 
 /**
  * AWT component for game board
@@ -29,14 +30,14 @@ public class GameBoardComponent extends JComponent {
     /**
      * Size of one field
      */
-    private static final int GUI_FIELD_SIZE = 9;
+    private static final int GUI_FIELD_SIZE = 18;
 
-    private final Board board;
+    private final Model model;
     private final ExecutionGovernor governor;
 
-    public GameBoardComponent(ExecutionGovernor governor, Board board) {
+    public GameBoardComponent(ExecutionGovernor governor, Model model) {
         super();
-        this.board = board;
+        this.model = model;
         this.governor = governor;
     }
 
@@ -44,11 +45,13 @@ public class GameBoardComponent extends JComponent {
     public void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
 
-        g2d.setColor(Color.black);
+        final Board board = model.getBoard();
         Rectangle frameBounds =
                 new Rectangle(
                         board.getWidth() * GUI_FIELD_SIZE,
                         board.getHeight() * GUI_FIELD_SIZE);
+
+        g2d.setColor(Color.black);
         g2d.fill(frameBounds);
         g2d.draw(frameBounds);
 
@@ -57,6 +60,7 @@ public class GameBoardComponent extends JComponent {
 
     @Override
     public Dimension getPreferredSize() {
+        final Board board = model.getBoard();
         return new Dimension(
                 board.getWidth() * GUI_FIELD_SIZE,
                 board.getHeight() * GUI_FIELD_SIZE);

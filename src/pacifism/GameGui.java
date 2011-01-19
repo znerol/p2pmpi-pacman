@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 
 import deism.run.ExecutionGovernor;
 
-import model.Board;
+import model.Model;
 
 /**
  *
@@ -29,11 +29,11 @@ public class GameGui extends JFrame {
      * 
      */
     public GameGui(ExecutionGovernor governor, KeyListener keyboardController,
-            Board board) {
+            Model model) {
         super("P2PMPI Pacman");
 
         GameBoardComponent boardComponent =
-                new GameBoardComponent(governor, board);
+                new GameBoardComponent(governor, model);
 
         setLayout(new BorderLayout());
         add(boardComponent, BorderLayout.CENTER);

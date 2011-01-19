@@ -1,6 +1,6 @@
 package pacifism;
 
-import model.Board;
+import model.Model;
 import model.events.DirectionEvent;
 import p2pmpi.mpi.IntraComm;
 import deism.core.Event;
@@ -50,7 +50,7 @@ public class GameNode implements Runnable {
     public GameNode(IntraComm mpiCommWorld, int mpiGvtMasterRank,
             int mpiReportTag, int mpiRank, long gvtTimeQuantumSize,
             int pacEventTag, final int pacSpriteId, double timeScale,
-            Board board) {
+            Model model) {
         // Setup environment
         service = new Service();
         governor = new RealtimeExecutionGovernor(timeScale);
@@ -110,7 +110,7 @@ public class GameNode implements Runnable {
         process = builder.getProcess();
 
         // Setup GUI
-        gui = new GameGui(governor, keyboardController, board);
+        gui = new GameGui(governor, keyboardController, model);
     }
 
     @Override
