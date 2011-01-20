@@ -18,6 +18,7 @@ public class Model {
     private final int clientCount;
     private final Set<DispatchedListener> listeners = new HashSet<DispatchedListener>();
     private final List<Sprite> sprites;
+    private final static int MAX_PLAYER_COUNT = 4;
     
     public static Model getModel() {
         return model;
@@ -25,6 +26,8 @@ public class Model {
     
     public Model(char[][] boardDef, int clientCount, long randomSeed) {
         assert (Model.model != null);
+        assert (clientCount > 0);
+        assert (clientCount <= MAX_PLAYER_COUNT);
         
         this.random = new Random(randomSeed);
         Model.model = this;
@@ -49,19 +52,18 @@ public class Model {
         return dirs.get(index);
     }
     
-    private List<Sprite> populateSpites(char[][] boardDef) {
-        // TODO als Const deklarieren
-        int maxClientCount = 4;
-        
+    private List<Sprite> populateSpites(char[][] boardDef) {        
         int id = 0;
         List<Sprite> sprites = new ArrayList<Sprite>();
         Sprite sprite = null;
+        int clientCount = 0;
         for (int y = 0; y < boardDef.length; y++) {
             for (int x = 0; x < boardDef[y].length; x++) {
-                if (this.clientCount < maxClientCount && boardDef[y][x] >= '0' && boardDef[y][x] <= '9') {
+                if (clientCount < this.clientCount && boardDef[y][x] >= '0' && boardDef[y][x] <= '9') {
                     sprite = createPacman(x, y, id++);
                     sprites.add(sprite);
                     addDispatchedListener(sprite);
+                    clientCount++;
                 } else if (boardDef[y][x] >= 'a' && boardDef[y][x] <= 'g') {
                     sprite = createGhost(x, y, id++);
                     sprites.add(sprite);
@@ -78,12 +80,12 @@ public class Model {
     
     private Sprite createPacman(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
-        return new Sprite(new PacmanState(Direction.East, Direction.East, centre, id));
+        return new Sprite(new PacmanState(Direction.East, Direction.West, centre, id));
     }
     
     private Sprite createGhost(int x, int y, int id) {
         Waypoint centre = ((StreetSegment)board.getSegment(x, y)).getWaypointCentre();
-        return new Sprite(new GhostState(Direction.East, Direction.East, centre, id));
+        return new Sprite(new GhostState(Direction.East, Direction.West, centre, id));
     }
     
     public Board getBoard() {

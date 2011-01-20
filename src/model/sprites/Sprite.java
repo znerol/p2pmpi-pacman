@@ -49,7 +49,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
 
     @Override
     public void remove(Event event) {
-        this.currentEvent = null;
+        //this.currentEvent = null;
         
     }
 
@@ -60,7 +60,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
 
     @Override
     public void dispatchEvent(Event e) {
-        if (e instanceof VisitableEvent) {
+        if (e instanceof VisitableEvent) {// && currentState.getEvent() == e) {
             VisitableEvent ve = (VisitableEvent)e;
             currentState = (MoveableSpriteState)currentState.clone();
             ve.accept(currentState);
@@ -74,6 +74,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
     public void eventDispatched(EventDispatchedEvent event) {
         if (event.getSource() == this || this.currentEvent == null)
             return;
+        
         if (this.currentEvent.getSimtime() > event.getEvent().getSimtime()) {
             currentState = (MoveableSpriteState)currentState.clone();
             currentState.updateToTime(event.getEvent().getSimtime());

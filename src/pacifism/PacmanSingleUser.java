@@ -36,7 +36,7 @@ public class PacmanSingleUser {
                         + "xxxxx.xxx.x.xxx.xxxxx\n"
                         + "xxxxx.x.b.c.d.x.xxxxx\n"
                         + "xxxxx.x.xxxxx.x.xxxxx\n"
-                        + "........xxxxx........\n"
+                        + "x.......xxxxx.......x\n"
                         + "xxxxx.x.xxxxx.x.xxxxx\n"
                         + "xxxxx.x.......x.xxxxx\n"
                         + "xxxxx.x.xxxxx.x.xxxxx\n"
@@ -73,7 +73,7 @@ public class PacmanSingleUser {
         StateController stateController = new NoStateController();
 
         DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
-        KeyboardController keyboardController = new KeyboardController(governor, 0);
+        KeyboardController keyboardController = new KeyboardController(governor, 4);
         builder.add(keyboardController);
 
         Model model = new Model(strArr, 1, 0);

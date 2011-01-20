@@ -44,7 +44,7 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
     @Override
     public void visit(ChangeViewEvent event) {
         // Ghosts can not walk through walls but see...
-        if (event.getSimtime() != getId())
+        if (event.getSprite() != getId())
             return;
         
         updateToTime(event.getSimtime());
@@ -52,7 +52,7 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public void visit(EnterJunctionEvent event) {
-        if (event.getSimtime() != getId())
+        if (event.getSprite() != getId())
             return;
         
         updateToTime(event.getSimtime());
@@ -72,13 +72,16 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public Event getEvent() {
-        Waypoint next = null;
         Waypoint current = Board.getBoard().getWaypoint(x, y);
+        Waypoint next = current;
+        
+        if (!next.isDirectionAvailable(currentDirection)) 
+            return null;
         
         do {
-            next = current.getNextPointOfInterest(currentDirection);
-        } while (!next.isJunction());
-        
+            next = next.getNextPointOfInterest(currentDirection);
+        } while (next != null && (!next.isJunction()));
+                
         int distance = current.getDistance(next).b;
         
         return new EnterJunctionEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());

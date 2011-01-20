@@ -29,7 +29,7 @@ public class CollisionEvent extends VisitableEvent {
 
     @Override
     public String toString() {
-        return (isAntimessage() ? "-" : "+") + "SpriteStoppedEvent [simtime = "
+        return (isAntimessage() ? "-" : "+") + "CollisionEvent [simtime = "
                 + getSimtime() + " sprite1 = " + sprite1 + " sprite2 = " + sprite2 + "]";
     }
 

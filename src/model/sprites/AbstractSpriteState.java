@@ -25,6 +25,7 @@ public abstract class AbstractSpriteState implements MoveableSpriteState {
         this.y = waypoint.getAbsoluteY();
         this.timestamp = time;
         this.id = id;
+        this.wallDistance = waypoint.getDistanceToWall(this.currentDirection);
     }
     
     protected AbstractSpriteState(AbstractSpriteState state, Event event) {
@@ -34,6 +35,7 @@ public abstract class AbstractSpriteState implements MoveableSpriteState {
         this.y = state.y;
         this.timestamp = event.getSimtime();
         this.id = state.id;
+        this.wallDistance = state.wallDistance;
         
         if (event instanceof VisitableEvent) {
             VisitableEvent vEvent = (VisitableEvent) event;
@@ -48,6 +50,7 @@ public abstract class AbstractSpriteState implements MoveableSpriteState {
         this.y = state.y;
         this.timestamp = state.timestamp;
         this.id = state.id;
+        this.wallDistance = state.wallDistance;
     }
     
     @Override

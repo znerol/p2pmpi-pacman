@@ -16,7 +16,7 @@ public class ChangeViewEvent extends VisitableEvent {
 
     @Override
     public String toString() {
-        return (isAntimessage() ? "-" : "+") + "SpriteStoppedEvent [simtime = "
+        return (isAntimessage() ? "-" : "+") + "ChangeViewEvent [simtime = "
                 + getSimtime() + " sprite = " + sprite + "]";
     }
 

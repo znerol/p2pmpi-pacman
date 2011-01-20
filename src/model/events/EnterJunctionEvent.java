@@ -34,7 +34,7 @@ public class EnterJunctionEvent extends VisitableEvent {
     
     @Override
     public String toString() {
-        return (isAntimessage() ? "-" : "+") + "SpriteStoppedEvent [simtime = "
+        return (isAntimessage() ? "-" : "+") + "EnterJunctionEvent [simtime = "
                 + getSimtime() + " sprite = " + sprite + " pos = " + getPosition() + "]";
     }
 

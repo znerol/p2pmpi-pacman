@@ -37,10 +37,16 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
             return;
         
         updateToTime(event.getSimtime());
+
+        Waypoint waypoint = Board.getBoard().getWaypoint(this.x, this.y);
         
-        this.nextDirection = event.getDirection();
-        if (currentDirection == Direction.None)
-            this.currentDirection = nextDirection;
+        if (waypoint.isDirectionAvailable(event.getDirection()) || currentDirection == Direction.None) {
+            this.currentDirection = event.getDirection();
+            this.nextDirection = Direction.None;
+        } else {
+            this.nextDirection = event.getDirection();
+        }
+        
         this.timestamp = event.getSimtime();
     }
 
@@ -87,9 +93,10 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
         
         if (this.nextDirection != Direction.None && Board.getBoard().getWaypoint(x, y).isDirectionAvailable(this.nextDirection)) {
             this.currentDirection = this.nextDirection;
-        } else if (!Board.getBoard().getWaypoint(x, y).isDirectionAvailable(this.currentDirection))
-            this.currentDirection = Direction.None;
-        this.nextDirection = Direction.None;
+            this.nextDirection = Direction.None;
+        } //else if (!Board.getBoard().getWaypoint(x, y).isDirectionAvailable(this.currentDirection))
+          //  this.currentDirection = Direction.None;
+        
     }
     
     @Override
@@ -99,12 +106,18 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public Event getEvent() {
-        Waypoint next = null;
         Waypoint current = Board.getBoard().getWaypoint(x, y);
+        Waypoint next = current;
+        
+        if (!next.isDirectionAvailable(currentDirection)) 
+            return null;
         
         do {
-            next = current.getNextPointOfInterest(currentDirection);
-        } while (!next.isJunction());
+            next = next.getNextPointOfInterest(currentDirection);
+        } while (next != null && (!next.isJunction()));
+        
+        if (next == null)
+            return null;
         
         int distance = current.getDistance(next).b;
         

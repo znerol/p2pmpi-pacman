@@ -25,7 +25,7 @@ public class Waypoint {
         this.absoluteY = owner.getY() * GamePlay.GUI_FIELD_SIZE + y;
         this.owner = owner;
         
-        if (owner.isJunction() && owner.getWaypointCentre() == this)
+        if (owner.isJunction() && owner.getWaypointCentre() == null)//== this)
             this.isJunction = true;
         else
             this.isJunction = false;
@@ -52,7 +52,9 @@ public class Waypoint {
         
         if (next == null)
             return null;
-        if (next.isJunction() || next.isChangingView(dir))
+        if (next.isJunction())
+            return next;
+        if (next.isChangingView(dir))
             return next;
         return next.getNextPointOfInterest(dir);
     }
