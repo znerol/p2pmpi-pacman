@@ -2,8 +2,6 @@ package model;
 
 import java.util.Scanner;
 
-import model.sprites.PacmanState;
-
 import org.junit.Test;
 
 public class ModelTest {

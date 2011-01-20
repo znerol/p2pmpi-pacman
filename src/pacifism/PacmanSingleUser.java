@@ -6,7 +6,6 @@ import org.apache.log4j.BasicConfigurator;
 
 import deism.core.Event;
 import deism.core.EventCondition;
-import deism.process.DefaultDiscreteEventProcess;
 import deism.process.DefaultProcessBuilder;
 import deism.run.ExecutionGovernor;
 import deism.run.MessageCenter;
