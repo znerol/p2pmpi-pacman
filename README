@@ -5,14 +5,18 @@ BUILDING
 
 RUNNING
 =======
-1. Single User Version
+1. Single User Version:
     $ ./run-nompi.sh
 
 2. P2PMPI Version
 
 * Adapt lib/p2pmpi/P2P-MPI.conf to your needs
-* Setup your environment:
+* Setup your environment (the source command will export P2PMPI_HOME and will
+  put p2pmpi into your PATH):
     $ source ./setup-mpi.sh
+* Start supernode and mpi node if necessary:
+    $ runSuperNode
+    $ mpiboot
 * Run mpi version:
     $ ./run-mpi.sh
 
