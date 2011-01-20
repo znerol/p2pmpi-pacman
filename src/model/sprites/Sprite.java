@@ -11,15 +11,21 @@ import deism.process.DiscreteEventProcess;
 import deism.stateful.AbstractStateHistory;
 
 public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> implements DiscreteEventProcess, DispatchedListener {
+    private final int spriteId;
     private MoveableSpriteState currentState;
     private final MoveableSpriteState initState;
     private Event currentEvent;
     
     public Sprite(MoveableSpriteState initState) {
+        this.spriteId = initState.getId();
         this.currentState = initState;
         this.initState = initState;
         this.currentEvent = initState.getEvent();
         pushHistory(currentState);
+    }
+    
+    public int getSpriteId() {
+        return this.spriteId;
     }
     
     public MoveableSpriteState getInitState() {
