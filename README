@@ -1,0 +1,21 @@
+BUILDING
+========
+* Import the project into your eclipse workspace
+* Choose "Build Jar" from the "External Tools" drop-down
+
+RUNNING
+=======
+
+1. Single User Version
+    $ ./run-nompi.sh
+
+2. P2PMPI Version
+
+* Adapt lib/p2pmpi/P2P-MPI.conf to your needs
+* Setup your environment:
+    $ source ./setup-mpi.sh
+* Run mpi version:
+    $ ./run-mpi.sh
+
+Both, the single and multi user versions accept the "-d" switch on the command
+line, producing tons of debug output.
