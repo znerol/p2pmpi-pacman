@@ -2,6 +2,7 @@ package pacifism;
 
 import model.Model;
 import model.events.DirectionEvent;
+import model.sprites.Sprite;
 import p2pmpi.mpi.IntraComm;
 import deism.core.Event;
 import deism.core.EventCondition;
@@ -106,7 +107,10 @@ public class GameNode implements Runnable {
         builder.add(new MpiEventSink(mpiCommWorld, PEER_RANK, pacEventTag),
                 onlyMine);
 
-        // FIXME: Add pacman process here
+        for (Sprite sprite : model.getSprites()) {
+            builder.add(sprite);            
+        }
+
         process = builder.getProcess();
 
         // Setup GUI
