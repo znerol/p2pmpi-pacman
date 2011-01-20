@@ -49,7 +49,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
 
     @Override
     public void remove(Event event) {
-        //this.currentEvent = null;
+        this.currentEvent = null;
         
     }
 

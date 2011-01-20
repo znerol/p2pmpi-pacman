@@ -112,9 +112,7 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
         if (!next.isDirectionAvailable(currentDirection)) 
             return null;
         
-        //do {
-            next = next.getNextPointOfInterest(currentDirection);
-        //} while (next != null && (!next.isJunction()));
+        next = next.getNextPointOfInterest(currentDirection);
         
         if (next == null)
             return null;

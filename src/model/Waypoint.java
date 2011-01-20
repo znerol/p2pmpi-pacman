@@ -31,6 +31,21 @@ public class Waypoint {
             this.isJunction = false;
     }
     
+    public Direction getDirectionToCentre() {
+        Waypoint centre = owner.getWaypointCentre();
+        
+        if (centre.getRelativeX() > this.getRelativeX())
+            return Direction.East;
+        else if (centre.getRelativeX() < this.getRelativeX())
+            return Direction.West;
+        else if (centre.getRelativeY() > this.getRelativeY())
+            return Direction.South;
+        else if (centre.getRelativeY() < this.getRelativeY())
+            return Direction.North;
+        else
+            return Direction.None;
+    }
+    
     public Waypoint getNextPointOfInterest(Direction dir) {
         Waypoint next = null;
         switch(dir) {
@@ -121,6 +136,13 @@ public class Waypoint {
         default:
             return null;
         }
+    }
+    
+    public double getEuclideanDistance(Waypoint other) {
+        int dx = other.getAbsoluteX() - getAbsoluteX();
+        int dy = other.getAbsoluteY() - getAbsoluteY();
+        
+        return Math.sqrt(dx*dx+dy*dy);
     }
     
     public Pair<Direction, Integer> getDistance(Waypoint other) {
