@@ -46,8 +46,12 @@ public class Model {
         }
     }
     
-    public Direction getRandomDirection(int x, int y) {
+    public Direction getRandomDirection(int x, int y, Direction currentDirection) {
         List<Direction> dirs = getBoard().getWaypoint(x, y).getPossibleDirections();
+        
+        if (dirs.size() > 1)
+            dirs.remove(currentDirection.inverse());
+        
         int index = this.random.nextInt(dirs.size());
         return dirs.get(index);
     }

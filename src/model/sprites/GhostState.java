@@ -60,7 +60,7 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
         if (nextDirection != Direction.None) {
             currentDirection = nextDirection;
         } else {
-            currentDirection = Model.getModel().getRandomDirection(x, y);
+            currentDirection = Model.getModel().getRandomDirection(x, y, currentDirection);
         }
         nextDirection = Direction.None;
     }
