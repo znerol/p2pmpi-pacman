@@ -3,6 +3,18 @@
     <target name="javadoc">
         <mkdir dir="bin/javadoc/"/>
         <javadoc sourcepath="src" linksource="true" destdir="bin/javadoc/">
+        	<doclet name="org.umlgraph.doclet.UmlGraphDoc" path="lib/ext/UmlGraph-5.4.jar">                    
+        		<param name="-inferrel"/>
+                <param name="-inferdep"/>
+                <param name="-hide" value="java.*"/>
+                <param name="-collpackages" value="java.util.*"/>
+                <param name="-qualify"/>
+                <param name="-postfixpackage"/>
+                <param name="-nodefontsize" value="9"/>
+                <param name="-nodefontpackagesize" value="7"/>
+                <param name="-link" value="http://java.sun.com/j2se/1.5.0/docs/guide/javadoc/doclet/spec"/>
+                <param name="-link" value="http://java.sun.com/j2se/1.5/docs/api"/>
+        	</doclet>
         </javadoc>
     </target>
     <target name="clean">
