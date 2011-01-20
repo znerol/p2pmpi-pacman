@@ -10,38 +10,64 @@ import deism.core.Event;
 import deism.process.DiscreteEventProcess;
 import deism.stateful.AbstractStateHistory;
 
-public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> implements DiscreteEventProcess, DispatchedListener {
+/**
+ * Implements a ghost respectively a pacman with its state history. Further
+ * provides the implementation a {@link deism.core.EventSource} and
+ * {@link deism.core.EventDispatcher}.
+ */
+public class Sprite extends AbstractStateHistory<Long, MovableSpriteState>
+        implements DiscreteEventProcess, DispatchedListener {
     private final int spriteId;
-    private MoveableSpriteState currentState;
-    private final MoveableSpriteState initState;
+    private MovableSpriteState currentState;
+    private final MovableSpriteState initState;
     private Event currentEvent;
-    
-    public Sprite(MoveableSpriteState initState) {
+
+    public Sprite(MovableSpriteState initState) {
         this.spriteId = initState.getId();
         this.currentState = initState;
         this.initState = initState;
         this.currentEvent = initState.getEvent();
         pushHistory(currentState);
     }
-    
+
+    /**
+     * The sprites id
+     * 
+     * @return sprite id
+     */
     public int getSpriteId() {
         return this.spriteId;
     }
-    
-    public MoveableSpriteState getInitState() {
+
+    /**
+     * Getter for initial state to reset sprite
+     * 
+     * @return init state
+     */
+    public MovableSpriteState getInitState() {
         return this.initState;
     }
-    
+
+    /**
+     * True if own state is instanceof {@link model.sprites.PacmanState}
+     * 
+     * @return true if pacman.
+     */
     public boolean isPacman() {
         return (currentState instanceof PacmanState);
     }
-    
+
+    /**
+     * True if own state is instanceof {@link model.sprites.GhostState}
+     * 
+     * @return true if ghost.
+     */
     public boolean isGhost() {
         return (currentState instanceof GhostState);
     }
-    
+
     @Override
-    public void revertHistory(List<MoveableSpriteState> tail) {
+    public void revertHistory(List<MovableSpriteState> tail) {
         if (tail.size() > 0) {
             currentState = tail.get(0);
             currentEvent = currentState.getEvent();
@@ -56,7 +82,7 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
     @Override
     public void remove(Event event) {
         this.currentEvent = null;
-        
+
     }
 
     @Override
@@ -67,8 +93,8 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
     @Override
     public void dispatchEvent(Event e) {
         if (e instanceof VisitableEvent) {// && currentState.getEvent() == e) {
-            VisitableEvent ve = (VisitableEvent)e;
-            currentState = (MoveableSpriteState)currentState.clone();
+            VisitableEvent ve = (VisitableEvent) e;
+            currentState = (MovableSpriteState) currentState.clone();
             ve.accept(currentState);
             pushHistory(currentState);
             currentEvent = currentState.getEvent();
@@ -80,17 +106,22 @@ public class Sprite extends AbstractStateHistory<Long, MoveableSpriteState> impl
     public void eventDispatched(EventDispatchedEvent event) {
         if (event.getSource() == this || this.currentEvent == null)
             return;
-        
+
         if (this.currentEvent.getSimtime() > event.getEvent().getSimtime()) {
-            currentState = (MoveableSpriteState)currentState.clone();
+            currentState = (MovableSpriteState) currentState.clone();
             currentState.updateToTime(event.getEvent().getSimtime());
             pushHistory(currentState);
             currentEvent = currentState.getEvent();
         }
-            
+
     }
 
-    public MoveableSpriteState getCurrentState() {
+    /**
+     * Getter for current state.
+     * 
+     * @return current state
+     */
+    public MovableSpriteState getCurrentState() {
         return currentState;
     }
 }

@@ -1,5 +1,8 @@
 package model;
 
+/**
+ * A blocking wall segement
+ */
 public class WallSegment extends BoardSegment {
 
     public WallSegment(int x, int y, Board board) {

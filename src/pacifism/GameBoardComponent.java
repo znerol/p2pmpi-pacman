@@ -15,13 +15,13 @@ import java.awt.geom.Ellipse2D;
 import javax.swing.JComponent;
 
 import deism.run.ExecutionGovernor;
+import deism.util.Triple;
 
 import model.Board;
 import model.Direction;
 import model.Model;
 import model.Segment;
 import model.StreetSegment;
-import model.Triple;
 import model.sprites.GhostState;
 import model.sprites.PacmanState;
 import model.sprites.Sprite;
