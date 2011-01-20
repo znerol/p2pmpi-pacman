@@ -5,7 +5,6 @@ BUILDING
 
 RUNNING
 =======
-
 1. Single User Version
     $ ./run-nompi.sh
 
@@ -19,3 +18,13 @@ RUNNING
 
 Both, the single and multi user versions accept the "-d" switch on the command
 line, producing tons of debug output.
+
+TESTS
+=====
+* Download mockito-all-1.8.5.jar from http://mockito.org/ and place the jar
+  into lib/ext. Use eclipse to run the unit tests
+
+DOCUMENTATION
+=============
+* Download UmlGraph-5.4.jar from http://www.umlgraph.org/ and place it into
+  lib/ext. Use "ant -f deism-build-javadoc.xml" to build the documentation.
