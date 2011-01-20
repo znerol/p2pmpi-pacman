@@ -76,11 +76,12 @@ public class PacmanMpi {
             Model model = new Model(strArr, 2, 0);
 
             int spriteId = 0;
+            i = 0;
             for (Sprite sprite : model.getSprites()) {
                 if (sprite.isGhost())
                     continue;
                 
-                if (spriteId == rank) {
+                if (i == rank) {
                     spriteId = sprite.getSpriteId();
                     break;
                 }
