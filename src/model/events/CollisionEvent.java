@@ -1,28 +1,45 @@
 package model.events;
 
-import model.Pair;
+import deism.util.Pair;
 
-
+/**
+ * This event informs the simulation about a predicted collision of two sprites
+ */
 @SuppressWarnings("serial")
 public class CollisionEvent extends VisitableEvent {
     private final int sprite1;
     private final int sprite2;
-    
+
     public CollisionEvent(int sprite1, int sprite2, long simtime) {
         super(simtime);
-        
+
         this.sprite1 = sprite1;
         this.sprite2 = sprite2;
     }
-    
+
+    /**
+     * Collision partner 1
+     * 
+     * @return a sprite id
+     */
     public int getSprite1() {
         return this.sprite1;
     }
-    
+
+    /**
+     * Collision partner 2
+     * 
+     * @return a sprite id
+     */
     public int getSprite2() {
         return this.sprite2;
     }
-    
+
+    /**
+     * Collision partners
+     * 
+     * @return both collision partners
+     */
     public Pair<Integer, Integer> getSprites() {
         return new Pair<Integer, Integer>(this.sprite1, this.sprite2);
     }
@@ -30,14 +47,15 @@ public class CollisionEvent extends VisitableEvent {
     @Override
     public String toString() {
         return (isAntimessage() ? "-" : "+") + "CollisionEvent [simtime = "
-                + getSimtime() + " sprite1 = " + sprite1 + " sprite2 = " + sprite2 + "]";
+                + getSimtime() + " sprite1 = " + sprite1 + " sprite2 = "
+                + sprite2 + "]";
     }
 
     @Override
     public void accept(EventVisitor visitor) {
         visitor.visit(this);
     }
-    
+
     @Override
     public Object clone() {
         return new CollisionEvent(this.sprite1, this.sprite2, this.getSimtime());

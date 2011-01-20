@@ -73,13 +73,17 @@ public class PacmanSingleUser {
         StateController stateController = new NoStateController();
 
         DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
-        KeyboardController keyboardController = new KeyboardController(governor, 4);
-        builder.add(keyboardController);
 
         Model model = new Model(strArr, 1, 0);
+        int pacId = 0;
         for (Sprite sprite : model.getSprites()) {
-            builder.add(sprite);            
+            builder.add(sprite);
+            if (sprite.isPacman())
+                pacId = sprite.getSpriteId();
         }
+        
+        KeyboardController keyboardController = new KeyboardController(governor, pacId);
+        builder.add(keyboardController);
 
         GameGui gui = new GameGui(governor, keyboardController, model);
         gui.setVisible(true);
