@@ -81,9 +81,16 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
         do {
             next = next.getNextPointOfInterest(currentDirection);
         } while (next != null && (!next.isJunction()));
-                
-        int distance = current.getDistance(next).b;
         
-        return new EnterJunctionEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
+        if (next == null)
+            return null;
+        
+        int distance = current.getDistance(next).b;
+
+        if (next.isJunction())
+            return new EnterJunctionEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
+        if (next.isChangingView(this.currentDirection))
+            return new ChangeViewEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
+        return null;
     }
 }
