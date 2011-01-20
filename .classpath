@@ -7,9 +7,6 @@
 	<classpathentry kind="lib" path="lib/p2pmpi/p2pmpi.jar" sourcepath="doc/ext/p2pmpi-mp/p2pmpi"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/p2pmpi/log4j.jar"/>
-	<classpathentry kind="lib" path="lib/ext/j3dcore.jar"/>
-	<classpathentry kind="lib" path="lib/ext/j3dutils.jar"/>
-	<classpathentry kind="lib" path="lib/ext/vecmath.jar"/>
 	<classpathentry kind="lib" path="lib/ext/mockito-all-1.8.5.jar" sourcepath="lib/ext/mockito-all-1.8.5.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/Pacman/doc/ext/mockito-1.8.5.zip!/javadoc"/>
