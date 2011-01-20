@@ -3,6 +3,8 @@ package pacifism;
 import java.util.Scanner;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import deism.core.Event;
 import deism.core.EventCondition;
@@ -22,6 +24,12 @@ public class PacmanSingleUser {
     public static void main(String args[]) {
         // log4j
         BasicConfigurator.configure();
+        if (args.length == 1 && args[0].equals("-d")) {
+            Logger.getRootLogger().setLevel(Level.ALL);
+        }
+        else {
+            Logger.getRootLogger().setLevel(Level.INFO);
+        }
 
         char[][] strArr = new char[22][21];
         Scanner in =
