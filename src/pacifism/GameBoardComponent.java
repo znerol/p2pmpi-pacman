@@ -4,12 +4,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
-import java.awt.geom.PathIterator;
+import java.awt.geom.Ellipse2D;
 
 import javax.swing.JComponent;
 
@@ -30,15 +31,31 @@ import model.sprites.SpriteState;
  * AWT component for game board
  */
 public class GameBoardComponent extends JComponent {
-    public static int TILE_SIZE = 27;
-    public static int STREET_MARGIN = 3;
-    public static int PAC_SIZE = 23;
-    public static int GHOST_SIZE = 23;
+    public static final int SCALE_FACTOR = 3;
+    public static final int TILE_WAYPOINTS = 9;
+
+    public static final int TILE_SIZE_PX = SCALE_FACTOR * TILE_WAYPOINTS;
+    public static final int STREET_MARGIN_PX = SCALE_FACTOR;
+
+    public static final int PAC_SIZE = 9;
+    public static final int PAC_SIZE_PX = PAC_SIZE * SCALE_FACTOR;
+
+    public static final int[] GHOST_ELLIPSE = { -4, -4, 9, 9 };
+    public static final int[] GHOST_LEFT_EYE = { -2, -2, 1, 2 };
+    public static final int[] GHOST_RIGHT_EYE = { 2, -2, 1, 2 };
+    public static final int[] GHOST_RECT = { -4, 0, 9, 5 };
+    public static final int[] GHOST_SKIRT_X = { -4, -2, 0, 2, 4, 6, 8 };
+    public static final int[] GHOST_SKIRT_Y = { 5, 3, 5, 3, 5, 3, 5 };
 
     private static final long serialVersionUID = -7028947825699430811L;
     private final Model model;
     private final ExecutionGovernor governor;
     private final Area walls;
+
+    /**
+     * Animated ghost shapes.
+     */
+    private final Shape ghostShapes[];
 
     public GameBoardComponent(ExecutionGovernor governor, Model model) {
         super();
@@ -49,20 +66,46 @@ public class GameBoardComponent extends JComponent {
         // rectangular area
         Board board = model.getBoard();
         walls =
-                new Area(new Rectangle(0, 0, board.getWidth() * TILE_SIZE,
-                        board.getHeight() * TILE_SIZE));
+                new Area(new Rectangle(0, 0, board.getWidth() * TILE_SIZE_PX,
+                        board.getHeight() * TILE_SIZE_PX));
 
         for (int row = 0; row < board.getHeight(); row++) {
             for (int col = 0; col < board.getWidth(); col++) {
                 Segment seg = board.getSegment(col, row);
                 if (seg instanceof StreetSegment) {
                     Rectangle rect =
-                            new Rectangle(col * TILE_SIZE, row * TILE_SIZE,
-                                    TILE_SIZE, TILE_SIZE);
-                    rect.grow(STREET_MARGIN, STREET_MARGIN);
+                            new Rectangle(col * TILE_SIZE_PX, row
+                                    * TILE_SIZE_PX, TILE_SIZE_PX, TILE_SIZE_PX);
+                    rect.grow(STREET_MARGIN_PX, STREET_MARGIN_PX);
                     walls.subtract(new Area(rect));
                 }
             }
+        }
+
+        // build ghost shapes
+        Area base =
+                new Area(new Ellipse2D.Float(GHOST_ELLIPSE[0],
+                        GHOST_ELLIPSE[1], GHOST_ELLIPSE[2], GHOST_ELLIPSE[3]));
+        base.add(new Area(new Rectangle(GHOST_RECT[0], GHOST_RECT[1],
+                GHOST_RECT[2], GHOST_RECT[3])));
+        base.subtract(new Area(new Ellipse2D.Float(GHOST_LEFT_EYE[0],
+                GHOST_LEFT_EYE[1], GHOST_LEFT_EYE[2], GHOST_LEFT_EYE[3])));
+        base.subtract(new Area(new Ellipse2D.Float(GHOST_RIGHT_EYE[0],
+                GHOST_RIGHT_EYE[1], GHOST_RIGHT_EYE[2], GHOST_RIGHT_EYE[3])));
+
+        Polygon skirt =
+                new Polygon(GHOST_SKIRT_X, GHOST_SKIRT_Y, GHOST_SKIRT_X.length);
+
+        AffineTransform scale =
+                AffineTransform.getScaleInstance(SCALE_FACTOR, SCALE_FACTOR);
+
+        ghostShapes = new Shape[4];
+        for (int i = 0; i < ghostShapes.length; i++) {
+            AffineTransform deplace =
+                    AffineTransform.getTranslateInstance(-i, 0);
+            Area ghost = new Area(base);
+            ghost.subtract(new Area(deplace.createTransformedShape(skirt)));
+            ghostShapes[i] = scale.createTransformedShape(ghost);
         }
     }
 
@@ -88,18 +131,17 @@ public class GameBoardComponent extends JComponent {
 
             if (state instanceof PacmanState) {
                 Shape pac = pacShape(simtime, movement.a);
-                g2d.translate(movement.b * 3, movement.c * 3);
+                g2d.translate(movement.b * SCALE_FACTOR, movement.c
+                        * SCALE_FACTOR);
                 g2d.setColor(Color.yellow);
                 g2d.fill(pac);
                 g2d.setTransform(new AffineTransform());
             }
             else if (state instanceof GhostState) {
-                Rectangle ghost =
-                        new Rectangle(-GHOST_SIZE / 2, -GHOST_SIZE / 2,
-                                GHOST_SIZE, GHOST_SIZE);
-                g2d.translate(movement.b * 3, movement.c * 3);
+                g2d.translate(movement.b * SCALE_FACTOR, movement.c
+                        * SCALE_FACTOR);
                 g2d.setColor(Color.red);
-                g2d.fill(ghost);
+                g2d.fill(ghostShapes[((int) simtime >> 2) % ghostShapes.length]);
                 g2d.setTransform(new AffineTransform());
             }
         }
@@ -132,7 +174,8 @@ public class GameBoardComponent extends JComponent {
         int angle = 30 + 30 * alter;
 
         pac.setArcType(Arc2D.PIE);
-        pac.setFrame(-PAC_SIZE / 2, -PAC_SIZE / 2, PAC_SIZE, PAC_SIZE);
+        pac.setFrame(-PAC_SIZE_PX / 2, -PAC_SIZE_PX / 2, PAC_SIZE_PX,
+                PAC_SIZE_PX);
         pac.setAngleStart(angle);
         pac.setAngleExtent(360 - 2 * angle);
 
