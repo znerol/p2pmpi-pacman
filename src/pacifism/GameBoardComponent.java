@@ -32,9 +32,8 @@ import model.sprites.SpriteState;
  */
 public class GameBoardComponent extends JComponent {
     public static final int SCALE_FACTOR = 3;
-    public static final int TILE_WAYPOINTS = 9;
 
-    public static final int TILE_SIZE_PX = SCALE_FACTOR * TILE_WAYPOINTS;
+    public static final int TILE_SIZE_PX = SCALE_FACTOR * Model.WAYPOINTS_PER_TILE;
     public static final int STREET_MARGIN_PX = SCALE_FACTOR;
 
     public static final int PAC_SIZE = 9;

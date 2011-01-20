@@ -5,8 +5,6 @@ import java.util.List;
 
 import deism.util.Pair;
 
-import paclib.GamePlay;
-
 /**
  * Represents a waypoint in the model. Every waypoint is double connected to its
  * neighbours and once to its owner segment. The sprites in the game can walk on
@@ -34,8 +32,8 @@ public class Waypoint {
     public Waypoint(StreetSegment owner, int x, int y) {
         this.x = x;
         this.y = y;
-        this.absoluteX = owner.getX() * GamePlay.GUI_FIELD_SIZE + x;
-        this.absoluteY = owner.getY() * GamePlay.GUI_FIELD_SIZE + y;
+        this.absoluteX = owner.getX() * Model.WAYPOINTS_PER_TILE + x;
+        this.absoluteY = owner.getY() * Model.WAYPOINTS_PER_TILE + y;
         this.owner = owner;
 
         if (owner.isJunction() && owner.getWaypointCentre() == null)// == this)

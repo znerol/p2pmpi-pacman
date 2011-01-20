@@ -16,6 +16,7 @@ import deism.core.Event;
  * {@link model.sprites.Sprite} models. Only one instance is allowed.
  */
 public class Model {
+    public final static int WAYPOINTS_PER_TILE = 9;
     private final Board board;
     private final Random random;
     private static Model model;

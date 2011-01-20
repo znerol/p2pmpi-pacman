@@ -18,7 +18,7 @@ public class PacmanMpi {
     private static int GVT_MASTER_RANK = 2;
     private static int GVT_REPORT_TAG = 1;
     private static int PAC_EVENT_TAG = 2;
-    private static double TIME_SCALE = 60. / 1000.;
+    private static double TIME_SCALE = 60. / 10000.;
 
     public static void main(String[] args) {
         args = MPI.Init(args);

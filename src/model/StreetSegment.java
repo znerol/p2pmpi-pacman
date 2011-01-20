@@ -4,15 +4,13 @@ import java.util.Map;
 
 import deism.util.Pair;
 
-import paclib.GamePlay;
-
 /**
  * A StreetSegment in the board definition where the sprites can act on. A
  * StreetSegments contains many {@link model.Waypoint}s and knows exactly, which
  * waypoint is in the centre and are on the border to othter StreetSegments.
  */
 public class StreetSegment extends BoardSegment {
-    private static int HALF_SIZE = GamePlay.GUI_FIELD_SIZE / 2;
+    private static int HALF_SIZE = Model.WAYPOINTS_PER_TILE / 2;
 
     private Waypoint centre;
     private Waypoint north;

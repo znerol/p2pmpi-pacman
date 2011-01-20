@@ -2,8 +2,6 @@ package model.sprites;
 
 import java.util.List;
 
-import paclib.GamePlay;
-
 import model.Board;
 import model.Direction;
 import model.Model;
@@ -136,7 +134,7 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
             if (myWaypoint.getOwner().directConnected(otherWaypoint.getOwner())) {
                 double newDistance = myWaypoint
                         .getEuclideanDistance(otherWaypoint);
-                if (newDistance > GamePlay.GUI_FIELD_SIZE / 2
+                if (newDistance > Model.WAYPOINTS_PER_TILE / 2
                         && newDistance < distance) {
                     distance = newDistance;
                     target = otherWaypoint;
