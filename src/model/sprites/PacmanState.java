@@ -75,10 +75,10 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
 
     @Override
     public void visit(ChangeViewEvent event) {
-//        if (event.getSprite() != getId())
-//            return;
-//        
-//        updateToTime(event.getSimtime());
+        if (event.getSprite() != getId())
+            return;
+        
+        updateToTime(event.getSimtime());
         // has to do nothing.
         // On event dispatching, all other sprites will get informed
         // and they will all update their behaviour if necessary
@@ -112,15 +112,19 @@ public class PacmanState extends AbstractSpriteState implements EventVisitor {
         if (!next.isDirectionAvailable(currentDirection)) 
             return null;
         
-        do {
+        //do {
             next = next.getNextPointOfInterest(currentDirection);
-        } while (next != null && (!next.isJunction()));
+        //} while (next != null && (!next.isJunction()));
         
         if (next == null)
             return null;
         
         int distance = current.getDistance(next).b;
-        
-        return new EnterJunctionEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
+
+        if (next.isJunction())
+            return new EnterJunctionEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
+        if (next.isChangingView(this.currentDirection))
+            return new ChangeViewEvent(getId(), next.getAbsoluteX(), next.getAbsoluteY(), distance + getTimestamp());
+        return null;
     }
 }
