@@ -3,6 +3,8 @@ package deism.run;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import deism.stateful.StateHistory;
 import deism.stateful.StateHistoryException;
 
@@ -14,6 +16,7 @@ public class StateHistoryController implements StateController {
     private SortedSet<Long> snapshots = new TreeSet<Long>();
     private SortedSet<Long> unusableSnapshots = new TreeSet<Long>();
     private StateHistory<Long> stateObject;
+    private static final Logger logger = Logger.getLogger(StateHistoryController.class);
 
     public StateHistory<Long> getStateObject() {
         return stateObject;
@@ -26,21 +29,14 @@ public class StateHistoryController implements StateController {
 
     @Override
     public void save(Long timestamp) {
-        if (unusableSnapshots.contains(timestamp)) {
-            return;
-        }
-        else if (snapshots.contains(timestamp)) {
-            unusableSnapshots.add(timestamp);
-            snapshots.remove(timestamp);
-            return;
-        }
-
+        logger.debug("Saving timestamp: " + timestamp);
         stateObject.save(timestamp);
         snapshots.add(timestamp);
     }
 
     @Override
     public void rollback(Long timestamp) {
+        logger.debug("Rollback timestamp: " + timestamp + " snapshots: " + snapshots);
         snapshots.tailSet(timestamp).clear();
         if (snapshots.size() == 0) {
             throw new StateHistoryException(
@@ -53,6 +49,17 @@ public class StateHistoryController implements StateController {
 
     @Override
     public void commit(Long timestamp) throws StateHistoryException {
+        logger.debug("Comit timestamp: " + timestamp + " snapshots: " + snapshots);
+        if (snapshots.size() == 1) {
+            logger.debug("Not comiting, only one snapshot left");
+            return;
+        }
+
+        if (timestamp > snapshots.last()) {
+            logger.debug("Reducing timestamp: " + timestamp + " to: " + snapshots.last());
+            timestamp = snapshots.last();
+        }
+
         snapshots.headSet(timestamp).clear();
         if (snapshots.size() == 0) {
             throw new StateHistoryException(

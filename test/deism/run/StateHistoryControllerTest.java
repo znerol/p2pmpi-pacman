@@ -59,11 +59,6 @@ public class StateHistoryControllerTest {
     }
 
     @Test(expected = StateHistoryException.class)
-    public void testCommitWithInvalidKey() {
-        stateController.commit(23L);
-    }
-
-    @Test(expected = StateHistoryException.class)
     public void testRollbackWithInvalidKey() {
         stateController.rollback(23L);
     }
