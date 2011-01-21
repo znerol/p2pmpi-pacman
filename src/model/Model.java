@@ -34,7 +34,7 @@ public class Model {
     }
 
     public Model(char[][] boardDef, int clientCount) {
-        assert (Model.model != null);
+        assert (Model.model == null);
         assert (clientCount > 0);
         assert (clientCount <= MAX_PLAYER_COUNT);
 
@@ -155,7 +155,7 @@ public class Model {
     private Sprite createPacman(int x, int y, int id) {
         Waypoint centre = ((StreetSegment) board.getSegment(x, y))
                 .getWaypointCentre();
-        return new Sprite(new PacmanState(Direction.East, Direction.West,
+        return new Sprite(new PacmanState(Direction.East, Direction.East,
                 centre, id));
     }
 
@@ -173,7 +173,7 @@ public class Model {
     private Sprite createGhost(int x, int y, int id) {
         Waypoint centre = ((StreetSegment) board.getSegment(x, y))
                 .getWaypointCentre();
-        return new Sprite(new GhostState(Direction.East, Direction.West,
+        return new Sprite(new GhostState(Direction.East, Direction.East,
                 centre, id));
     }
 

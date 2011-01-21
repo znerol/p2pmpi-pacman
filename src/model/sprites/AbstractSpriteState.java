@@ -70,8 +70,6 @@ public abstract class AbstractSpriteState implements MovableSpriteState {
 
     @Override
     public Triple<Direction, Integer, Integer> nextPosition(Long simTime) {
-        assert (simTime > timestamp);
-
         // Distance equals to the elapsed time since v = 1s/t
         int distance = (int) (simTime - this.timestamp);
 
@@ -102,8 +100,6 @@ public abstract class AbstractSpriteState implements MovableSpriteState {
 
     @Override
     public void updateToTime(Long simTime) {
-        assert (simTime > timestamp);
-
         Triple<Direction, Integer, Integer> nextPos = nextPosition(simTime);
         this.x = nextPos.b;
         this.y = nextPos.c;
