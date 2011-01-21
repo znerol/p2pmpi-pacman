@@ -99,8 +99,10 @@ public class Model {
         // current direction
         if (dirs.size() > 1)
             dirs.remove(currentDirection.inverse());
+        if (dirs.size() == 0)
+            return currentDirection;
 
-        int index = this.random.nextInt(dirs.size());
+        int index = (this.random.nextInt() & 0x3) % dirs.size();
         return dirs.get(index);
     }
 
@@ -155,7 +157,7 @@ public class Model {
     private Sprite createPacman(int x, int y, int id) {
         Waypoint centre = ((StreetSegment) board.getSegment(x, y))
                 .getWaypointCentre();
-        return new Sprite(new PacmanState(Direction.East, Direction.East,
+        return new Sprite(new PacmanState(Direction.East, Direction.West,
                 centre, id));
     }
 
@@ -173,7 +175,7 @@ public class Model {
     private Sprite createGhost(int x, int y, int id) {
         Waypoint centre = ((StreetSegment) board.getSegment(x, y))
                 .getWaypointCentre();
-        return new Sprite(new GhostState(Direction.East, Direction.East,
+        return new Sprite(new GhostState(Direction.East, Direction.West,
                 centre, id));
     }
 

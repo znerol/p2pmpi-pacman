@@ -90,7 +90,8 @@ public class GameNode implements Runnable {
             }
         };
         final Timer tqReportTimer = new Timer();
-        tqReportTimer.scheduleAtFixedRate(tqReportTask, gvtTimeQuantumSize, gvtTimeQuantumSize);
+        tqReportTimer.scheduleAtFixedRate(tqReportTask, 10000, gvtTimeQuantumSize);
+        //tqReportTimer.scheduleAtFixedRate(tqReportTask, gvtTimeQuantumSize, gvtTimeQuantumSize);
 
         // Setup pacman process
         final int MY_RANK = mpiCommWorld.Rank();

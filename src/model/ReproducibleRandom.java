@@ -30,11 +30,11 @@ public class ReproducibleRandom<K> extends AbstractStateHistory<K, Integer> {
     /**
      * {@see java.util.Random} Random number with state history.
      */
-    public int nextInt(int n) {
+    public int nextInt() { 
         Integer next = pending.poll();
 
         if (next == null) {
-            next = new Integer(rng.nextInt(n));
+            next = new Integer(rng.nextInt());
         }
 
         pushHistory(next);
