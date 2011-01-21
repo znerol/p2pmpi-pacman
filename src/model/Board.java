@@ -20,7 +20,7 @@ public class Board {
     private static Board board;
 
     public Board(char[][] boardDef) {
-        assert (Board.board != null);
+        assert (Board.board == null);
 
         Board.board = this;
 
