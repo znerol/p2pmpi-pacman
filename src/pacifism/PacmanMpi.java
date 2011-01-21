@@ -81,7 +81,7 @@ public class PacmanMpi {
                 i++;
             }
 
-            Model model = new Model(strArr, 2, 0);
+            Model model = new Model(strArr, 2);
 
             int spriteId = 0;
             i = 0;

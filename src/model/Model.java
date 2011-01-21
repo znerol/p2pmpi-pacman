@@ -3,7 +3,6 @@ package model;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import model.sprites.GhostState;
@@ -18,7 +17,7 @@ import deism.core.Event;
 public class Model {
     public final static int WAYPOINTS_PER_TILE = 9;
     private final Board board;
-    private final Random random;
+    private ReproducibleRandom<Long> random;
     private static Model model;
     private final int clientCount;
     private final Set<DispatchedListener> listeners = new HashSet<DispatchedListener>();
@@ -34,16 +33,26 @@ public class Model {
         return model;
     }
 
-    public Model(char[][] boardDef, int clientCount, long randomSeed) {
+    public Model(char[][] boardDef, int clientCount) {
         assert (Model.model != null);
         assert (clientCount > 0);
         assert (clientCount <= MAX_PLAYER_COUNT);
+        assert (random != null);
 
-        this.random = new Random(randomSeed);
         Model.model = this;
         this.clientCount = clientCount;
         this.board = new Board(boardDef);
         sprites = populateSpites(boardDef);
+    }
+    
+    /**
+     * Sets a reproducible random generator for the simulation
+     * @param random random generator
+     */
+    public void setRandomGenerator(ReproducibleRandom<Long> random) {
+        assert (random != null);
+        
+        this.random = random;
     }
 
     /**

@@ -82,7 +82,7 @@ public class PacmanSingleUser {
 
         DefaultProcessBuilder builder = new DefaultProcessBuilder(service);
 
-        Model model = new Model(strArr, 1, 0);
+        Model model = new Model(strArr, 1);
         int pacId = 0;
         for (Sprite sprite : model.getSprites()) {
             builder.add(sprite);
