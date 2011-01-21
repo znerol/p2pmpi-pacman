@@ -6,6 +6,13 @@ import java.util.Random;
 
 import deism.stateful.AbstractStateHistory;
 
+/**
+ * Produces reproducible random numbers and implements a state history so that
+ * the numbers will not diverge.
+ * 
+ * @param <K>
+ *            History Key
+ */
 public class ReproducibleRandom<K> extends AbstractStateHistory<K, Integer> {
     private final Random rng;
     private final ArrayDeque<Integer> pending;
@@ -20,13 +27,16 @@ public class ReproducibleRandom<K> extends AbstractStateHistory<K, Integer> {
         this.pending.addAll(tail);
     }
 
+    /**
+     * {@see java.util.Random} Random number with state history.
+     */
     public int nextInt(int n) {
         Integer next = pending.poll();
 
         if (next == null) {
             next = new Integer(rng.nextInt(n));
         }
-        
+
         pushHistory(next);
         return next;
     }
