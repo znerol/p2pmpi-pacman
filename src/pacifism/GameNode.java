@@ -1,5 +1,8 @@
 package pacifism;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import model.Model;
 import model.events.DirectionEvent;
 import model.sprites.Sprite;
@@ -71,12 +74,21 @@ public class GameNode implements Runnable {
         service.register(gvtReportToMaster);
         messageCenter.addEndpoint(gvtReportToMaster, new ReportMessageFilter());
 
-        Client tqclient =
+        final Client tqclient =
                 new Client(mpiCommWorld.Rank(), gvtTimeQuantumSize,
                         stateController);
         service.register(tqclient);
         messageCenter.addEmitter(tqclient);
         messageCenter.addHandler(tqclient, new GvtMessageFilter());
+
+        final TimerTask tqReportTask = new TimerTask() {
+            @Override
+            public void run() {
+                tqclient.updateReport();
+            }
+        };
+        final Timer tqReportTimer = new Timer();
+        tqReportTimer.scheduleAtFixedRate(tqReportTask, gvtTimeQuantumSize, gvtTimeQuantumSize);
 
         // Setup pacman process
         final int MY_RANK = mpiCommWorld.Rank();
@@ -111,10 +123,13 @@ public class GameNode implements Runnable {
             builder.add(sprite);            
         }
 
+        GvtStats stats = new GvtStats(tqclient);
+        builder.add(stats);
+
         process = builder.getProcess();
 
         // Setup GUI
-        gui = new GameGui(governor, keyboardController, model);
+        gui = new GameGui(governor, keyboardController, model, stats);
     }
 
     @Override
