@@ -34,7 +34,7 @@ public class Model {
     }
 
     public Model(char[][] boardDef, int clientCount) {
-        assert (Model.model != null);
+        assert (Model.model == null);
         assert (clientCount > 0);
         assert (clientCount <= MAX_PLAYER_COUNT);
 
