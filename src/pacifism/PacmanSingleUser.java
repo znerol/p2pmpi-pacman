@@ -68,6 +68,7 @@ public class PacmanSingleUser {
             }
         };
         EventCondition snapshotCondition = new EventCondition() {
+            @Override
             public boolean match(Event e) {
                 return false;
             }

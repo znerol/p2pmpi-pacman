@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="deism-build-javadoc" default="javadoc" basedir=".">
     <target name="javadoc">
-        <mkdir dir="bin/javadoc/"/>
-        <javadoc sourcepath="src" linksource="true" destdir="bin/javadoc/">
+        <mkdir dir="doc/javadoc/"/>
+        <javadoc sourcepath="src" linksource="true" destdir="doc/javadoc/">
         	<doclet name="org.umlgraph.doclet.UmlGraphDoc" path="lib/ext/UmlGraph-5.4.jar">                    
         		<param name="-inferrel"/>
                 <param name="-inferdep"/>

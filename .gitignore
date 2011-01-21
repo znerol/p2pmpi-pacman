@@ -4,3 +4,4 @@ lib/ext
 lib/p2pmpi/tmp
 pacman-p2pmpi.jar
 bin
+doc/javadoc
