@@ -14,7 +14,6 @@ import deism.stateful.StateHistoryException;
 public class StateHistoryController implements StateController {
 
     private SortedSet<Long> snapshots = new TreeSet<Long>();
-    private SortedSet<Long> unusableSnapshots = new TreeSet<Long>();
     private StateHistory<Long> stateObject;
     private static final Logger logger = Logger.getLogger(StateHistoryController.class);
 
