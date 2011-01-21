@@ -1,5 +1,6 @@
 package pacifism;
 
+import java.util.Random;
 import java.util.Scanner;
 
 import org.apache.log4j.BasicConfigurator;
@@ -18,18 +19,25 @@ import deism.run.Service;
 import deism.run.StateController;
 
 import model.Model;
+import model.ReproducibleRandom;
 import model.sprites.Sprite;
 
 public class PacmanSingleUser {
+    private static double BASE_TIME_SCALE = 60. / 1000.;
+
     public static void main(String args[]) {
         // log4j
         BasicConfigurator.configure();
-        if (args.length == 1 && args[0].equals("-d")) {
-            Logger.getRootLogger().setLevel(Level.ALL);
-        }
-        else {
-            Logger.getRootLogger().setLevel(Level.INFO);
-        }
+
+        /* Game speed parameter */
+        double speed = Double.valueOf(System.getProperty("speed", "1.0"));
+
+        /* Random seed parameter */
+        long seed = Long.valueOf(System.getProperty("seed", "0"));
+
+        /* Log level parameter */
+        Level loglevel = Level.toLevel(System.getProperty("loglevel", "WARN"));
+        Logger.getRootLogger().setLevel(loglevel);
 
         char[][] strArr = new char[22][21];
         Scanner in =
@@ -75,7 +83,7 @@ public class PacmanSingleUser {
         };
 
         Service service = new Service();
-        ExecutionGovernor governor = new RealtimeExecutionGovernor(60./1000.);
+        ExecutionGovernor governor = new RealtimeExecutionGovernor(BASE_TIME_SCALE * speed);
         service.register(governor);
         MessageCenter messageCenter = new MessageCenter(governor);
         StateController stateController = new NoStateController();
@@ -89,7 +97,13 @@ public class PacmanSingleUser {
             if (sprite.isPacman())
                 pacId = sprite.getSpriteId();
         }
-        
+
+        // Add random number generator with timewarp support
+        Random origRng = new Random(seed);
+        ReproducibleRandom<Long> rng = new ReproducibleRandom<Long>(origRng);
+        model.setRandomGenerator(rng);
+        service.register(rng);
+
         KeyboardController keyboardController = new KeyboardController(governor, pacId);
         builder.add(keyboardController);
 

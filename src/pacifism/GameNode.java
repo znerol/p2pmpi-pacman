@@ -1,9 +1,11 @@
 package pacifism;
 
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import model.Model;
+import model.ReproducibleRandom;
 import model.events.DirectionEvent;
 import model.sprites.Sprite;
 import p2pmpi.mpi.IntraComm;
@@ -54,7 +56,7 @@ public class GameNode implements Runnable {
     public GameNode(IntraComm mpiCommWorld, int mpiGvtMasterRank,
             int mpiReportTag, int mpiRank, long gvtTimeQuantumSize,
             int pacEventTag, final int pacSpriteId, double timeScale,
-            Model model) {
+            long seed, Model model) {
         // Setup environment
         service = new Service();
         governor = new RealtimeExecutionGovernor(timeScale);
@@ -119,10 +121,18 @@ public class GameNode implements Runnable {
         builder.add(new MpiEventSink(mpiCommWorld, PEER_RANK, pacEventTag),
                 onlyMine);
 
+        // Add random number generator with timewarp support
+        Random origRng = new Random(seed);
+        ReproducibleRandom<Long> rng = new ReproducibleRandom<Long>(origRng);
+        model.setRandomGenerator(rng);
+        service.register(rng);
+
+        // Add pacs and ghosts
         for (Sprite sprite : model.getSprites()) {
             builder.add(sprite);            
         }
 
+        // Add GVT status collector
         GvtStats stats = new GvtStats(tqclient);
         builder.add(stats);
 
