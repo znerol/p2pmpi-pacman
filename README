@@ -7,6 +7,11 @@ RUNNING
 =======
 1. Single User Version:
     $ ./run-nompi.sh
+    You may specify the following parametrs on the command line:
+    -Dspeed=factor:     Speed factor for this simulation: e.g. 0.1 (ten times
+                        slower) or 2.0 (two times faster)
+    -Dseed=integer:     Random seed: e.g. 1234
+    -Dloglevel=name:    Name of log4j loglevel: e.g. -Dloglevel=debug
 
 2. P2PMPI Version
 
@@ -19,6 +24,12 @@ RUNNING
     $ mpiboot
 * Run mpi version:
     $ ./run-mpi.sh
+    You may specify the following parametrs on the command line:
+    -Dspeed=factor:     Speed factor for this simulation: e.g. 0.1 (ten times
+                        slower) or 2.0 (two times faster)
+    -Dseed=integer:     Random seed: e.g. 1234
+    -Dloglevel=name:    Name of log4j loglevel: e.g. -Dloglevel=debug
+    -Dtqsize=duration:  Length in milliseconds for GVT time quantum
 
 Both, the single and multi user versions accept the "-d" switch on the command
 line, producing tons of debug output.
@@ -32,3 +43,5 @@ DOCUMENTATION
 =============
 * Download UmlGraph-5.4.jar from http://www.umlgraph.org/ and place it into
   lib/ext. Use "ant -f deism-build-javadoc.xml" to build the documentation.
+* You find the generated documentation in:
+  doc/javadoc/index.html
