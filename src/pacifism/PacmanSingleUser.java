@@ -93,7 +93,7 @@ public class PacmanSingleUser {
         KeyboardController keyboardController = new KeyboardController(governor, pacId);
         builder.add(keyboardController);
 
-        GameGui gui = new GameGui(governor, keyboardController, model);
+        GameGui gui = new GameGui(governor, keyboardController, model, "No Stats available");
         gui.setVisible(true);
 
         Runloop runloop = new Runloop(governor, terminationCondition, stateController, snapshotCondition, messageCenter, service);

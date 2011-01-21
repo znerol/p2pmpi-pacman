@@ -9,8 +9,6 @@ import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Layout;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import p2pmpi.mpi.MPI;
@@ -36,13 +34,14 @@ public class PacmanMpi {
                         + PatternLayout.TTCC_CONVERSION_PATTERN);
         Appender appender = new ConsoleAppender(layout);
         BasicConfigurator.configure(appender);
-
+/*
         if (args.length == 1 && args[0].equals("-d")) {
             Logger.getRootLogger().setLevel(Level.ALL);
         }
         else {
             Logger.getRootLogger().setLevel(Level.WARN);
         }
+        */
 
         // setup gvt master and game nodes
         if (rank == GVT_MASTER_RANK) {

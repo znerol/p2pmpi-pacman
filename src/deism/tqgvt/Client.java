@@ -140,7 +140,7 @@ public class Client implements Startable, EventExporter, EventImporter,
      * Calculate current time quantum. If it changed from the previous value,
      * create a new TQ-GVT report message and send it to the tq master.
      */
-    public void updateReport() {
+    public synchronized void updateReport() {
         long newtq = getCurrentTq();
 
         if (newtq != tq) {
