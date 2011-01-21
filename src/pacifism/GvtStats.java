@@ -9,7 +9,7 @@ import deism.tqgvt.Client;
 public class GvtStats implements StateHistory<Long>, EventDispatcher {
     private int saves;
     private long lastSave;
-    private int comits;
+    private int commits;
     private int rollbacks;
     private long lvt;
     private long gvt;
@@ -34,7 +34,7 @@ public class GvtStats implements StateHistory<Long>, EventDispatcher {
     @Override
     public void commit(Long key) throws StateHistoryException {
         gvt = key;
-        comits++;
+        commits++;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class GvtStats implements StateHistory<Long>, EventDispatcher {
     public String toString() {
         long tq = gvtClient.getCurrentTq();
         return "LVT: " + lvt + " GVT: " + gvt + " TQ: " + tq + " Saves: "
-                + saves + " lastSave: " + lastSave + " Comits: " + comits
+                + saves + " lastSave: " + lastSave + " Commits: " + commits
                 + " Rollbacks: " + rollbacks;
     }
 }

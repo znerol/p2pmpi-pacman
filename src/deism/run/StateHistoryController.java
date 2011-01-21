@@ -48,9 +48,9 @@ public class StateHistoryController implements StateController {
 
     @Override
     public void commit(Long timestamp) throws StateHistoryException {
-        logger.debug("Comit timestamp: " + timestamp + " snapshots: " + snapshots);
+        logger.debug("Commit timestamp: " + timestamp + " snapshots: " + snapshots);
         if (snapshots.size() == 1) {
-            logger.debug("Not comiting, only one snapshot left");
+            logger.debug("Not commiting, only one snapshot left");
             return;
         }
 
