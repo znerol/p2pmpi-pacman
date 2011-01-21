@@ -37,7 +37,6 @@ public class Model {
         assert (Model.model != null);
         assert (clientCount > 0);
         assert (clientCount <= MAX_PLAYER_COUNT);
-        assert (random != null);
 
         Model.model = this;
         this.clientCount = clientCount;
