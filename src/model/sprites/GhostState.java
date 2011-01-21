@@ -84,7 +84,7 @@ public class GhostState extends AbstractSpriteState implements EventVisitor {
         Waypoint current = Board.getBoard().getWaypoint(x, y);
         Waypoint next = current;
 
-        //setDirectionToNextPac();
+        setDirectionToNextPac();
 
         if (!next.isDirectionAvailable(currentDirection))
             return null;
